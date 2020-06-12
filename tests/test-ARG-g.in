@@ -1,0 +1,44 @@
+# Ensure that ParaView path was previously set
+if [ -z ${PARAVIEW_PATH} ] ; then
+	echo ERROR: PARAVIEW_PATH not set
+	exit 1
+fi
+echo PARAVIEW_PATH=${PARAVIEW_PATH}
+
+# Retrieve and report system type
+UNAME=$(uname)
+echo UNAME=${UNAME}
+
+# Set Python version if needed
+if [ -z ${ARG_PYTHON_VERSION} ] ; then
+	if [[ "$UNAME" == CYGWIN* || "$UNAME" == MINGW* ]] ; then
+		export ARG_PYTHON_VERSION=37
+	else
+		export ARG_PYTHON_VERSION=3.7
+	fi
+fi
+echo ARG_PYTHON_VERSION=${ARG_PYTHON_VERSION}
+
+# Set up ParaView Python environment
+if [ "$UNAME" = "Linux" ] ; then
+	export PYTHONPATH="${PYTHONPATH}:${PARAVIEW_PATH}/lib/python${ARG_PYTHON_VERSION}/site-packages:${PARAVIEW_PATH}/lib/python${ARG_PYTHON_VERSION}/site-packages/paraview:${PARAVIEW_PATH}/lib/python${ARG_PYTHON_VERSION}/site-packages/vtkmodules"
+elif [ "$UNAME" = "Darwin" ] ; then
+	export DYLD_FALLBACK_LIBRARY_PATH="${PARAVIEW_PATH}/lib"
+	echo DYLD_FALLBACK_LIBRARY_PATH=${DYLD_FALLBACK_LIBRARY_PATH}
+	export PYTHONPATH="${PYTHONPATH}:${PARAVIEW_PATH}/lib/python${ARG_PYTHON_VERSION}/site-packages"
+elif [ "$UNAME" == CYGWIN* || "$UNAME" == MINGW* ] ; then
+	export PYTHONPATH="$HOMEDRIVE/python${ARG_PYTHON_VERSION}/Lib/site-packages/;${PARAVIEW_PATH}"
+fi
+
+# Report on ParaView and Python environment variables
+echo PYTHONPATH=${PYTHONPATH}
+python -c 'import sys; print("Encoding is {}".format("UCS4" if sys.maxunicode > 65536 else "UCS2"))'
+python -c 'import paraview.vtk as vtk; print("Python VTK module is {}".format(vtk))'
+
+# Clean-up
+rm -fR @NAME@.@EXT@ mutables.yml @NAME@ artifacts
+
+# Run ARG to create report structure YAML file THEN generate additional report artifacts and report
+python ../../src/Applications/ARG.py -g
+# Move generated report one level up
+mv @NAME@/@NAME@.@EXT@ .

@@ -1,0 +1,8 @@
+Note that, unlike surface renderings, isocontouring only makes sense for point-centered, scalar attributes. If the variable is cell-centered instead, it must be interpolated before iso-contours can be computed. As a result, interpolation errors will occur.
+
+We chose two isocontour values that are close enough from the minimum and maximum values for that attribute, because we want to highlight:
+- the heated disk;
+- the cooler air mass surrounding it.
+
+In a more refined implementation of this generator, we could specificy a range of values so several contours can be shown in the same image.
+

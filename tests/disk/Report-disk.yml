@@ -1,0 +1,139 @@
+#HEADER
+#                        arg/tests/disk/Report-disk.yml
+#               Automatic Report Generator (ARG) v. 1.0
+#
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+# (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+# Government retains certain rights in this software.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+#
+#HEADER
+
+---
+chapters:
+- n: chapter
+  title: Introduction
+  include: introduction.txt
+- n: chapter
+  title: The Spinning Heated Disk Case
+  sections:
+  - n: section
+    title: Model Meta-Information
+    include: meta_section.txt
+    sections:
+    - n: meta
+      dataset: disk_out_ref.ex2
+      datatype: ExodusII
+  - n: section
+    title: Visualizations of Some Available Attributes
+    sections:
+    - n: subsection
+      title: Surface Renderings
+      include: surface_renderings.txt
+      sections:
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: Pres_30.0_0.0_-50.0_surface.png
+          caption_file: Pres_30.0_0.0_-50.0_surface.txt
+          label: f1
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: V_30.0_0.0_-50.0_surface.png
+          caption_file: V_30.0_0.0_-50.0_surface.txt
+          label: f2
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: H2_30.0_0.0_-50.0_surface.png
+          caption_file: H2_30.0_0.0_-50.0_surface.txt
+          label: f3
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: CH4_30.0_0.0_-50.0_surface.png
+          caption_file: CH4_30.0_0.0_-50.0_surface.txt
+          label: f4
+    - n: subsection
+      title: Isocontours
+      include: isocontours.txt
+      sections:
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: Temp_310.0_30.0_0.0_-50.0_contour.png
+          caption_file: Temp_310.0_30.0_0.0_-50.0_contour.txt
+          label: f5
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: Temp_850.0_30.0_0.0_-50.0_contour.png
+          caption_file: Temp_850.0_30.0_0.0_-50.0_contour.txt
+          label: f6
+      - n: paragraph
+        include: isocontours_comments.txt
+    - n: subsection
+      title: Clips
+      include: clipping.txt
+      sections:
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: Temp_-1.5_-1.0_0.8_30.0_0.0_-50.0_clip.png
+          caption_file: Temp_-1.5_-1.0_0.8_30.0_0.0_-50.0_clip.txt
+          label: f7
+      - n: figure
+        arguments:
+          width: 8cm
+          figure_file: Pres_-1.5_-1.0_0.8_30.0_0.0_-50.0_clip.png
+          caption_file: Pres_-1.5_-1.0_0.8_30.0_0.0_-50.0_clip.txt
+          label: f8
+- n: chapter
+  title: Results
+  string: 'This chapter describes key results of the analysis workflow instance.'
+  sections:
+  - n: section 
+    title: Quantities of Interest -- Margin
+    sections:
+    - n: subsection 
+      title: Requirements
+      sections:
+      - n: enumerate
+        items:
+        - number: "Tensile yield stress is 20000 psi"
+        - number: "Required factor of safety is 3."
+    - n: subsection 
+      title: Calculated Performance
+      sections:
+      - n: itemize
+        items:
+        - string: "The calculated maximum nodal projected Mises stress is 7904.79 psi."
+        - string: "The calculated normalized margin of maximum von Mises stress is -0.062."
