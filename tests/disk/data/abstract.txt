@@ -1,0 +1,3 @@
+This report is about the numerical simulation of a heated disk spinning in air at ambiant temperature.
+
+It was generated using the Automatic Report Generator (ARG).

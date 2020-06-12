@@ -1,0 +1,1 @@
+We finish by clipping the dataset with a plane, and surface rendering the result.

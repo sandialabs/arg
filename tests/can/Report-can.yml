@@ -1,0 +1,126 @@
+#HEADER
+#                         arg/tests/can/Report-can.yml
+#               Automatic Report Generator (ARG) v. 1.0
+#
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+# (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+# Government retains certain rights in this software.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+#
+#HEADER
+
+---
+chapters:
+- n: chapter
+  title: Introduction
+  latex: 'This sample report illustrates the automatic report generator (ARG).
+    \par We simply recall that the \emph{equivalent plastic strain rate}
+    is defined as follows: \[\dot{\bar{\epsilon}}=\sqrt{\frac{2}{3}\dot{\epsilon_{ij}}^{p}\dot{\epsilon_{ij}}^{p},}\]
+    where $\dot{\epsilon_{ij}}^{p}$ is the \emph{plastic strain rate}.'
+- n: chapter
+  title: The Can Case
+  sections:
+  - n: section
+    title: Model Meta-Information
+    latex: 'This section provides an overview of the data set used for this analysis.'
+    sections:
+    - n: meta
+      dataset: can.ex2
+      datatype: ExodusII
+  - n: section
+    title: Mesh Blocks
+    latex: 'This section provides a description of all blocks contained in the mesh \texttt{mesh/crush_assembly.g}.'
+    sections:
+    - n: aggregate
+      name: show_all_blocks_with_edges
+      model: can.ex2
+      width: 10cm
+      axes: True
+      string@1@Comment by Author: 'Comment by author: This block represents one half of a can.'
+      string@2: 'Other note: This block represents a crushing plate.'
+  - n: section
+    title: Visualizations of Some Available Attributes
+    sections:
+    - n: subsection
+      latex: 'We begin by presenting some surface renderings of the data set for several of its scalar or vector attributes, at the initial time step $t=0$.'
+      sections:
+      - n: figure
+        arguments:
+          figure_file: EQPS0_20.0_-16.0_-40.0_surface.png
+          caption_file: EQPS0_20.0_-16.0_-40.0_surface.tex
+          label: f1
+          width: 8cm
+      - n: figure
+        arguments:
+          figure_file: VEL0_20.0_-16.0_-40.0_surface.png
+          caption_file: VEL0_20.0_-16.0_-40.0_surface.tex
+          label: f2
+          width: 8cm
+      title: Surface Renderings of Initial State
+    - latex: 'We continue with some depictions of the same data set, half-way through the simulation.'
+      n: subsection
+      sections:
+      - n: figure
+        arguments:
+          figure_file: EQPS21_20.0_-16.0_-40.0_surface.png
+          caption_file: EQPS21_20.0_-16.0_-40.0_surface.tex
+          label: f3
+          width: 8cm
+      - n: figure
+        arguments:
+          figure_file: VEL21_20.0_-16.0_-40.0_surface.png
+          caption_file: VEL21_20.0_-16.0_-40.0_surface.tex
+          label: f4
+          width: 8cm
+      title: Surface Renderings at Intermediate
+        Time Step
+    - latex: 'We conclude with renditions of the final state of the simulation.'
+      n: subsection
+      sections:
+      - n: figure
+        arguments:
+          figure_file: EQPS43_20.0_-16.0_-40.0_surface.png
+          caption_file: EQPS43_20.0_-16.0_-40.0_surface.tex
+          label: f5
+          width: 8cm
+      - n: figure
+        arguments:
+          figure_file: VEL43_20.0_-16.0_-40.0_surface.png
+          caption_file: VEL43_20.0_-16.0_-40.0_surface.tex
+          label: f6
+          width: 8cm
+      title: Surface Renderings of Final State
+- n: chapter
+  title: Results
+  latex: 'This chapter describes key results of the analysis workflow instance.'
+  sections:
+  - n: section
+    title: Quantities of Interest; Margins
+    include: can-QOI.tex

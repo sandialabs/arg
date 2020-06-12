@@ -1,0 +1,278 @@
+ARG version: develop
+
+# Title directive
+title:
+  datatype: SM
+  dataset: ../Report-crush/crush_from_log.inp
+
+# Chapters
+chapters:
+
+# Introduction
+- n: chapter_null
+  title: Introduction
+  string: 'The structure of this report was built by the Explorator component of ARG, which explored the following directory:'
+  sections:
+  - n: paragraph
+    verbatim: '/builds/iwf/arg/tests/crush/data'
+  - n: paragraph
+    string: 'and discovered the following relevant data:'
+  - n: itemize
+    items:
+    - string: SM input deck extracted from \texttt{crush.run.log}
+    - string: ExodusII mesh in \texttt{crush_assembly.g}
+    - string: SM input deck with root \texttt{../Report-crush/crush_from_log.inp}
+# CAD chapter
+- n: chapter
+  title: Geometry
+  string: 'This chapter describes the geometry as specified in the parameters file.'
+  sections:
+  - n: paragraph
+    string: The term Electronic Product Definition (EPD) is also often used to denote the CAD geometry of the case.
+  - n: section
+    title: Geometry to Finite Elements Elements Mapping
+    string: 'This section describes the mapping from CAD parts to FEM blocks:'
+    sections:
+    - n: aggregate
+      name: show_all_mappings
+      datatype: CAD_to_FEM
+      dataset: {'case': ['case'], 'lid': ['lid'], 'weld': ['weld'], 'target': ['target'], 'duct': ['duct'], 'foam': ['foam'], 'box_shell': ['box_shell'], 'post': ['post'], 'crusher': ['crusher'], 'plug': ['plug']}
+      src_name: part
+      dst_name: block
+      logfile: crush.run.log
+      factors: {'box_shell': 2.0, 'case': 2.0, 'crusher': 2.0, 'duct': 2.0, 'foam': 2.0, 'lid': 2.0, 'plug': 2.0, 'post': 2.0, 'target': 2.0, 'weld': 2.0}
+      geometry_root: Interface
+    - n: paragraph
+      string: We note that this is a particular case with a bijection between CAD and FEM items.
+  - n: section
+    title: Finite Elements to Geometry Elements Mapping
+    string: 'This section describes the mapping from FEM blocks to CAD parts:'
+    sections:
+    - n: aggregate
+      name: show_all_mappings
+      datatype: FEM_to_CAD
+      dataset: {'case': ['case'], 'lid': ['lid'], 'weld': ['weld'], 'target': ['target'], 'duct': ['duct'], 'foam': ['foam'], 'box_shell': ['box_shell'], 'post': ['post'], 'crusher': ['crusher'], 'plug': ['plug']}
+      src_name: block
+      dst_name: part
+      logfile: crush.run.log
+  - n: section
+    title: Geometry Files
+    string: 'This section provides an overview of the geometry files found in:'
+    sections:
+    - n: paragraph
+      verbatim: /builds/iwf/arg/tests/crush/data/Interface
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/box_shell.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/case.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/crusher.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/duct.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/foam.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/lid.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/plug.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/post.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/target.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/weld.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+  - n: section
+    title: CAD metadata
+    string: 'This section provides CAD metadata found in:'
+    sections:
+    - n: paragraph
+      verbatim: /builds/iwf/arg/tests/crush/data/Interface
+    - n: aggregate
+      name: show_metadata
+      metadata: ['DWG_TITLE1', 'PART_CLASSIFICATION', 'MATERIAL', 'GRANTA_MATERIAL_ID']
+      parameters_root: /builds/iwf/arg/tests/crush/data/Interface
+# Mesh chapter
+- n: chapter
+  title: ExodusII Mesh
+  string: 'This chapter describes the ExodusII mesh in:'
+  sections:
+  - n: paragraph
+    verbatim: /builds/iwf/arg/tests/crush/data/crush_assembly.g
+  - n: section
+    title: Overview
+    string: This section provides an overview of the meta-data and global properties of this ExodusII mesh.
+    sections:
+    - n: meta
+      datatype: ExodusII
+      dataset: crush_assembly.g
+    - n: aggregate
+      name: show_mesh_surface
+      model: crush_assembly.g
+      type: ExodusII
+      var_name: ObjectId
+      width: 16cm
+      axes: True
+      ignore_blocks: [target,crusher,foam,bogus]
+  - n: section
+    title: Mesh Blocks
+    string: This section provides a description of all blocks contained in the mesh.
+    sections:
+    - n: aggregate
+      name: show_all_blocks_with_edges
+      model: crush_assembly.g
+      datatype: SM
+      deckfile: ../Report-crush/crush_from_log.inp
+      logfile: crush.run.log
+      width: 10cm
+      histogram_width: 14cm
+      axes: True
+# SM chapter
+- n: chapter
+  title: SM Input Deck
+  string: 'This chapter describes the SM input deck starting at:'
+  sections:
+  - n: paragraph
+    verbatim: /builds/iwf/arg/tests/crush/data/../Report-crush/crush_from_log.inp
+  - n: section
+    title: Meta-Data
+    string: This section provides the meta-information properties of this SM input deck.
+    sections:
+    - n: meta
+      datatype: SM
+      dataset: ../Report-crush/crush_from_log.inp
+  - n: section
+    title: Function Definitions
+    latex: 'This section presents the function definitions.'
+    sections:
+    - n: properties
+      datatype: SM
+      dataset: ../Report-crush/crush_from_log.inp
+      property_request: [function, type, abscissa, ordinate]
+  - n: section
+    title: Boundary Conditions
+    string: 'This section presents the boundary conditions.'
+    sections:
+    - n: aggregate
+      name: show_all_boundary_conditions
+      datatype: SM
+      dataset: ../Report-crush/crush_from_log.inp
+      verbosity: 0
+  - n: section
+    title: Material Properties
+    string: This section describes the material properties.
+    sections:
+    - n: aggregate
+      name: show_all_materials
+      datatype: SM
+      dataset: ../Report-crush/crush_from_log.inp
+      width: 16cm
+      xyratio: 3
+      verbosity: 0
+# Log file chapter
+- n: chapter
+  title: SM Log File
+  string: 'This chapter describes the SM log file in:'
+  sections:
+  - n: paragraph
+    verbatim: /builds/iwf/arg/tests/crush/data/crush.run.log
+  - n: section
+    title: Meta-Data
+    string: This section provides the meta-information properties of this SM log file.
+    sections:
+    - n: meta
+      datatype: SM log
+      dataset: crush.run.log
+  - n: section
+    title: Mass Properties
+    string: This section shows the logged mass properties.
+    sections:
+    - n: properties
+      datatype: SM log
+      dataset: crush.run.log
+      property_request:
+      - TotalMassCG
+    - n: properties
+      datatype: SM log
+      dataset: crush.run.log
+      property_request:
+      - TotalMassMoments
+  - n: section
+    title: Generic Per-Block Properties
+    latex: 'This section extracts per-block log file properties using the following generic descriptions:'
+    sections:
+    - n: itemize
+      items:
+      - string: MAXIMUM OVERLAP REMOVED BY BLOCK
+      - string: FINAL OVERLAP STATE
+      - string: ELEMENT SHAPE QUALITY INFORMATION
+    - n: properties
+      datatype: SM log
+      dataset: crush.run.log
+      property_request:
+      - GenericBlockTable
+      - n: per-block maximum overlap removed by block
+        section: MAXIMUM OVERLAP REMOVED BY BLOCK
+    - n: properties
+      datatype: SM log
+      dataset: crush.run.log
+      property_request:
+      - GenericBlockTable
+      - n: per-block final overlap state
+        section: FINAL OVERLAP STATE
+    - n: properties
+      datatype: SM log
+      dataset: crush.run.log
+      property_request:
+      - GenericBlockTable
+      - n: per-block element shape quality information
+        section: ELEMENT SHAPE QUALITY INFORMATION
