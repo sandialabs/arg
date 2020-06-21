@@ -64,17 +64,15 @@ for m in [
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
 
+# Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from Common.argReportParameters         import argReportParameters
-    from Backend.argBackendBase             import argBackendBase
-    from Generation                         import argPlot, argVTK
-    from Tools                              import Utilities
 else:
-    from ..Common.argReportParameters       import argReportParameters
-    from ..Backend.argBackendBase           import argBackendBase
-    from ..Generation                       import argPlot, argVTK
-    from ..Tools                            import Utilities
+    sys.path.append("..")
+from Common.argReportParameters         import argReportParameters
+from Backend.argBackendBase             import argBackendBase
+from Generation                         import argPlot, argVTK
+from Tools                              import Utilities
 
 ########################################################################
 # Load supported types

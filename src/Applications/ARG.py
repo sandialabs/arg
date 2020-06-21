@@ -74,14 +74,10 @@ for m in [
 # Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from Common.argReportParameters    import argReportParameters
-    from Backend.argBackendBase        import argBackendBase
-    from Tools                         import Utilities
 else:
-    from ..Common.argReportParameters  import argReportParameters
-    from ..Backend.argBackendBase      import argBackendBase
-    from ..Tools                       import Utilities
-    from ..Applications                import Explorator, Generator, Assembler
+    sys.path.append("..")
+from Common.argReportParameters    import argReportParameters
+from Backend.argBackendBase        import argBackendBase
 
 ########################################################################
 # Load supported types
