@@ -38,7 +38,7 @@
 
 ########################################################################
 argReportWordBackend_module_aliases = {}
-from Backend.argWordBackend           import *
+from arg.Backend.argWordBackend           import *
 argReportWordBackend_module_aliases.update(argWordBackend_module_aliases)
 for m in [
     "os",
@@ -56,6 +56,7 @@ for m in [
     except ImportError as e:
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
+
 
 ########################################################################
 class argReportWordBackend(argWordBackend):

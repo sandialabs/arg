@@ -37,9 +37,9 @@
 #HEADER
 
 ########################################################################
-from DataInterface.argKeyValueFilesReader           import *
-from DataInterface.argVTKExodusReader               import *
-from DataInterface.argVTKSTLReader                  import *
+from arg.DataInterface.argKeyValueFilesReader import *
+from arg.DataInterface.argVTKExodusReader     import *
+from arg.DataInterface.argVTKSTLReader        import *
 
 ########################################################################
 class argDataInterface(object):

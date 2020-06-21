@@ -41,7 +41,7 @@ DEBUG_ARG_AGGREGATE = False
 
 ########################################################################
 # Workaround for MatPlotLib backend limitations
-from Aggregation import argSummarize
+from arg.Aggregation import argSummarize
 import matplotlib
 matplotlib.use("Agg")
 
@@ -69,15 +69,17 @@ for m in [
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
 
-# Import python packages
+# Import additional Python package
 from collections                        import OrderedDict
 
 # Import ARG modules
-from Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from DataInterface.argDataInterface     import *
-from Generation                         import argPlot, argVTK
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface  import *
+from arg.Generation                      import argPlot, argVTK
 
+# Import VTK module
 import vtkmodules.vtkFiltersExtraction  as vtkFiltersExtraction
+
 ########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))

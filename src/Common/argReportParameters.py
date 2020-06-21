@@ -66,9 +66,9 @@ for m in [
         globals()[has_flag] = False
 
 # Import ARG modules
-from Backend.argBackend                 import argBackend
-from DataInterface.argDataInterface     import argDataInterface
-from Tools                              import Utilities
+from arg.Backend.argBackend               import argBackend
+from arg.DataInterface.argDataInterface   import argDataInterface
+from arg.Tools                            import Utilities
 
 ########################################################################
 class argReportParameters(object):

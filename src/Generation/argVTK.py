@@ -66,9 +66,9 @@ for m in [
         globals()[has_flag] = False
 
 # Import ARG modules
-from Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from DataInterface.argDataInterface     import argDataInterface
-from Tools                              import Utilities
+from arg.Common.argMultiFontStringHelper    import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface     import argDataInterface
+from arg.Tools                              import Utilities
 
 # Import VTK modules
 import vtkmodules.vtkCommonCore             as vtkCommonCore

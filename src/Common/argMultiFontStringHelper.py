@@ -55,7 +55,7 @@ for m in [
         globals()[has_flag] = False
 
 # Import ARG module
-from Tools                              import Utilities
+from arg.Tools import Utilities
 
 ########################################################################
 class argMultiFontStringHelper(object):

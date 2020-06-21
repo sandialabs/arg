@@ -38,7 +38,7 @@
 
 ########################################################################
 argReportLaTeXBackend_module_aliases = {}
-from Backend.argLaTeXBackend            import *
+from arg.Backend.argLaTeXBackend            import *
 argReportLaTeXBackend_module_aliases.update(argLaTeXBackend_module_aliases)
 for m in [
     "os",
@@ -57,6 +57,7 @@ for m in [
     except ImportError as e:
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
+
 
 # Define constants
 document_class = "report"

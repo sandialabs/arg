@@ -65,11 +65,11 @@ for m in [
 from pylatex.utils                      import NoEscape, bold, italic, verbatim
 
 # Import ARG modules
-from Aggregation                        import argAggregate
-from Backend.argBackendBase             import argBackendBase
-from Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from DataInterface.argDataInterface     import argDataInterface
-from Tools                              import Utilities
+from arg.Aggregation                     import argAggregate
+from arg.Backend.argBackendBase          import argBackendBase
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface  import argDataInterface
+from arg.Tools                           import Utilities
 
 ########################################################################
 # Load supported colors

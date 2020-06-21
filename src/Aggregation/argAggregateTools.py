@@ -68,15 +68,15 @@ for m in [
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
 
-# Import python packages
+# Import additional Python packages
 from pylatex                            import *
 from pylatex.utils                      import NoEscape, verbatim
 
 # Import ARG modules
-from Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from DataInterface.argDataInterface     import *
-from Generation                         import argPlot
-from Tools                              import Utilities
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface  import *
+from arg.Generation                      import argPlot
+from arg.Tools                           import Utilities
 
 ########################################################################
 # Load supported types

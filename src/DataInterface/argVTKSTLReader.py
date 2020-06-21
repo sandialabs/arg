@@ -57,7 +57,7 @@ for m in [
         print("*  WARNING: Failed to import {}. {}.".format(m, e))
         globals()[has_flag] = False
 
-from DataInterface.argDataInterfaceBase             import *
+from arg.DataInterface.argDataInterfaceBase import *
 
 import vtkmodules.vtkCommonDataModel    as vtkCommonDataModel
 import vtkmodules.vtkIOGeometry         as vtkIOGeometry

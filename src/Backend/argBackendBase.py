@@ -60,10 +60,10 @@ for m in [
         globals()[has_flag] = False
 
 # Import ARG modules
-from Common.argMultiFontStringHelper  import argMultiFontStringHelper
-from DataInterface.argDataInterface   import *
-from Aggregation                      import argSummarize, argAggregate
-from Tools                            import Utilities
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface  import *
+from arg.Aggregation                     import argSummarize, argAggregate
+from arg.Tools                           import Utilities
 
 ########################################################################
 class argBackendBase(object):

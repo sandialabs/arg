@@ -85,11 +85,11 @@ except:
         pass
 
 # Import ARG modules
-from Aggregation                        import argAggregate
-from Backend.argBackendBase             import *
-from Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from DataInterface.argDataInterface     import argDataInterface
-from Tools                              import Utilities
+from arg.Aggregation                     import argAggregate
+from arg.Backend.argBackendBase          import *
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface  import argDataInterface
+from arg.Tools                           import Utilities
 
 ########################################################################
 # Load supported colors

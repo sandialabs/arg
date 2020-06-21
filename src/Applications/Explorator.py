@@ -70,10 +70,10 @@ if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 else:
     sys.path.append("..")
-from Common.argReportParameters         import argReportParameters
-from DataInterface.argDataInterface     import *
-from Backend.argBackendBase             import *
-from Tools                              import Utilities
+from arg.Common.argReportParameters         import argReportParameters
+from arg.DataInterface.argDataInterface     import *
+from arg.Backend.argBackendBase             import *
+from arg.Tools                              import Utilities
 
 ########################################################################
 # Load supported types
