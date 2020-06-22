@@ -49,14 +49,13 @@ import yaml
 # Import ARG-GUI modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argUserSettingsReader      import *
-    from src.GUI.argUserSettingsWriter      import *
+    sys.path.append(root_path)
 else:
-    from ..src.GUI.argUserSettingsReader    import *
-    from ..src.GUI.argUserSettingsWriter    import *
+    sys.path.append("..")
+from arg.GUI.argUserSettingsReader      import *
+from arg.GUI.argUserSettingsWriter      import *
 
 ############################################################################
 class argUserSettingsReader_unittest(unittest.TestCase):
@@ -98,13 +97,13 @@ class argUserSettingsReader_unittest(unittest.TestCase):
                       "latex_processor"]]
     expectedAdmin = {"python_executable":"/opt/local/bin/python3.7",
                      "python_site_package":"/opt/local/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                     "arg_script":"/opt/local/arg/src/Applications/ARG.py",
+                     "arg_script":"/opt/local/arg/arg/Applications/ARG.py",
                      "paraview_site_package":"/opt/local/paraview-install/lib/python3.7/site-packages/",
                      "paraview_libs":"/opt/local/paraview-install/lib",
                      "latex_processor":"/opt/local/Latex/bin"}
     expectedUsr   = {"python_executable":"/Users/myuser/python3.7",
                      "python_site_package":"/Users/myuser/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                     "arg_script":"/Users/myuser/arg/src/Applications/ARG.py",
+                     "arg_script":"/Users/myuser/arg/arg/Applications/ARG.py",
                      "paraview_site_package":"/Users/myuser/paraview-install/lib/python3.7/site-packages/",
                      "paraview_libs":"/Users/myuser/paraview-install/lib",
                      "latex_processor":"/Users/myuser/Latex/bin"}

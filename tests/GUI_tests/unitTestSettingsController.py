@@ -56,18 +56,15 @@ from PySide2.QtCore             import QCoreApplication, \
 # Import ARG-GUI modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argApplication             import *
-    from src.GUI.argSettingsController     import *
-    from src.GUI.argSettingsController      import *
-    from tests.GUI_tests.tools              import *
+    sys.path.append(root_path)
 else:
-    from ..src.GUI.argApplication           import *
-    from ..src.GUI.argSettingsController   import *
-    from ..src.GUI.argSettingsController    import *
-    from ..tests.GUI_tests.tools            import *
+    sys.path.append("..")
+from arg.GUI.argApplication             import *
+from arg.GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
+from tests.GUI_tests.tools              import *
 
 ############################################################################
 class argSettingsController_unittest(unittest.TestCase):
@@ -76,7 +73,7 @@ class argSettingsController_unittest(unittest.TestCase):
 
     expected         = {"python_executable":"/Users/myuser/python3.7",
                          "python_site_package":"/Users/myuser/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                         "arg_script":"/Users/myuser/arg/src/Applications/ARG.py",
+                         "arg_script":"/Users/myuser/arg/arg/Applications/ARG.py",
                          "paraview_site_package":"/Users/myuser/paraview-install/lib/python3.7/site-packages/",
                          "paraview_libs":"/Users/myuser/paraview-install/lib",
                          "latex_processor":"/Users/myuser/Latex/bin"}
@@ -152,9 +149,9 @@ class argSettingsController_unittest(unittest.TestCase):
         controller1 = argSettingsController()
         # Check initialized values
         self.assertEqual(controller1.scriptDirectory,
-                         os.path.join(src_path, "GUI"))
+                         os.path.join(root_path, "GUI"))
         self.assertEqual(controller1.scriptDirectoryConfigFilePath,
-                         os.path.join(src_path, "GUI\\ARG-GUI-config.yml"))
+                         os.path.join(root_path, "GUI\\ARG-GUI-config.yml"))
         self.assertEqual(controller1.homePath,
                          appData_path)
         self.assertEqual(controller1.userHomeConfigFilePath,
@@ -168,9 +165,9 @@ class argSettingsController_unittest(unittest.TestCase):
         controller2 = argSettingsController()
         # Check initialized values
         self.assertEqual(controller2.scriptDirectory,
-                         os.path.join(src_path, "GUI"))
+                         os.path.join(root_path, "GUI"))
         self.assertEqual(controller2.scriptDirectoryConfigFilePath,
-                         os.path.join(src_path, "GUI\\ARG-GUI-config.yml"))
+                         os.path.join(root_path, "GUI\\ARG-GUI-config.yml"))
         self.assertEqual(controller2.homePath,
                          home_path)
         self.assertEqual(controller2.userHomeConfigFilePath,

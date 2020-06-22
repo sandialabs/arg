@@ -56,18 +56,15 @@ from PySide2.QtCore             import QCoreApplication, \
 # Import ARG-GUI modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argApplication             import *
-    from src.GUI.argParameterController     import *
-    from src.GUI.argSettingsController      import *
-    from tests.GUI_tests.tools              import *
+    sys.path.append(root_path)
 else:
-    from ..src.GUI.argApplication           import *
-    from ..src.GUI.argParameterController   import *
-    from ..src.GUI.argSettingsController    import *
-    from ..tests.GUI_tests.tools            import *
+    sys.path.append("..")
+from arg.GUI.argApplication             import *
+from arg.GUI.argParameterController     import *
+from arg.GUI.argSettingsController      import *
+from tests.GUI_tests.tools              import *
 
 ############################################################################
 class argParameterController_unittest(unittest.TestCase):

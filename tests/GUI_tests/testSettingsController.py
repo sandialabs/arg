@@ -51,20 +51,18 @@ import yaml
 # Import ARG modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.Applications                    import ARG
-    from src.GUI.argSettingsController       import *
-    from tests.GUI_tests.tools               import *
+    sys.path.append(root_path)
 else:
-    from ..src.Applications                  import ARG
-    from ..src.GUI.argSettingsController import *
-    from ..tests.GUI_tests.tools             import *
+    sys.path.append("..")
+from arg.Applications                    import ARG
+from arg.GUI.argSettingsController       import *
+from tests.GUI_tests.tools               import *
 
 ########################################################################
 # Load supported types
-with open(os.path.join(src_path, "Common/argTypes.yml"),
+with open(os.path.join(root_path, "Common/argTypes.yml"),
     'r',
     encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)

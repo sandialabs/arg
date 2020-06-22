@@ -38,6 +38,6 @@
 
 python_executable: /opt/local/bin/python3.7
 python_site_package: /opt/local/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/
-arg_script: /opt/local/arg/src/Applications/ARG.py
+arg_script: /opt/local/arg/arg/Applications/ARG.py
 paraview_site_package: /opt/local/paraview-install/lib/python3.7/site-packages/
 paraview_libs: /opt/local/paraview-install/lib

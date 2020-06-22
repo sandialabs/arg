@@ -49,14 +49,13 @@ import yaml
 # Import ARG-GUI modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argParameterReader         import *
-    from src.GUI.argParameterWriter         import *
+    sys.path.append(root_path)
 else:
-    from ..src.GUI.argParameterReader       import *
-    from ..src.GUI.argParameterWriter       import *
+    sys.path.append("..")
+from arg.GUI.argParameterReader         import *
+from arg.GUI.argParameterWriter         import *
 
 ############################################################################
 class argParameterReader_unittest(unittest.TestCase):

@@ -50,7 +50,7 @@ from PySide2.QtCore                         import Signal, Slot
 from PySide2.QtWidgets                      import QApplication
 
 # Import ARG-GUI modules
-from src.GUI.argSettingsController          import *
+from arg.GUI.argSettingsController          import *
 
 ############################################################################
 class unittest_application(QApplication):
