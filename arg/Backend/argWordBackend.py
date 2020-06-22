@@ -846,7 +846,7 @@ class argWordBackend(argBackendBase):
             except:
                 # Try running C#-built exe solution
                 try:
-                    subprocess.check_call([r"../../src/Backend/updateWordFields", docx_file])
+                    subprocess.check_call([r"../../arg/Backend/updateWordFields", docx_file])
                     return
                 # Return with warning message
                 except:
