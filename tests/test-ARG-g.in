@@ -39,6 +39,6 @@ python -c 'import paraview.vtk as vtk; print("Python VTK module is {}".format(vt
 rm -fR @NAME@.@EXT@ mutables.yml @NAME@ artifacts
 
 # Run ARG to create report structure YAML file THEN generate additional report artifacts and report
-python ../../src/Applications/ARG.py -g
+python ../../arg/Applications/ARG.py -g
 # Move generated report one level up
 mv @NAME@/@NAME@.@EXT@ .

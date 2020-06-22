@@ -75,7 +75,7 @@ class argBackend(object):
             if backend_type == "LaTeX":
                 try:
                     argLaTeXBackend = getattr(
-                        importlib.import_module("Backend.argLaTeXBackend"),
+                        importlib.import_module("arg.Backend.argLaTeXBackend"),
                         "argLaTeXBackend")
                     ret_object = argLaTeXBackend(parameters)
                 except:
@@ -84,7 +84,7 @@ class argBackend(object):
             elif backend_type == "Word":
                 try:
                     argWordBackend = getattr(
-                        importlib.import_module("Backend.argWordBackend"),
+                        importlib.import_module("arg.Backend.argWordBackend"),
                         "argWordBackend")
                     ret_object = argWordBackend(parameters)
                 except:
@@ -95,12 +95,12 @@ class argBackend(object):
             # Via LaTeX backend
             if backend_type == "LaTeX":
                 argReportLaTeXBackend = getattr(
-                    importlib.import_module("Backend.argReportLaTeXBackend"),
+                    importlib.import_module("arg.Backend.argReportLaTeXBackend"),
                     "argReportLaTeXBackend")
                 ret_object = argReportLaTeXBackend(parameters)
                 try:
                     argReportLaTeXBackend = getattr(
-                        importlib.import_module("Backend.argReportLaTeXBackend"),
+                        importlib.import_module("arg.Backend.argReportLaTeXBackend"),
                         "argReportLaTeXBackend")
                     ret_object = argReportLaTeXBackend(parameters)
                 except:
@@ -109,7 +109,7 @@ class argBackend(object):
             elif backend_type == "Word":
                 try:
                     argReportWordBackend = getattr(
-                        importlib.import_module("Backend.argReportWordBackend"),
+                        importlib.import_module("arg.Backend.argReportWordBackend"),
                         "argReportWordBackend")
                     ret_object = argReportWordBackend(parameters)
                 except:

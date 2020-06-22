@@ -55,9 +55,6 @@ for m in [
     "sys",
     "time",
     "yaml",
-    "Explorator",
-    "Generator",
-    "Assembler"
     ]:
     has_flag = "has_" + m
     try:
@@ -73,11 +70,12 @@ for m in [
 
 # Import ARG modules
 if not __package__:
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
 from arg.Common.argReportParameters    import argReportParameters
 from arg.Backend.argBackendBase        import argBackendBase
+from arg.Applications                  import Explorator, Generator, Assembler
 
 ########################################################################
 # Load supported types

@@ -66,7 +66,7 @@ for m in [
 
 # Import ARG modules
 if not __package__:
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
 from arg.Common.argReportParameters         import argReportParameters
