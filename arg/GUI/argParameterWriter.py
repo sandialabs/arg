@@ -1,5 +1,5 @@
 #HEADER
-#                      arg/src/GUI/argParameterWriter.py
+#                      arg/GUI/argParameterWriter.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC

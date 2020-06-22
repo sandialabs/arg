@@ -1,5 +1,5 @@
 #HEADER
-#                        arg/src/GUI/argLoggerWidget.py
+#                        arg/GUI/argLoggerWidget.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC

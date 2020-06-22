@@ -1,5 +1,5 @@
 #HEADER
-#                          arg/src/Tools/__init__.py
+#                          arg/Tools/__init__.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC

@@ -1,5 +1,5 @@
 #HEADER
-#                      arg/src/Applications/Assembler.py
+#                      arg/Applications/Assembler.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC

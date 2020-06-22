@@ -1,5 +1,5 @@
 #HEADER
-#                        arg/src/GUI/argAboutAction.py
+#                        arg/GUI/argAboutAction.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
