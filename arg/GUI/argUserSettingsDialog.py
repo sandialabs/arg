@@ -58,7 +58,7 @@ from PySide2.QtCore                    import Qt, QSettings, Slot
 from PySide2.QtGui                     import QIcon
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argUserSettingsDialog(QDialog):

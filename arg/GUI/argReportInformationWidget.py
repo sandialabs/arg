@@ -56,7 +56,7 @@ from PySide2.QtWidgets          import QApplication, \
 from PySide2.QtCore             import QFileInfo
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argReportInformationWidget(QWidget):

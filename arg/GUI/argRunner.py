@@ -53,7 +53,7 @@ from PySide2.QtCore             import QCoreApplication, \
                                        Signal
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argRunner(QObject):

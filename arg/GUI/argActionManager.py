@@ -41,18 +41,18 @@
 from PySide2.QtCore             import QObject
 
 # Import ARG-GUI modules
-from GUI.argQuitAction              import *
-from GUI.argOpenAction              import *
-from GUI.argOpenRecentAction        import *
-from GUI.argRunAction               import *
-from GUI.argCleanAction             import *
-from GUI.argSaveBeforeRunAction     import *
-from GUI.argSaveAction              import *
-from GUI.argSaveAsAction            import *
-from GUI.argReloadAction            import *
-from GUI.argHelpAction              import *
-from GUI.argAboutAction             import *
-from GUI.argOpenUserSettingsAction  import *
+from arg.GUI.argQuitAction              import *
+from arg.GUI.argOpenAction              import *
+from arg.GUI.argOpenRecentAction        import *
+from arg.GUI.argRunAction               import *
+from arg.GUI.argCleanAction             import *
+from arg.GUI.argSaveBeforeRunAction     import *
+from arg.GUI.argSaveAction              import *
+from arg.GUI.argSaveAsAction            import *
+from arg.GUI.argReloadAction            import *
+from arg.GUI.argHelpAction              import *
+from arg.GUI.argAboutAction             import *
+from arg.GUI.argOpenUserSettingsAction  import *
 
 ########################################################################
 class argActionManager(QObject):

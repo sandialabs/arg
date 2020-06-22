@@ -21,8 +21,8 @@ from PySide2.QtWidgets          import QApplication, \
                                        QWidget
 
 # Import ARG-GUI modules
-from argGuiTools                import *
-from argSettingsController      import *
+from arg.GUI.argGuiTools           import *
+from arg.GUI.argSettingsController import *
 
 ########################################################################
 class argDataWidget(QWidget):

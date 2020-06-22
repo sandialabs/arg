@@ -50,8 +50,8 @@ from PySide2.QtWidgets          import QAction, \
                                        QWidget
 
 # Import ARG-GUI modules
-from GUI.argActionManager           import *
-from GUI.argCentralWidget           import *
+from arg.GUI.argActionManager           import *
+from arg.GUI.argCentralWidget           import *
 
 ########################################################################
 class argMainWindow(QMainWindow):

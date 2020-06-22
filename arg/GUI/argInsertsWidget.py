@@ -56,7 +56,7 @@ from PySide2.QtGui              import QColor
 from PySide2.QtCore             import Slot, QFileInfo
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argInsertsWidget(QWidget):

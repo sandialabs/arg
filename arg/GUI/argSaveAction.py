@@ -48,7 +48,7 @@ from PySide2.QtGui              import QIcon
 from PySide2.QtWidgets          import QAction, QApplication, QFileDialog
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argSaveAction(QAction):

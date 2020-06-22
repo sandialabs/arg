@@ -44,8 +44,8 @@ import os
 from PySide2.QtCore             import QObject, QSettings
 
 # Import ARG-GUI modules
-from GUI.argUserSettingsReader      import *
-from GUI.argUserSettingsWriter      import *
+from arg.GUI.argUserSettingsReader      import *
+from arg.GUI.argUserSettingsWriter      import *
 
 ########################################################################
 class argSettingsController(QObject):

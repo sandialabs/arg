@@ -43,11 +43,11 @@ import sys
 
 # Import ARG-GUI modules
 home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-src_path = os.path.join(home_path, "src")
+root_path = os.path.join(home_path, "arg")
 sys.path.append(home_path)
-sys.path.append(src_path)
-from GUI.argApplication             import *
-from GUI.argMainWindow              import *
+sys.path.append(root_path)
+from arg.GUI.argApplication             import *
+from arg.GUI.argMainWindow              import *
 
 ########################################################################
 if __name__ == '__main__':

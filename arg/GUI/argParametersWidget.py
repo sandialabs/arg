@@ -49,11 +49,11 @@ from PySide2.QtWidgets              import QGridLayout,\
                                            QWidget
 
 # Import ARG-GUI modules
-from GUI.argSettingsController          import *
-from GUI.argGeneralOptionsWidget        import *
-from GUI.argDataWidget                  import *
-from GUI.argInsertsWidget               import *
-from GUI.argReportInformationWidget     import *
+from arg.GUI.argSettingsController          import *
+from arg.GUI.argGeneralOptionsWidget        import *
+from arg.GUI.argDataWidget                  import *
+from arg.GUI.argInsertsWidget               import *
+from arg.GUI.argReportInformationWidget     import *
 
 ########################################################################
 class argParametersWidget(QTabWidget):

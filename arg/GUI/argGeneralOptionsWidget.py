@@ -52,7 +52,7 @@ from PySide2.QtWidgets          import QApplication, \
                                        QWidget
 
 # Import ARG-GUI modules
-from GUI.argSettingsController      import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argGeneralOptionsWidget(QWidget):

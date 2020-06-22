@@ -44,8 +44,8 @@ import sys
 from PySide2.QtWidgets          import QTextEdit, QHBoxLayout, QSplitter
 
 # Import ARG-GUI modules
-from GUI.argLoggerWidget            import *
-from GUI.argParametersWidget        import *
+from arg.GUI.argLoggerWidget            import *
+from arg.GUI.argParametersWidget        import *
 
 ########################################################################
 class argCentralWidget(QSplitter):

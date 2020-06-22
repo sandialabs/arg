@@ -47,10 +47,10 @@ from PySide2.QtCore             import QCoreApplication, \
                                        Slot
 
 # Import ARG-GUI modules
-# from GUI.argApplication             import *
-from GUI.argParameterReader         import *
-from GUI.argParameterWriter         import *
-from GUI.argSettingsController      import *
+# from arg.GUI.argApplication             import *
+from arg.GUI.argParameterReader         import *
+from arg.GUI.argParameterWriter         import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argParameterController(QObject):

@@ -46,12 +46,12 @@ from PySide2.QtWidgets          import QApplication, QMessageBox
 
 
 # Import ARG-GUI modules
-from GUI.argActionManager           import *
-from GUI.argMainWindow              import *
-from GUI.argUserSettingsDialog      import *
-from GUI.argParameterController     import *
-from GUI.argRunner                  import *
-from GUI.argSettingsController      import *
+from arg.GUI.argActionManager           import *
+from arg.GUI.argMainWindow              import *
+from arg.GUI.argUserSettingsDialog      import *
+from arg.GUI.argParameterController     import *
+from arg.GUI.argRunner                  import *
+from arg.GUI.argSettingsController      import *
 
 ########################################################################
 class argApplication(QApplication):

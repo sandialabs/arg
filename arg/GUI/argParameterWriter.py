@@ -47,8 +47,8 @@ import yaml
 from PySide2.QtCore             import QObject, Signal
 
 # Import ARG-GUI modules
-from GUI.argParameterData           import *
-from GUI.argSettingsController      import *
+from arg.GUI.argParameterData           import *
+from arg.GUI.argSettingsController      import *
 
 ############################################################################
 class argParameterWriter(QObject):
