@@ -28,7 +28,7 @@ IF "%1" == "clean" (
   )
 ) ELSE (
   echo Starting generation of %DOC_NAME%...
-  python.exe ..\\..\\src\\Applications\\ARG.py -e
+  python.exe ..\\..\\arg\\Applications\\ARG.py -e
   robocopy %DOC_NAME% . %DOC_NAME%.pdf /MOV /njh /njs /ndl /nc /ns
   echo %DOC_NAME% report generated. 
 )
