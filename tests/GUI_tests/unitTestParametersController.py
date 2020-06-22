@@ -97,6 +97,9 @@ class argParameterController_unittest(unittest.TestCase):
         """Unit test read method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Create test parameterController
         controller = argParameterController()
 
@@ -110,6 +113,9 @@ class argParameterController_unittest(unittest.TestCase):
     def test_write(self):
         """Unit test write method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Create test parameterController
         controller = argParameterController()
@@ -132,6 +138,9 @@ class argParameterController_unittest(unittest.TestCase):
     def test_reloadData(self):
         """Unit test reloadData method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Create test parameterController
         controller = argParameterController()
@@ -171,6 +180,9 @@ class argParameterController_unittest(unittest.TestCase):
     def test_onDataCreated(self):
         """Unit test onDataCreated method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Create test parameterController
         controller = argParameterController()

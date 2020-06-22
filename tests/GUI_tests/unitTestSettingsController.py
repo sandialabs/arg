@@ -135,12 +135,24 @@ class argSettingsController_unittest(unittest.TestCase):
                          "ExecutiveSummary":["Executive Summary", False],
                          "Nomenclature":["Nomenclature", False],
                          "Final":["Final", False],
-                         "KeySeparator":["Key Separator", False]}
+                         "KeySeparator":["Key Separator", False],
+                         "DataDirectory": ["Model Directory", False],
+                         "DeckRoot": ["Input Deck", False],
+                         "GeometryRoot": ["Geometry Root", False],
+                         "ReportedCadMetaData": ["Reported CAD Metadata", False],
+                         "LogFile": ["Log File", False],
+                         "IgnoredBlockKeys": ["Ignored Blocks", False],
+                         "Mappings": ["Bijective Mapping", False],
+                         "CAD_to_FEM": ["CAD to FEM", False],
+                         "FEM_to_CAD": ["FEM to CAD", False]}
 
     ########################################################################
     def test_init(self):
         """Unit test __init__ contructor
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         appData_path = os.path.join(home_path, "APPDATA")
@@ -178,6 +190,9 @@ class argSettingsController_unittest(unittest.TestCase):
         """Unit test initialize method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")
 
@@ -191,7 +206,7 @@ class argSettingsController_unittest(unittest.TestCase):
         # Test initialization on empty controller
         controllerEmpty.initialize()
         self.assertEqual(controllerEmpty.settings,
-                    argSettingsController_unittest.expectedSettings)
+                         argSettingsController_unittest.expectedSettings)
 
         # Tests initialization on set up controllers
         for i in range(len(argSettingsController_unittest.expectedMissings)):
@@ -244,6 +259,9 @@ class argSettingsController_unittest(unittest.TestCase):
     def test_initializeUserSettings(self):
         """Unit test initializeUserSettings method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")
@@ -299,6 +317,9 @@ class argSettingsController_unittest(unittest.TestCase):
     def test_saveSettings(self):
         """Unit test saveSettings method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")

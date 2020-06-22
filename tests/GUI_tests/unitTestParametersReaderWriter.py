@@ -75,6 +75,9 @@ class argParameterReader_unittest(unittest.TestCase):
         """Unit test all values on verbosity_to_int method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argParameterReader()
         self.assertEqual(reader.verbosity_to_int("verbose"), 1)
         self.assertEqual(reader.verbosity_to_int("default"), 0)
@@ -85,6 +88,9 @@ class argParameterReader_unittest(unittest.TestCase):
     def test_read(self):
         """Unit test read method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argParameterReader()
         reader.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "input/parameters.yml"))
@@ -112,6 +118,9 @@ class argParameterWriter_unittest(unittest.TestCase):
         """Unit test setData method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):
             writer.setData(argParameterWriter_unittest.data[i])
@@ -121,6 +130,9 @@ class argParameterWriter_unittest(unittest.TestCase):
     def test_write(self):
         """Unit test write method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):
