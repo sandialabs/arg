@@ -38,7 +38,7 @@
 
 python_executable: /Users/myuser/python3.7
 python_site_package: /Users/myuser/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/
-arg_script: /Users/myuser/arg/src/Applications/ARG.py
+arg_script: /Users/myuser/arg/arg/Applications/ARG.py
 paraview_site_package: /Users/myuser/paraview-install/lib/python3.7/site-packages/
 paraview_libs: /Users/myuser/paraview-install/lib
 latex_processor: /Users/myuser/Latex/bin

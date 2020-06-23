@@ -60,12 +60,12 @@ for m in [
 # Import pylint
 from pylint import epylint as lint
 
-# Add home and src paths
+# Add home and root paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
+    sys.path.append(root_path)
 
 ########################################################################
 # Set separators
@@ -88,7 +88,7 @@ def main(app):
         sys_version.micro))
 
     # Run scan routine
-    scan(src_path, "log/pylint/", "pylintScan.log", "pylintScan.err")
+    scan(root_path, "log/pylint/", "pylintScan.log", "pylintScan.err")
 
     # Parse scan result
     parse_pylint_log("log/pylint/pylintScan.log", "log/pylint/parsed/")

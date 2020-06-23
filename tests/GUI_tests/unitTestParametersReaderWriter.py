@@ -49,14 +49,13 @@ import yaml
 # Import ARG-GUI modules
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argParameterReader         import *
-    from src.GUI.argParameterWriter         import *
+    sys.path.append(root_path)
 else:
-    from ..src.GUI.argParameterReader       import *
-    from ..src.GUI.argParameterWriter       import *
+    sys.path.append("..")
+from arg.GUI.argParameterReader         import *
+from arg.GUI.argParameterWriter         import *
 
 ############################################################################
 class argParameterReader_unittest(unittest.TestCase):
@@ -76,6 +75,9 @@ class argParameterReader_unittest(unittest.TestCase):
         """Unit test all values on verbosity_to_int method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argParameterReader()
         self.assertEqual(reader.verbosity_to_int("verbose"), 1)
         self.assertEqual(reader.verbosity_to_int("default"), 0)
@@ -86,6 +88,9 @@ class argParameterReader_unittest(unittest.TestCase):
     def test_read(self):
         """Unit test read method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argParameterReader()
         reader.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "input/parameters.yml"))
@@ -113,6 +118,9 @@ class argParameterWriter_unittest(unittest.TestCase):
         """Unit test setData method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):
             writer.setData(argParameterWriter_unittest.data[i])
@@ -122,6 +130,9 @@ class argParameterWriter_unittest(unittest.TestCase):
     def test_write(self):
         """Unit test write method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):

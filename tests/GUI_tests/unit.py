@@ -42,12 +42,12 @@ import os
 import subprocess
 import sys
 
-# Add home and src paths
+# Add home and root paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
+    root_path = os.path.join(home_path, "arg")
     sys.path.append(home_path)
-    sys.path.append(src_path)
+    sys.path.append(root_path)
 
 ############################################################################
 def main():
