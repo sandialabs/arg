@@ -54,6 +54,8 @@ if __name__ == '__main__':
     """ARG-GUI main routine
     """
 
+    main()
+    
 ########################################################################
 def main():
     """ ARG-GUI main method
