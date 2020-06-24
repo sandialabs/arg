@@ -62,10 +62,10 @@ def main():
     # Instantiate Qt Application
     app = argApplication(sys.argv)
     # Create and display ARG-GUI main window
-    argMainWindow = argMainWindow()
-    argMainWindow.initRecentMenuFromSettings()
-    argMainWindow.show()
-    app.setMainWindow(argMainWindow)
+    window = argMainWindow()
+    window.initRecentMenuFromSettings()
+    window.show()
+    app.setMainWindow(window)
     app.setApplicationTitle("")
 
     # Run main Qt loop
