@@ -54,6 +54,11 @@ if __name__ == '__main__':
     """ARG-GUI main routine
     """
 
+########################################################################
+def main():
+    """ ARG-GUI main method
+    """
+
     # Instantiate Qt Application
     app = argApplication(sys.argv)
     # Create and display ARG-GUI main window
