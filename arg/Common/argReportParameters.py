@@ -760,7 +760,7 @@ class argReportParameters(object):
         # Parse specified constants file if found
         if self.ParametersFile:
             if os.path.isfile(self.ParametersFile):
-                print("[argReportParameters] Found constants file {}".format(
+                print("[Explorator] Found constants file".format(
                     self.ParametersFile))
                 if not self.parse_parameters_file(self.ParametersFile):
                     sys.exit(1)
