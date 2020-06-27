@@ -760,7 +760,7 @@ class argReportParameters(object):
         # Parse specified constants file if found
         if self.ParametersFile:
             if os.path.isfile(self.ParametersFile):
-                print("[Explorator] Found constants file".format(
+                print("[argReportParameters] Found constants file {}".format(
                     self.ParametersFile))
                 if not self.parse_parameters_file(self.ParametersFile):
                     sys.exit(1)
@@ -771,11 +771,19 @@ class argReportParameters(object):
             print("** ERROR: a constants file is required. Exiting.")
             sys.exit(1)
 
-        # Try to parse constants file and set backend
-        if not (self.parse_parameters_file(self.ParametersFile) and self.set_backend()):
+        # Try to parse constants file
+        if not self.parse_parameters_file(self.ParametersFile):
+            print("** ERROR: could not parse constants file {}. Exiting.".format(
+                self.ParametersFile))
             sys.exit(1)
-        else:
-            return True
+
+        # Try to set backend
+        if not self.set_backend():
+            print("** ERROR: could not set backend. Exiting.")
+            sys.exit(1)
+
+        # Checks passed successfully
+        return True
 
     ####################################################################
     def check_generator_parameters(self):
