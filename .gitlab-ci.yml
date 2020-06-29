@@ -14,7 +14,11 @@ stages:
   - build-pypi
   - deploy
 
-#Deploy arg on pypi
+###########################
+####### Build stage #######
+###########################
+
+#Build arg on pypi
 Build pyARG:
   image: python:3.7-slim
   stage: build-pypi
@@ -24,6 +28,7 @@ Build pyARG:
     - echo "========== Getting Packaging dependencies ==========="
     - pip install --upgrade pip
     - pip install wheel
+    - pip install twine
   script:
     - echo "==================== Build pyARG ===================="
     - mkdir $PACKAGING_PATH/
@@ -34,6 +39,7 @@ Build pyARG:
     - ls -al $PACKAGING_PATH/
     - cd $PACKAGING_PATH
     - python setup.py sdist bdist_wheel
+    - twine check dist/*
   artifacts:
     expire_in: 7 days
     expose_as: "pyARG wheel package"
@@ -41,6 +47,10 @@ Build pyARG:
     paths:
       - $PACKAGING_PATH/
       - $PACKAGING_PATH/dist/
+
+###########################
+###### Deploy stage #######
+###########################
 
 #Deploy pyARG on pypi
 Upload in Gitlab.com:
@@ -54,13 +64,35 @@ Upload in Gitlab.com:
   before_script:
     - echo "========== Getting Uploading dependencies ==========="
     - pip install --upgrade pip
-    - pip install --upgrade twine
+    - pip install twine
   script:
     - echo "==================== Upload pyARG ==================="
-    - ls -al $PACKAGING_PATH/
-    - echo $CI_COMMIT_TAG
-    - twine check $PACKAGING_PATH/dist/*
     - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
+    # Try to install pyARG from gitlab packages
+    #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.0
+    #- python -c "import arg"
+    #- pip uninstall pyARG -y
+
+#Deploy pyARG on pypi
+Upload in test.pypi.org:
+  image: python:3.7-slim
+  stage: deploy
+  needs:
+    - job: "Build pyARG"
+      artifacts: True
+  variables:
+    PACKAGING_PATH: "package"
+  before_script:
+    - echo "========== Getting Uploading dependencies ==========="
+    - pip install --upgrade pip
+    - pip install twine
+  script:
+    - echo "========== Upload pyARG on test.pypi.org ============"
+    - twine upload --repository-url https://test.pypi.org/legacy/ --username $PYPI_TEST_USER --password $PYPI_TEST_PASS $PACKAGING_PATH/dist/*
+    - pip install --index-url https://test.pypi.org/simple/ pyARG
+    - python -c "import arg"
+    - pip uninstall pyARG -y
+  when: manual
 
 #Deploy pyARG on pypi
 Upload in pypi.org:
@@ -76,7 +108,9 @@ Upload in pypi.org:
     - pip install --upgrade pip
     - pip install --upgrade twine
   script:
-    - echo "==================== Upload pyARG ==================="
-    - ls -al .
-    #python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+    - echo "========= Upload pyARG on pypi.org/legacy ==========="
+    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/*
+    - pip install pyARG
+    - python -c "import arg"
+    - pip uninstall pyARG -y
   when: manual
