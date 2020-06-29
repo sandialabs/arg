@@ -61,7 +61,6 @@ for m in [
 
 # Import ARG modules
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import *
 from arg.Aggregation                     import argSummarize, argAggregate
 from arg.Tools                           import Utilities
 
@@ -276,7 +275,7 @@ class argBackendBase(object):
         datafile = os.path.join(self.Parameters.DataDir, data_set)
 
         # Retrieve meta-information
-        data = argDataInterface.factory(data_type, datafile, data_parameters)
+        data = self.Parameters.DataFactory(data_type, datafile, data_parameters)
         meta_info = data.get_meta_information()
 
         # Break out early if no meta-information was retrieved
@@ -407,7 +406,7 @@ class argBackendBase(object):
 
         # Assemble data base name and instantiate reader
         datafile = os.path.join(self.Parameters.DataDir, data_set)
-        data = argDataInterface.factory(data_type, datafile, '')
+        data = self.Parameters.DataFactory(data_type, datafile, '')
 
         # Retrieve information for given property
         prop_info = data.get_property_information(prop_type, prop_items)
@@ -442,10 +441,14 @@ class argBackendBase(object):
         else:
             # Iterate over of properties information list
             for props in prop_info:
+                # Skip void entries
+                if not props:
+                    continue
+
                 # Create table if at least one property item and one value exist
                 prop_item = props[0]
                 prop_values = props[1]
-                if prop_item and prop_values:
+                if prop_item and prop_values and isinstance(prop_values, dict):
                     tab_head = [argMultiFontStringHelper(self),
                                 argMultiFontStringHelper(self)]
                     tab_head[0].append(prop_type, "typewriter")

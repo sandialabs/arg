@@ -97,11 +97,15 @@ class argReportParameters(object):
     ####################################################################
     def __init__(self, application, parameters_file=None, version=None, types=None, latex_processor=None):
 
+        # Default application settings
         self.Application      = application
         self.Version          = version
         self.Types            = types
         self.TmpFile          = None
         self.LatexProcessor   = latex_processor
+
+        # Default static data interface factory
+        self.DataFactory      = argDataInterface.factory
 
         # Default assembler settings
         self.Verbosity        = self.VerbosityLevels.get("default")
@@ -112,7 +116,7 @@ class argReportParameters(object):
         self.FileName         = None
         self.Mutables         = "mutables.yml"
         self.StructureFile    = None
-        self.StructureEndFile    = None
+        self.StructureEndFile = None
         self.Abstract         = None
         self.Thanks           = None
         self.Preface          = None
