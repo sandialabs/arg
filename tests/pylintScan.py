@@ -38,46 +38,42 @@
 
 ########################################################################
 app = "pylintScan"
-########################################################################
-scan_module_aliases = {}
-for m in [
-    "os",
-    "sys",
-    "time",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in scan_module_aliases:
-            globals()[scan_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
 
-# Import pylint
+########################################################################
+# Import python packages
+import getopt, os, shutil, sys, time
 from pylint import epylint as lint
 
-# Add home and root paths
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    root_path = os.path.join(home_path, "arg")
-    sys.path.append(home_path)
-    sys.path.append(root_path)
+else:
+    home_path = os.path.realpath("..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
 
 ########################################################################
 # Set separators
 newModuleSep = "************* Module "
 
+####################################################################
+def clean():
+    """pylintScan clean method to remove all result files from previous runs
+    """
+
+    print(os.path.join(home_path, "tests", "log"))
+    try:
+        shutil.rmtree(os.path.join(home_path, "tests", "log"), ignore_errors=True)
+    except Exception as e:
+        pass
+
 ########################################################################
 def main(app):
-    """ pylintScan main method
+    """pylintScan main method
     """
 
     # Start stopwatch
-    t_start = time. time()
+    t_start = time.time()
 
     # Print startup information
     sys_version = sys.version_info
@@ -87,14 +83,21 @@ def main(app):
         sys_version.minor,
         sys_version.micro))
 
-    # Run scan routine
-    scan(root_path, "log/pylint/", "pylintScan.log", "pylintScan.err")
+    # Parse commandline arguments to detect clean routine
+    opts, args = getopt.getopt(sys.argv[1:], "c")
+    if '-c' in [opt[0] for opt in opts] or 'c' in args:
+        print("\n==================== CLEAN PREVIOUS RESULTS ====================\n")
+        clean()
+    # Otherwise
+    else:
+        # Run scan routine
+        scan(os.path.join(home_path, "arg"), "log/pylint/", "pylintScan.log", "pylintScan.err")
 
-    # Parse scan result
-    parse_pylint_log("log/pylint/pylintScan.log", "log/pylint/parsed/")
+        # Parse scan result
+        parse_pylint_log("log/pylint/pylintScan.log", "log/pylint/parsed/")
 
     # End stopwatch
-    dt = time. time() - t_start
+    dt = time.time() - t_start
 
     # If this point is reached everything went fine
     print("[{}] Process completed in {} seconds. ###".format(
@@ -103,7 +106,7 @@ def main(app):
 
 ########################################################################
 def scan(root_dir, log_dir, log_file_name, err_file_name):
-    """ Scan main method
+    """Scan main method
     """
 
     # Retrieve scan output
@@ -172,7 +175,7 @@ def parse_pylint_log(file_name, res_folder):
 
 ########################################################################
 if __name__ == '__main__':
-    """Main scan routine
+    """Scan main routine
     """
 
     main(app)

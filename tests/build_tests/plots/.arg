@@ -1,5 +1,5 @@
 #HEADER
-#         arg/tests/GUI_tests/input/parametersReaderWriter.yml
+#                        arg/tests/plots/parameters.yml
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,9 +36,20 @@
 #
 #HEADER
 
-backend_type: LaTeX
-report_type: Report
-structure: ../../../tests/GUI_tests/input/structure.yml
-output: %WORKING_DIR%
-number: "-%TEST_NAME%-%DATE%"
+# Exemplar constants for plots case
+
+# Command parameters
+artifact: plots/generator-artifacts.yml
+data: %WORKING_DIR%
+mutables: mutables.yml
+output: %OUTPUT_DIR%
+structure: plots/Report-plots.yml
 file_name: %DOC_NAME%
+
+# General report parameters
+verbosity: terse
+number: -plots
+abstract: abstract.tex
+thanks: thanks.tex
+report_type: %REPORT_TYPE%
+backend_type: %BACKEND_TYPE%

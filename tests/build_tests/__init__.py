@@ -1,5 +1,5 @@
 #HEADER
-#         arg/tests/GUI_tests/input/parametersReaderWriter.yml
+#                     arg/tests/build_tests/init.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,9 +36,12 @@
 #
 #HEADER
 
-backend_type: LaTeX
-report_type: Report
-structure: ../../../tests/GUI_tests/input/structure.yml
-output: %WORKING_DIR%
-number: "-%TEST_NAME%-%DATE%"
-file_name: %DOC_NAME%
+############################################################################
+# Import python packages
+import getopt, os, shutil, subprocess, sys, time
+from pathlib                    import Path
+
+# Import ARG modules
+from setEnv  import *
+from ..tools import *
+__all__ = ["setEnv", "test"]

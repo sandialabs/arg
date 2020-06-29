@@ -37,25 +37,26 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+prefix     = "GUI_unittests"
+app        = "ARG-{}".format(prefix)
+workingDir = prefix
+testName   = "unitTestUserSettingsReaderWriter"
 
 ############################################################################
 # Import python packages
-import os
-import sys
-import unittest
-import yaml
+import os, sys, unittest, yaml
 
-# Import ARG-GUI modules
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    root_path = os.path.join(home_path, "arg")
-    sys.path.append(home_path)
-    sys.path.append(root_path)
 else:
-    sys.path.append("..")
-from arg.GUI.argUserSettingsReader      import *
-from arg.GUI.argUserSettingsWriter      import *
+    home_path = os.path.realpath("../..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from arg.GUI.argUserSettingsReader      import argUserSettingsReader
+from arg.GUI.argUserSettingsWriter      import argUserSettingsWriter
 
 ############################################################################
 class argUserSettingsReader_unittest(unittest.TestCase):
@@ -419,8 +420,8 @@ class argUserSettingsWriter_unittest(unittest.TestCase):
 
         writer = argUserSettingsWriter()
         for i in range(len(argUserSettingsWriter_unittest.data)):
-            writer.write("output/unitTestUserSettingsReaderWriter{}.yml".format(i), argUserSettingsWriter_unittest.data[i])
-            with open("output/unitTestUserSettingsReaderWriter{}.yml".format(i),'r') as f:
+            writer.write("{}/{}{}.yml".format(workingDir, testName, i), argUserSettingsWriter_unittest.data[i])
+            with open("{}/{}{}.yml".format(workingDir, testName, i),'r') as f:
                 self.assertDictEqual(yaml.safe_load(f), argUserSettingsWriter_unittest.expected[i])
                 f.close()
 
