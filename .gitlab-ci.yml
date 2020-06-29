@@ -12,7 +12,7 @@ variables:
 # Stages definition
 stages:
   - build-pypi
-  - deploy-pypi
+  - deploy
 
 #Deploy arg on pypi
 Build pyARG:
@@ -43,19 +43,40 @@ Build pyARG:
       - $PACKAGING_PATH/dist/
 
 #Deploy pyARG on pypi
-Upload on pypi.org:
+Upload in Gitlab.com:
   image: python:3.7-slim
-  stage: deploy-pypi
+  stage: deploy
   needs:
     - job: "Build pyARG"
       artifacts: True
   variables:
     PACKAGING_PATH: "package"
   before_script:
-    - echo "========== Getting Packaging dependencies ==========="
+    - echo "========== Getting Uploading dependencies ==========="
     - pip install --upgrade pip
     - pip install --upgrade twine
   script:
-    - echo "==================== Build pyARG ===================="
+    - echo "==================== Upload pyARG ==================="
+    - ls -al $PACKAGING_PATH/
+    - echo $CI_COMMIT_TAG
+    - twine check $PACKAGING_PATH/dist/*
+    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
+
+#Deploy pyARG on pypi
+Upload in pypi.org:
+  image: python:3.7-slim
+  stage: deploy
+  needs:
+    - job: "Build pyARG"
+      artifacts: True
+  variables:
+    PACKAGING_PATH: "package"
+  before_script:
+    - echo "========== Getting Uploading dependencies ==========="
+    - pip install --upgrade pip
+    - pip install --upgrade twine
+  script:
+    - echo "==================== Upload pyARG ==================="
     - ls -al .
     #python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+  when: manual
