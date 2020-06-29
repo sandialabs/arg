@@ -1,5 +1,5 @@
 #HEADER
-#                     arg/tests/GUI_tests/unit.py
+#                        arg/tests/all_tests.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,50 +36,83 @@
 #
 #HEADER
 
-############################################################################
-prefix = "GUI_unittests"
-app    = "ARG-{}".format(prefix)
+########################################################################
+app                 = "ARG all_tests"
+prefix              = "all_tests"
 
 ############################################################################
 # Import python packages
 import getopt, os, shutil, subprocess, sys, time
+from pathlib                    import Path
 
 # Add home path
 if not __package__:
-    home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    home_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
-    home_path = os.path.realpath("../..")
+    home_path = os.path.realpath("..")
 home_path.lower() not in [path.lower() for path in sys.path] \
     and sys.path.append(home_path)
 
-# Import ARG module
-from tests.tools import clean
+####################################################################
+def clean():
+    """ARG tests overall clean method to remove all result files from previous runs
+    """
+
+    # Run build tests
+    print("\n==================== ARG build tests ====================\n")
+    os.chdir("build_tests")
+    proc = subprocess.Popen(["python",
+                             "test.py",
+                             "-c"])
+    proc.wait()
+    os.chdir("..")
+
+    # Run GUI tests
+    print("\n==================== ARG GUI tests ====================\n")
+    os.chdir("GUI_tests")
+    proc = subprocess.Popen(["python",
+                             "test.py",
+                             "-c"])
+    proc.wait()
+    os.chdir("..")
+
+    # Run pylint scan
+    print("\n==================== ARG pylint scan ====================\n")
+    proc = subprocess.Popen(["python",
+                             "pylintScan.py",
+                             "-c"])
+    proc.wait()
 
 ############################################################################
 def main():
-    """ARG GUI unit tests main method
+    """ARG test main method
     """
 
-    # Create output directory if does not exist
-    if not os.path.exists("output") or not os.path.isdir("output"):
-        os.mkdir("output")
+    # Run build tests
+    print("\n==================== ARG build tests ====================\n")
+    os.chdir("build_tests")
+    proc = subprocess.Popen(["python",
+                             "test.py"])
+    proc.wait()
+    os.chdir("..")
 
-    # Run integration test scripts
-    testScripts = ["unitTestParametersReaderWriter",
-                   "unitTestUserSettingsReaderWriter",
-                   "unitTestParametersController",
-                   "unitTestSettingsController"]
+    # Run GUI tests
+    print("\n==================== ARG GUI tests ====================\n")
+    os.chdir("GUI_tests")
+    proc = subprocess.Popen(["python",
+                             "test.py"])
+    proc.wait()
+    os.chdir("..")
 
-    for script in testScripts:
-        print("\n-------------------- [{}] {} --------------------".format(app, script))
-        proc = subprocess.Popen(["python",
-                             "{}.py".format(script),
-                             "-b"])
-        proc.wait()
+    # Run pylint scan
+    print("\n==================== ARG pylint scan ====================\n")
+    proc = subprocess.Popen(["python",
+                             "pylintScan.py"])
+    proc.wait()
 
-############################################################################
+########################################################################
 if __name__ == '__main__':
-    """ARG GUI unit tests main routine
+    """ARG test main routine
     """
 
     # Start stopwatch
@@ -87,21 +120,23 @@ if __name__ == '__main__':
 
     # Print startup information
     sys_version = sys.version_info
+    print("*************************************************************************")
     print("[{}] ### Started with Python {}.{}.{}".format(
         app,
         sys_version.major,
         sys_version.minor,
         sys_version.micro))
 
+    # Create boolean to run tests
+    runTests = True
+    # Create boolean to clean repository
+    cleanRepo = False
+
     # Parse commandline arguments to detect clean routine
     opts, args = getopt.getopt(sys.argv[1:], "c")
     if '-c' in [opt[0] for opt in opts] or 'c' in args:
-        print("\n-------------------- [{}] Clean previous results --------------------\n".format(app))
-        clean(prefix)
-        try:
-            shutil.rmtree(prefix)
-        except:
-            pass
+        print("\n==================== CLEAN PREVIOUS RESULTS ====================\n")
+        clean()
     # Otherwise, run main routine
     else:
         main()
@@ -110,8 +145,9 @@ if __name__ == '__main__':
     dt = time.time() - t_start
 
     # If this point is reached everything went fine
+    print("*************************************************************************")
     print("[{}] Process completed in {} seconds. ###".format(
     app,
     dt))
 
-############################################################################
+########################################################################

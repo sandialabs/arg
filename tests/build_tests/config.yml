@@ -1,0 +1,13 @@
+# Define all available backend types
+- backendTypes:
+  - LaTeX
+  - Word
+
+# Define all available report types
+- reportTypes:
+  - Report
+
+# Define environment
+- host
+- machine: build_tests
+- argFile: .arg

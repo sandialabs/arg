@@ -1,5 +1,5 @@
 #HEADER
-#         arg/tests/GUI_tests/input/parametersReaderWriter.yml
+#                         arg/tests/can/parameters.yml
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,9 +36,22 @@
 #
 #HEADER
 
-backend_type: LaTeX
-report_type: Report
-structure: ../../../tests/GUI_tests/input/structure.yml
-output: %WORKING_DIR%
-number: "-%TEST_NAME%-%DATE%"
+# Exemplar constants for can case
+
+# Command parameters
+data: %WORKING_DIR%
+mutables: mutables.yml
+output: %OUTPUT_DIR%
 file_name: %DOC_NAME%
+artifact: can/generator-artifacts.yml
+structure: can/Report-can.yml
+
+# General report parameters
+abstract: abstract.tex
+backend_type: %BACKEND_TYPE%
+final: no
+key_separator: '@'
+number: -can
+report_type: %REPORT_TYPE%
+title: Can Test Report
+verbosity: verbose

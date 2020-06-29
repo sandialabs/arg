@@ -1,5 +1,5 @@
 #HEADER
-#                     arg/tests/GUI_tests/unit.py
+#                     arg/tests/GUI_tests/test.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -37,49 +37,48 @@
 #HEADER
 
 ############################################################################
-prefix = "GUI_unittests"
+prefix = "GUI_tests"
 app    = "ARG-{}".format(prefix)
 
 ############################################################################
 # Import python packages
-import getopt, os, shutil, subprocess, sys, time
+import getopt, os, subprocess, sys, time
 
-# Add home path
-if not __package__:
-    home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-else:
-    home_path = os.path.realpath("../..")
-home_path.lower() not in [path.lower() for path in sys.path] \
-    and sys.path.append(home_path)
+############################################################################
+def clean():
+    """ARG GUI tests overall clean method to remove all result files from previous runs
+    """
 
-# Import ARG module
-from tests.tools import clean
+    # Run integration tests
+    proc = subprocess.Popen(["python",
+                             "integration.py",
+                             "-c"])
+    proc.wait()
+
+    # Run unit tests
+    proc = subprocess.Popen(["python",
+                             "unit.py",
+                             "-c"])
+    proc.wait()
 
 ############################################################################
 def main():
-    """ARG GUI unit tests main method
+    """ARG GUI tests main method
     """
 
-    # Create output directory if does not exist
-    if not os.path.exists("output") or not os.path.isdir("output"):
-        os.mkdir("output")
+    # Run integration tests
+    proc = subprocess.Popen(["python",
+                             "integration.py"])
+    proc.wait()
 
-    # Run integration test scripts
-    testScripts = ["unitTestParametersReaderWriter",
-                   "unitTestUserSettingsReaderWriter",
-                   "unitTestParametersController",
-                   "unitTestSettingsController"]
-
-    for script in testScripts:
-        print("\n-------------------- [{}] {} --------------------".format(app, script))
-        proc = subprocess.Popen(["python",
-                             "{}.py".format(script),
-                             "-b"])
-        proc.wait()
+    # Run unit tests
+    proc = subprocess.Popen(["python",
+                             "unit.py"])
+    proc.wait()
 
 ############################################################################
 if __name__ == '__main__':
-    """ARG GUI unit tests main routine
+    """ARG GUI tests main routine
     """
 
     # Start stopwatch
@@ -97,11 +96,7 @@ if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "c")
     if '-c' in [opt[0] for opt in opts] or 'c' in args:
         print("\n-------------------- [{}] Clean previous results --------------------\n".format(app))
-        clean(prefix)
-        try:
-            shutil.rmtree(prefix)
-        except:
-            pass
+        clean()
     # Otherwise, run main routine
     else:
         main()

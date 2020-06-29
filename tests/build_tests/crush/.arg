@@ -1,0 +1,31 @@
+# Exemplar constants for crush case
+
+# Command parameters
+data: %WORKING_DIR%
+mutables: mutables.yml
+output: %OUTPUT_DIR%
+structure: %DOC_NAME%.yml
+file_name: %DOC_NAME%
+
+# General report parameters
+backend_type: %BACKEND_TYPE%
+number: -crush
+report_type: %REPORT_TYPE%
+
+# CAD parameters
+geometry_root: Interface
+
+# CAD metadata to report
+reported_CAD_metadata:
+- DWG_TITLE1
+- UNITS
+- MATERIAL
+
+# Inserts
+insert_in:
+- location: 1
+  string:
+  - "The term Electronic Product Definition (EPD) is also often used to denote the CAD geometry of the case."
+- location: 1.1
+  string:
+  - "We note that this is a particular case with a bijection between CAD and FEM items."
