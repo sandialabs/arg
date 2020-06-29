@@ -65,16 +65,15 @@ class argDataInterface(object):
         elif data_type == "vtkSTL":
             ret_object = argVTKSTLReader(database_name, *parameters)
 
-        # Unsupported data type
-        else:
-            print("*  WARNING: ignoring unsupported data type: {}".format(
-                data_type))
-            return None
-
         # Return instantiated object
-        print("[argDataInterface] Instantiated {} reader for {}".format(
-            data_type,
-            database_name))
+        if not ret_object:
+            print("[argDataInterface] Could not instantiate {} reader for {}".format(
+                data_type,
+                database_name))
+        else:
+            print("[argDataInterface] Instantiated {} reader for {}".format(
+                data_type,
+                database_name))
         return ret_object
 
 ########################################################################
