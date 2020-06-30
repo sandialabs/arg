@@ -419,7 +419,7 @@ class argBackendBase(object):
             return
 
         # Some specific items were requested, build a summary table
-        if prop_items:
+        if prop_items and isinstance(prop_info, dict):
             # Create table for property items only if needed
             tab_head = [argMultiFontStringHelper(self)]
             tab_head[0].append(prop_type, "typewriter")
