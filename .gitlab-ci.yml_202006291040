@@ -7,9 +7,6 @@
 variables:
   DOCKER_DRIVER: overlay2
   DEFAULT_OS: "Debian"
-  BUILD_TEST_PATH: "tests/${BUILD_TESTS}"
-  BUILD_TESTS: "build_tests"
-  GUI_TESTS: "GUI_tests"
 
 # Stages definition
 stages:
@@ -18,8 +15,7 @@ stages:
   - compare-individual-test
   - gui-test
   - test-distributions
-  - package
-  - deploy
+  - deploy-pypi.org
 
 
 ################################################
@@ -93,51 +89,59 @@ Prepare test environment:
   script:
     - echo "==================== [${BUILD_TEST_NAME}] Build reports ===================="
     - cd ${BUILD_TEST_PATH}
-    - python -c "import test; import os; caseName = os.environ.get('BUILD_TEST_NAME') if 'BUILD_TEST_NAME' in os.environ else ''; caseRunType = os.environ.get('BUILD_TEST_RUNTYPE') if 'BUILD_TEST_RUNTYPE' in os.environ else ''; print(caseName);print(caseRunType); test.build_all(test.machine, caseName, caseRunType, test.reportTypes, test.backendTypes)"
-    - cd ..
+    - sh test.sh
     - echo "==================== [${BUILD_TEST_NAME}] Arrange artifacts ===================="
-    - mkdir -p ${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
-    - cp -r ${BUILD_TESTS}/${BUILD_TEST_NAME}/${BUILD_TESTS}-*/ ${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
+    - cd ..
+    - mkdir -p ${DEFAULT_OS}/${BUILD_TEST_NAME}
+    - test -e ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.pdf && cp ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.pdf ${DEFAULT_OS}/${BUILD_TEST_NAME} 2>/dev/null
+    - test -e ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.docx && cp ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.docx ${DEFAULT_OS}/${BUILD_TEST_NAME} 2>/dev/null
+    - test -e ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.yml && cp ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}.yml ${DEFAULT_OS}/${BUILD_TEST_NAME} 2>/dev/null
+    - cp -r ${BUILD_TEST_NAME}/${BUILD_TEST_REPORT_NAME}/ ${DEFAULT_OS}/${BUILD_TEST_NAME} 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "Individual builds on Debian"
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
-      - tests/${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
+      - tests/${DEFAULT_OS}/${BUILD_TEST_NAME}
 
 # 'can' case build variables
 Build 'can' case:
   variables:
     BUILD_TEST_NAME: "can"
-    BUILD_TEST_RUNTYPE: "-g"
+    BUILD_TEST_PATH: "tests/can"
+    BUILD_TEST_REPORT_NAME: "Report-can"
   <<: *build_ind_test
 
 # 'crush' case build variables
 Build 'crush' case:
   variables:
     BUILD_TEST_NAME: "crush"
-    BUILD_TEST_RUNTYPE: "-e"
+    BUILD_TEST_PATH: "tests/crush"
+    BUILD_TEST_REPORT_NAME: "Report-crush"
   <<: *build_ind_test
 
 # 'disk' case build variables
 Build 'disk' case:
   variables:
     BUILD_TEST_NAME: "disk"
-    BUILD_TEST_RUNTYPE: "-g"
+    BUILD_TEST_PATH: "tests/disk"
+    BUILD_TEST_REPORT_NAME: "Report-disk"
   <<: *build_ind_test
 
 # 'plots' case build variables
 Build 'plots' case:
   variables:
     BUILD_TEST_NAME: "plots"
-    BUILD_TEST_RUNTYPE: "-g"
+    BUILD_TEST_PATH: "tests/plots"
+    BUILD_TEST_REPORT_NAME: "Report-plots"
   <<: *build_ind_test
 
 # 'tables' case build variables
 Build 'tables' case:
   variables:
     BUILD_TEST_NAME: "tables"
-    BUILD_TEST_RUNTYPE: "-g"
+    BUILD_TEST_PATH: "tests/tables"
+    BUILD_TEST_REPORT_NAME: "Report-tables"
   <<: *build_ind_test
 
 
@@ -188,24 +192,25 @@ Compare 'can' case:
     COMPARE_WORD_OUTPUT: "false"
     COMPARE_TEST_NAME: "can"
     COMPARE_TEST_PAGE_RANGE: "3-17"
-    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
-    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
-    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+    COMPARE_TEST_EXPECTED_PATH: "tests/can/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/can"
+    COMPARE_TEST_REPORT_NAME: "Report-can.pdf"
+    COMPARE_TEST_CONF_FILE_NAME: "Report-can.yml"
   <<: *compare_ind_test
 
 # 'crush' case comparison variables
 Compare 'crush' case:
   variables:
     NEEDED_JOB: "Build 'crush' case"
-    COMPARE_EXPLORATOR_OUTPUT: "true"
+    COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_WORD_OUTPUT: "false"
     COMPARE_TEST_NAME: "crush"
     COMPARE_TEST_PAGE_RANGE: "3-44"
-    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
-    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
-    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
-    COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
+    COMPARE_TEST_EXPECTED_PATH: "tests/crush/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/crush"
+    COMPARE_TEST_REPORT_NAME: "Report-crush.pdf"
+    COMPARE_TEST_CONF_FILE_NAME: "Report-crush.yml"
   <<: *compare_ind_test
 
 # 'disk' case comparison variables
@@ -217,9 +222,10 @@ Compare 'disk' case:
     COMPARE_WORD_OUTPUT: "true"
     COMPARE_TEST_NAME: "disk"
     COMPARE_TEST_PAGE_RANGE: "4-17"
-    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
-    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word"
-    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+    COMPARE_TEST_EXPECTED_PATH: "tests/disk/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/disk"
+    COMPARE_TEST_REPORT_NAME: "Report-disk.docx"
+    COMPARE_TEST_CONF_FILE_NAME: "Report-disk.yml"
   <<: *compare_ind_test
 
 # 'plots' case comparison variables
@@ -231,9 +237,10 @@ Compare 'plots' case:
     COMPARE_WORD_OUTPUT: "false"
     COMPARE_TEST_NAME: "plots"
     COMPARE_TEST_PAGE_RANGE: "3-9"
-    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
-    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
-    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+    COMPARE_TEST_EXPECTED_PATH: "tests/plots/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/plots"
+    COMPARE_TEST_REPORT_NAME: "Report-plots.pdf"
+    COMPARE_TEST_CONF_FILE_NAME: "Report-plots.yml"
   <<: *compare_ind_test
 
 # 'tables' case comparison variables
@@ -245,9 +252,10 @@ Compare 'tables' case:
     COMPARE_WORD_OUTPUT: "false"
     COMPARE_TEST_NAME: "tables"
     COMPARE_TEST_PAGE_RANGE: "3-8"
-    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
-    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
-    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+    COMPARE_TEST_EXPECTED_PATH: "tests/tables/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/tables"
+    COMPARE_TEST_REPORT_NAME: "Report-tables.pdf"
+    COMPARE_TEST_CONF_FILE_NAME: "Report-tables.yml"
   <<: *compare_ind_test
 
 
@@ -282,25 +290,24 @@ Compare 'tables' case:
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
     - echo "==================== [${GUI_TEST_NAME}] Run tests ===================="
-    - cd tests/${GUI_TESTS}/
+    - cd tests/GUI_tests/
     - python ${GUI_TEST_SCRIPT}
-    - cd ..
     - echo "==================== [${GUI_TEST_NAME}] Arrange artifacts ===================="
-    - mkdir -p ${DEFAULT_OS}/${GUI_TESTS}/${GUI_TEST_NAME}
-    - cp -r ${GUI_TESTS}/${GUI_TEST_OUTPUT}/ ${DEFAULT_OS}/${GUI_TESTS}/ 2>/dev/null
+    - cd ..
+    - mkdir -p ${DEFAULT_OS}/GUI/${GUI_TEST_NAME}/
+    - cp -r GUI_tests/output/ ${DEFAULT_OS}/GUI_tests/ 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "GUI tests on Debian"
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
-      - tests/${DEFAULT_OS}/${GUI_TESTS}/
+      - tests/${DEFAULT_OS}/GUI_tests/
 
 # GUI integration tests
 GUI integration tests:
   variables:
     GUI_TEST_NAME: "integration"
     GUI_TEST_SCRIPT: "integration.py"
-    GUI_TEST_OUTPUT: "GUI_integrationtests"
   <<: *gui_test
 
 # GUI unit tests
@@ -308,7 +315,6 @@ GUI unit tests:
   variables:
     GUI_TEST_NAME: "unit"
     GUI_TEST_SCRIPT: "unit.py"
-    GUI_TEST_OUTPUT: "GUI_unittests"
   <<: *gui_test
 
 
@@ -344,21 +350,28 @@ Build on macOS 10.14.6:
     - pip install pylint
     - python pylintScan.py
     - echo "---------- [${OS}] Run build tests ----------"
-    - cd ${BUILD_TESTS}
-    - python test.py
-    - cd ..
+    - sh all_tests.sh
     - echo "---------- [${OS}] Run GUI tests ----------"
-    - cd ${GUI_TESTS}
+    - cd GUI_tests
     - export PYTHONPATH=${PYTHONPATH}:${PARAVIEW_PATH}/lib/python3.7/site-packages:${PARAVIEW_PATH}/lib/python3.7/site-packages/vtkmodules
     - echo $PYTHONPATH
-    - python test.py
-    - cd ..
+    - python unit.py
+    - python integration.py
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p ${OS}/log/ ${OS}/${BUILD_TESTS}/ ${OS}/${GUI_TESTS}/
+    - cd ..
+    - mkdir -p ${OS}/log/ ${OS}/can/ ${OS}/crush/ ${OS}/disk/ ${OS}/plots/ ${OS}/tables/ ${OS}/GUI_tests/
     - cp -r log/ ${OS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/${BUILD_TESTS}-* ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/*/${BUILD_TESTS}-*/ ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${GUI_TESTS}/GUI_*n*tests ${OS}/${GUI_TESTS}/ 2>/dev/null
+    - cp Report-can.pdf ${OS}/can/ 2>/dev/null
+    - cp -r can/Report-can ${OS}/can/ 2>/dev/null
+    - cp Report-crush.pdf ${OS}/crush/ 2>/dev/null
+    - cp -r crush/Report-crush ${OS}/crush/ 2>/dev/null
+    - cp Report-disk.docx ${OS}/disk/ 2>/dev/null
+    - cp -r disk/Report-disk ${OS}/disk/ 2>/dev/null
+    - cp Report-plots.pdf ${OS}/plots/ 2>/dev/null
+    - cp -r plots/Report-plots ${OS}/plots/ 2>/dev/null
+    - cp Report-tables.pdf ${OS}/tables/ 2>/dev/null
+    - cp -r tables/Report-tables ${OS}/tables/ 2>/dev/null
+    - cp -r GUI_tests/output/ ${OS}/GUI_tests/ 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "Distribution build on macOS"
@@ -420,21 +433,27 @@ Build on Ubuntu latest Docker image:
     - pip install pylint
     - python pylintScan.py
     - echo "---------- [${OS}] Run build tests ----------"
-    - cd ${BUILD_TESTS}
-    - python test.py
-    - cd ..
+    - sh all_tests.sh
     - echo "---------- [${OS}] Run GUI tests ----------"
-    - cd ${GUI_TESTS}
+    - cd GUI_tests
     - export PYTHONPATH=${PYTHONPATH}:${PARAVIEW_PATH}/lib/python3.7/site-packages:${PARAVIEW_PATH}/lib/python3.7/site-packages/vtkmodules
     - echo $PYTHONPATH
-    - python test.py
-    - cd ..
+    - python unit.py
+    - python integration.py
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p ${OS}/log/ ${OS}/${BUILD_TESTS}/ ${OS}/${GUI_TESTS}/
+    - cd ..
+    - mkdir -p ${OS}/log/ ${OS}/can/ ${OS}/crush/ ${OS}/disk/ ${OS}/plots/ ${OS}/tables/ ${OS}/GUI_tests/
     - cp -r log/ ${OS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/${BUILD_TESTS}-* ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/*/${BUILD_TESTS}-*/ ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${GUI_TESTS}/GUI_*n*tests ${OS}/${GUI_TESTS}/ 2>/dev/null
+    - cp Report-can.pdf ${OS}/can/ 2>/dev/null
+    - cp -r can/Report-can ${OS}/can/ 2>/dev/null
+    - cp Report-crush.pdf ${OS}/crush/ 2>/dev/null
+    - cp -r crush/Report-crush ${OS}/crush/ 2>/dev/null
+    - cp Report-disk.docx ${OS}/disk/ 2>/dev/null
+    - cp -r disk/Report-disk ${OS}/disk/ 2>/dev/null
+    - cp Report-plots.pdf ${OS}/plots/ 2>/dev/null
+    - cp -r plots/Report-plots ${OS}/plots/ 2>/dev/null
+    - cp Report-tables.pdf ${OS}/tables/ 2>/dev/null
+    - cp -r tables/Report-tables ${OS}/tables/ 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "Distribution build on Ubuntu"
@@ -490,21 +509,27 @@ Build on fedora latest Docker image:
     - pip install pylint
     - python pylintScan.py
     - echo "---------- [${OS}] Run build tests ----------"
-    - cd ${BUILD_TESTS}
-    - python test.py
-    - cd ..
+    - sh all_tests.sh
     - echo "---------- [${OS}] Run GUI tests ----------"
-    - cd ${GUI_TESTS}
+    - cd GUI_tests
     - export PYTHONPATH=${PYTHONPATH}:${PARAVIEW_PATH}/lib/python3.7/site-packages:${PARAVIEW_PATH}/lib/python3.7/site-packages/vtkmodules
     - echo $PYTHONPATH
-    - python test.py
-    - cd ..
+    - python unit.py
+    - python integration.py
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p ${OS}/log/ ${OS}/${BUILD_TESTS}/ ${OS}/${GUI_TESTS}/
+    - cd ..
+    - mkdir -p ${OS}/log/ ${OS}/can/ ${OS}/crush/ ${OS}/disk/ ${OS}/plots/ ${OS}/tables/ ${OS}/GUI_tests/
     - cp -r log/ ${OS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/${BUILD_TESTS}-* ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/*/${BUILD_TESTS}-*/ ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${GUI_TESTS}/GUI_*n*tests ${OS}/${GUI_TESTS}/ 2>/dev/null
+    - cp Report-can.pdf ${OS}/can/ 2>/dev/null
+    - cp -r can/Report-can ${OS}/can/ 2>/dev/null
+    - cp Report-crush.pdf ${OS}/crush/ 2>/dev/null
+    - cp -r crush/Report-crush ${OS}/crush/ 2>/dev/null
+    - cp Report-disk.docx ${OS}/disk/ 2>/dev/null
+    - cp -r disk/Report-disk ${OS}/disk/ 2>/dev/null
+    - cp Report-plots.pdf ${OS}/plots/ 2>/dev/null
+    - cp -r plots/Report-plots ${OS}/plots/ 2>/dev/null
+    - cp Report-tables.pdf ${OS}/tables/ 2>/dev/null
+    - cp -r tables/Report-tables ${OS}/tables/ 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "Distribution build on fedora"
@@ -593,21 +618,27 @@ Build on CentOS latest Docker image:
     - pip install pylint
     - python pylintScan.py
     - echo "---------- [${OS}] Run build tests ----------"
-    - cd ${BUILD_TESTS}
-    - python test.py
-    - cd ..
+    - sh all_tests.sh
     - echo "---------- [${OS}] Run GUI tests ----------"
-    - cd ${GUI_TESTS}
+    - cd GUI_tests
     - export PYTHONPATH=${PYTHONPATH}:${PARAVIEW_PATH}/lib/python3.7/site-packages:${PARAVIEW_PATH}/lib/python3.7/site-packages/vtkmodules
     - echo $PYTHONPATH
-    - python test.py
-    - cd ..
+    - python unit.py
+    - python integration.py
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p ${OS}/log/ ${OS}/${BUILD_TESTS}/ ${OS}/${GUI_TESTS}/
+    - cd ..
+    - mkdir -p ${OS}/log/ ${OS}/can/ ${OS}/crush/ ${OS}/disk/ ${OS}/plots/ ${OS}/tables/ ${OS}/GUI_tests/
     - cp -r log/ ${OS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/${BUILD_TESTS}-* ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${BUILD_TESTS}/*/${BUILD_TESTS}-*/ ${OS}/${BUILD_TESTS}/ 2>/dev/null
-    - cp -r ${GUI_TESTS}/GUI_*n*tests ${OS}/${GUI_TESTS}/ 2>/dev/null
+    - cp Report-can.pdf ${OS}/can/ 2>/dev/null
+    - cp -r can/Report-can ${OS}/can/ 2>/dev/null
+    - cp Report-crush.pdf ${OS}/crush/ 2>/dev/null
+    - cp -r crush/Report-crush ${OS}/crush/ 2>/dev/null
+    - cp Report-disk.docx ${OS}/disk/ 2>/dev/null
+    - cp -r disk/Report-disk ${OS}/disk/ 2>/dev/null
+    - cp Report-plots.pdf ${OS}/plots/ 2>/dev/null
+    - cp -r plots/Report-plots ${OS}/plots/ 2>/dev/null
+    - cp Report-tables.pdf ${OS}/tables/ 2>/dev/null
+    - cp -r tables/Report-tables ${OS}/tables/ 2>/dev/null
   artifacts:
     expire_in: 7 days
     expose_as: "Distribution build on CentOS"
@@ -615,88 +646,26 @@ Build on CentOS latest Docker image:
     paths:
       - tests/${OS}/
 
-###########################
-####### Package stage #######
-###########################
-
-#Package arg for pypi
-Package pyARG:
+#Deploy arg on pypi
+Deploy on pypi.org:
   image: python:3.7-slim
-  stage: package
-  variables:
-    DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi"
-    PACKAGING_PATH: "package"
+  stage: deploy-pypi.org
   before_script:
     - echo "========== Getting Packaging dependencies ==========="
-    - pip install --upgrade pip
-    - pip install wheel
-    - pip install twine
+    - sudo pip install --upgrade pip
+    - sudo pip install wheel
   script:
     - echo "==================== Build pyARG ===================="
-    - mkdir $PACKAGING_PATH/
-    - cp $DEPLOYMENT_PYPI_SRC/* $PACKAGING_PATH/
-    - cp LICENSE $PACKAGING_PATH/
-    - cp README.md $PACKAGING_PATH/
-    - cp -R arg/ $PACKAGING_PATH/arg/
-    - ls -al $PACKAGING_PATH/
-    - cd $PACKAGING_PATH
+    - mkdir package/
+    - cp .gitlab/pypi/* package/
+    - cp LICENSE package/
+    - cp README.md package/
+    - cp -R arg/ package/arg/
+    - ls -al package/
     - python setup.py sdist bdist_wheel
-    - twine check dist/*
   artifacts:
     expire_in: 7 days
     expose_as: "pyARG wheel package"
     name: "pyARG"
     paths:
-      - $PACKAGING_PATH/
-  rules:
-    - if: $CI_COMMIT_TAG
-
-###########################
-###### Deploy stage #######
-###########################
-
-#Deploy pyARG on pypi
-Upload in Gitlab.com:
-  image: python:3.7-slim
-  stage: deploy
-  needs:
-    - job: "Package pyARG"
-      artifacts: True
-  variables:
-    PACKAGING_PATH: "package"
-  before_script:
-    - echo "========== Getting Uploading dependencies ==========="
-    - pip install --upgrade pip
-    - pip install twine
-  script:
-    - echo "==================== Upload pyARG ==================="
-    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
-    # Try to install pyARG from gitlab packages
-    #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.0
-    #- python -c "import arg"
-    #- pip uninstall pyARG -y
-  rules:
-    - if: $CI_COMMIT_TAG
-
-#Deploy pyARG on pypi
-Upload in pypi.org:
-  image: python:3.7-slim
-  stage: deploy
-  needs:
-    - job: "Package pyARG"
-      artifacts: True
-  variables:
-    PACKAGING_PATH: "package"
-  before_script:
-    - echo "========== Getting Uploading dependencies ==========="
-    - pip install --upgrade pip
-    - pip install --upgrade twine
-  script:
-    - echo "========= Upload pyARG on pypi.org/legacy ==========="
-    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/*
-    - pip install pyARG
-    - python -c "import arg"
-    - pip uninstall pyARG -y
-  rules:
-    - if: $CI_COMMIT_TAG && '$CI_MERGE_REQUEST_TARGET_BRANCH == "master"'
-      when: manual
+      - package/dist/
