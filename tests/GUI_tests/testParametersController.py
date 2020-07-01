@@ -37,66 +37,81 @@
 #HEADER
 
 ############################################################################
-app     = "ARG-GUI_tests"
-data    = {"a":"A", "b":"B", "c":"C"}
+prefix     = "GUI_integrationtests"
+app        = "ARG-{}".format(prefix)
+data       = {"a":"A", "b":"B", "c":"C"}
+workingDir = prefix
+testName   = "testParametersController"
 
 ############################################################################
 # Import python packages
-import os
-import subprocess
-import sys
-import unittest
+import os, shutil, subprocess, sys, yaml
 
-# Import ARG modules
+# Add home and arg paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.Applications                 import ARG
-    from src.GUI.argParameterController   import *
-    from tests.GUI_tests.tools            import *
 else:
-    from ..src.Applications               import ARG
-    from ..src.GUI.argParameterController import *
-    from ..tests.GUI_tests.tools          import *
+    home_path = os.path.realpath("../..")
+arg_path = os.path.join(home_path, "arg")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+arg_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(arg_path)
+
+# Import ARG modules
+from arg.Applications                 import ARG
+from arg.GUI.argParameterController   import argParameterController
+from tools                            import replaceInTemplate, sed, unittest_application
 
 ########################################################################
 # Load supported types
-with open(os.path.join(src_path, "Common/argTypes.yml"),
+with open(os.path.join(arg_path, "Common/argTypes.yml"),
     'r',
     encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
 
 ############################################################################
 def main():
+    """ARG GUI parametersController test main method
+    """
+
+    # Create output directory and copy input parameters file template
+    os.mkdir(workingDir) if not os.path.isdir(workingDir) else False
+    parametersFilePath = os.path.join(workingDir,
+                                      "parameters{}.yml".format(testName[0].upper() + testName[1:]))
+    shutil.copyfile(os.path.join("input", "parameters.yml"), parametersFilePath)
+
+    # Subtitute templated values to current ones in parameters file
+    date = replaceInTemplate(parametersFilePath, testName)
+
+    # Substitute WORKING_DIR in copied parameters file template
+    sed(parametersFilePath, "%WORKING_DIR%", workingDir)
+
+    # Substitute DOC_NAME in copied parameters file template
+    sed(parametersFilePath, "%DOC_NAME%", testName + date)
 
     # Initiate controller
     controller = argParameterController()
-    controller.read(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "input/parameters.yml"))
+    controller.read(parametersFilePath)
     data = controller.backupData
     controller.write(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "output/testParametersController.yml"),
+                                  "{}/{}.yml".format(workingDir, testName)),
                      data)
-
-    # Subtitute templated values to current ones in parameters file
-    date = replaceInTemplate("output/testParametersController.yml", "testParametersController")
 
     # Call ARG to generate report
     proc = subprocess.Popen(["python",
-                             os.path.realpath("{}/src/Applications/ARG.py".format(home_path)),
+                             os.path.realpath("{}/arg/Applications/ARG.py".format(home_path)),
                              "-p",
-                             "output/testParametersController.yml"])
+                             "{}/{}.yml".format(workingDir, testName)])
     proc.wait()
 
 ########################################################################
 if __name__ == '__main__':
-    """Main readerWriter test routine
+    """ARG GUI parametersController test main method
     """
 
     # Create test application
-    app = unittest_application()
+    app = unittest_application(workingDir, testName)
 
     main()
 

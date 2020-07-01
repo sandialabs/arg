@@ -37,50 +37,52 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+prefix     = "GUI_unittests"
+app        = "ARG-{}".format(prefix)
+workingDir = prefix
+testName   = "unitTestParametersController"
 
 ############################################################################
 # Import python packages
-import os
-import random
-import sys
-import unittest
-import yaml
+import datetime, os, random, sys, unittest, yaml
 
 # Import GUI packages
 from PySide2.QtCore             import QCoreApplication, \
                                        QObject, \
                                        Signal, \
                                        Slot
-
-# Import ARG-GUI modules
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argApplication             import *
-    from src.GUI.argParameterController     import *
-    from src.GUI.argSettingsController      import *
-    from tests.GUI_tests.tools              import *
 else:
-    from ..src.GUI.argApplication           import *
-    from ..src.GUI.argParameterController   import *
-    from ..src.GUI.argSettingsController    import *
-    from ..tests.GUI_tests.tools            import *
+    home_path = os.path.realpath("../..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from arg.GUI.argApplication            import argApplication
+from arg.GUI.argParameterController    import argParameterController
+from arg.GUI.argSettingsController     import argSettingsController
+from tests.tools                       import prepareParametersFile, unittest_application, unittest_signal
 
 ############################################################################
 class argParameterController_unittest(unittest.TestCase):
     """A GUI unit test class for argParameterController
     """
 
+    # Define parameters file
+    inputFile = os.path.join(home_path, "tests", "GUI_tests", "input", "parameters.yml")
+    parametersFilePath = prepareParametersFile(inputFile, workingDir, testName)
+
+
     expectedRead = {"BackendType":"LaTeX",
                     "ReportType":"Report",
                     "StructureFile":"../../../tests/GUI_tests/input/structure.yml",
-                    "OutputDir":"output",
+                    "OutputDir":"{}".format(prefix),
                     "Verbosity":0,
                     "Final":False,
-                    "Number":"-%TEST_NAME%-%DATE%"}
+                    "Number":"-{}-{}".format(testName,
+                                             datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d"))}
 
     dataWrite     =  [{"a":"A", "b":"B", "c":"C", "d":"D"},
                       {"backend_type":"A", "report_type":"B", "structure":"C", "output":"D"},
@@ -99,42 +101,50 @@ class argParameterController_unittest(unittest.TestCase):
     def test_read(self):
         """Unit test read method
         """
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Create test parameterController
         controller = argParameterController()
 
         # Apply test scenario
-        self.assertEqual(controller.read("input/parameters.yml"),
+        self.assertEqual(controller.read(argParameterController_unittest.parametersFilePath),
                          True)
         self.assertEqual(app.settingsController.getCurrentParameterFile(),
-                         "input/parameters.yml")
+                         argParameterController_unittest.parametersFilePath)
 
     ########################################################################
     def test_write(self):
         """Unit test write method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Create test parameterController
         controller = argParameterController()
 
         # Apply test scenario
         for i in range(len(argParameterController_unittest.dataWrite)):
-            controller.write("output/unitTestParametersController{}.yml".format(i),
+            controller.write("{}/{}{}.yml".format(workingDir, testName, i),
                              argParameterController_unittest.dataWrite[i])
             if i == 3 or i == 4:
-                with open("output/unitTestParametersController{}.yml".format(i),'r') as f:
+                with open("{}/{}{}.yml".format(workingDir, testName, i),'r') as f:
                     self.assertDictEqual(yaml.safe_load(f),
                                          argParameterController_unittest.expectedWrite[i])
                     self.assertEqual(app.settingsController.getCurrentParameterFile(),
-                                     "output/unitTestParametersController{}.yml".format(i))
+                                     "{}/{}{}.yml".format(workingDir, testName, i))
                     f.close()
             else:
-                self.assertFalse(os.stat("output/unitTestParametersController{}.yml".format(i)).st_size)
+                self.assertFalse(os.stat("{}/{}{}.yml".format(workingDir, testName, i)).st_size)
 
     ########################################################################
     def test_reloadData(self):
         """Unit test reloadData method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Create test parameterController
         controller = argParameterController()
@@ -149,13 +159,13 @@ class argParameterController_unittest(unittest.TestCase):
         self.assertDictEqual(controller.backupData, {})
 
         # Check backupData is updated after a read
-        controller.read("input/parameters.yml")
+        controller.read(argParameterController_unittest.parametersFilePath)
         self.assertDictEqual(controller.backupData,
                              argParameterController_unittest.expectedRead)
 
         # Check empty backupData is NOT updated after a write
         i = random.randint(0, len(argParameterController_unittest.dataWrite) - 1)
-        controller.write("output/unitTestParametersControllerReload.yml",
+        controller.write("{}/unitTestParametersControllerReload.yml".format(workingDir),
                          argParameterController_unittest.dataWrite[i])
         self.assertNotEqual(controller.backupData,
                              argParameterController_unittest.dataWrite[i])
@@ -175,6 +185,9 @@ class argParameterController_unittest(unittest.TestCase):
         """Unit test onDataCreated method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Create test parameterController
         controller = argParameterController()
         handler = unittest_signal()
@@ -190,7 +203,7 @@ class argParameterController_unittest(unittest.TestCase):
 if __name__ == '__main__':
 
     # Create test application
-    app = unittest_application()
+    app = unittest_application(workingDir, testName)
 
     # Run test main routine
     unittest.main()

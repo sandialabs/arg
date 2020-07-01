@@ -37,34 +37,34 @@
 #HEADER
 
 ############################################################################
-app     = "ARG-GUI_tests"
-data    = {"a":"A", "b":"B", "c":"C"}
+prefix     = "GUI_integrationtests"
+app        = "ARG-{}".format(prefix)
+data       = {"a":"A", "b":"B", "c":"C"}
+workingDir = prefix
+testName   = "testSettingsController"
 
 ############################################################################
 # Import python packages
-import os
-import subprocess
-import sys
-import unittest
-import yaml
+import os, shutil, subprocess, sys, yaml
 
-# Import ARG modules
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.Applications                    import ARG
-    from src.GUI.argSettingsController       import *
-    from tests.GUI_tests.tools               import *
 else:
-    from ..src.Applications                  import ARG
-    from ..src.GUI.argSettingsController import *
-    from ..tests.GUI_tests.tools             import *
+    home_path = os.path.realpath("../..")
+arg_path = os.path.join(home_path, "arg")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from arg.Applications               import ARG
+from arg.GUI.argSettingsController  import argSettingsController
+from arg.GUI.argUserSettingsReader  import argUserSettingsReader
+from tools                          import replaceInTemplate, sed, unittest_application
 
 ########################################################################
 # Load supported types
-with open(os.path.join(src_path, "Common/argTypes.yml"),
+with open(os.path.join(arg_path, "Common/argTypes.yml"),
     'r',
     encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
@@ -75,6 +75,23 @@ usrLvl   = os.path.join(home_path,"tests/GUI_tests/input/userSettingsUsr.yml")
 
 ############################################################################
 def main():
+    """ARG GUI settingsController test main method
+    """
+
+    # Create output directory and copy input parameters file template
+    os.mkdir(workingDir) if not os.path.isdir(workingDir) else False
+    parametersFilePath = os.path.join(workingDir,
+                                      "parameters{}.yml".format(testName[0].upper() + testName[1:]))
+    shutil.copyfile(os.path.join("input", "parameters.yml"), parametersFilePath)
+
+    # Substitute WORKING_DIR in copied parameters file template
+    sed(parametersFilePath, "%WORKING_DIR%", workingDir)
+
+    # Substitute DOC_NAME in copied parameters file template
+    sed(parametersFilePath, "%DOC_NAME%", testName)
+
+    # Subtitute templated values to current ones in parameters file
+    date = replaceInTemplate(parametersFilePath, testName)
 
     # Initiate controller
     controller = argSettingsController()
@@ -88,7 +105,7 @@ def main():
 
     # Set config file path to output, initialize controller and save settings as initialized
     controller.userHomeConfigFilePath = os.path.join(home_path,
-        "tests/GUI_tests/output/userSettingsController.yml")
+        "tests/GUI_tests/{}/userSettingsController.yml".format(workingDir))
     controller.initialize()
     controller.saveSettings({"python_executable":controller.argPythonExePath,
                              "python_site_package":controller.argPythonSitePackagePath,
@@ -104,11 +121,11 @@ def main():
 
 ########################################################################
 if __name__ == '__main__':
-    """Main readerWriter test routine
+    """ARG GUI settingsController test main routine
     """
 
     # Create test application
-    app = unittest_application()
+    app = unittest_application(workingDir, testName)
 
     main()
 

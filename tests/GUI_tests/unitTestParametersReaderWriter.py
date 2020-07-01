@@ -37,44 +37,52 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+prefix     = "GUI_unittests"
+app        = "ARG-{}".format(prefix)
+workingDir = prefix
+testName   = "unitTestParametersReaderWriter"
 
 ############################################################################
 # Import python packages
-import os
-import sys
-import unittest
-import yaml
+import datetime, os, sys, unittest, yaml
 
-# Import ARG-GUI modules
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argParameterReader         import *
-    from src.GUI.argParameterWriter         import *
 else:
-    from ..src.GUI.argParameterReader       import *
-    from ..src.GUI.argParameterWriter       import *
+    home_path = os.path.realpath("../..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from arg.GUI.argParameterReader         import argParameterReader
+from arg.GUI.argParameterWriter         import argParameterWriter
+from tests.tools                        import prepareParametersFile
 
 ############################################################################
 class argParameterReader_unittest(unittest.TestCase):
     """A GUI unit test class for argParameterReader
     """
 
+    # Define parameters file
+    inputFile = os.path.join(home_path, "tests", "GUI_tests", "input", "parameters.yml")
+    parametersFilePath = prepareParametersFile(inputFile, workingDir, testName)
+
     expected = {"BackendType":"LaTeX",
                 "ReportType":"Report",
                 "StructureFile":"../../../tests/GUI_tests/input/structure.yml",
-                "OutputDir":"output",
+                "OutputDir":"{}".format(workingDir),
                 "Verbosity":0,
                 "Final":False,
-                "Number":"-%TEST_NAME%-%DATE%"}
+                "Number":"-{}-{}".format(testName, datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d"))}
 
     ########################################################################
     def test_verbosity_to_int(self):
         """Unit test all values on verbosity_to_int method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argParameterReader()
         self.assertEqual(reader.verbosity_to_int("verbose"), 1)
@@ -87,9 +95,14 @@ class argParameterReader_unittest(unittest.TestCase):
         """Unit test read method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argParameterReader()
-        reader.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "input/parameters.yml"))
-        self.assertDictEqual(reader.ParameterData.Dict, argParameterReader_unittest.expected)
+        reader.read(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 argParameterReader_unittest.parametersFilePath))
+        self.assertDictEqual(reader.ParameterData.Dict,
+                             argParameterReader_unittest.expected)
 
 ############################################################################
 class argParameterWriter_unittest(unittest.TestCase):
@@ -113,6 +126,9 @@ class argParameterWriter_unittest(unittest.TestCase):
         """Unit test setData method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):
             writer.setData(argParameterWriter_unittest.data[i])
@@ -123,16 +139,19 @@ class argParameterWriter_unittest(unittest.TestCase):
         """Unit test write method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         writer = argParameterWriter()
         for i in range(len(argParameterWriter_unittest.data)):
             writer.setData(argParameterWriter_unittest.data[i])
-            writer.write("output/unitTestParametersReaderWriter{}.yml".format(i))
+            writer.write("{}/{}{}.yml".format(workingDir, testName, i))
             if i == 3 or i == 4:
-                with open("output/unitTestParametersReaderWriter{}.yml".format(i),'r') as f:
+                with open("{}/{}{}.yml".format(workingDir, testName, i),'r') as f:
                     self.assertDictEqual(yaml.safe_load(f), argParameterWriter_unittest.expected[i])
                     f.close()
             else:
-                self.assertFalse(os.stat("output/unitTestParametersReaderWriter{}.yml".format(i)).st_size)
+                self.assertFalse(os.stat("{}/{}{}.yml".format(workingDir, testName, i)).st_size)
 
 ############################################################################
 if __name__ == '__main__':

@@ -39,5 +39,6 @@
 backend_type: LaTeX
 report_type: Report
 structure: ../../../tests/GUI_tests/input/structure.yml
-output: output
+output: %WORKING_DIR%
 number: "-%TEST_NAME%-%DATE%"
+file_name: %DOC_NAME%

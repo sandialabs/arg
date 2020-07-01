@@ -37,33 +37,35 @@
 #HEADER
 
 ############################################################################
-app     = "ARG-GUI_tests"
-data    = {"a":"A", "b":"B", "c":"C"}
+prefix     = "GUI_integrationtests"
+app         = "ARG-GUI_tests"
+data        = {"a":"A", "b":"B", "c":"C"}
+workingDir = prefix
+testName   = "testUserSettingsReaderWriter"
 
 ############################################################################
 # Import python packages
-import os
-import subprocess
-import sys
-import unittest
+import os, subprocess, sys, yaml
 
-# Import ARG modules
+# Add home and arg paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.Applications                import ARG
-    from src.GUI.argUserSettingsReader   import *
-    from src.GUI.argUserSettingsWriter   import *
 else:
-    from ..src.Applications              import ARG
-    from ..src.GUI.argUserSettingsReader import *
-    from ..src.GUI.argUserSettingsWriter import *
+    home_path = os.path.realpath("../..")
+arg_path = os.path.join(home_path, "arg")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+arg_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(arg_path)
+
+# Import ARG modules
+from arg.Applications                import ARG
+from arg.GUI.argUserSettingsReader   import argUserSettingsReader
+from arg.GUI.argUserSettingsWriter   import argUserSettingsWriter
 
 ########################################################################
 # Load supported types
-with open(os.path.join(src_path, "Common/argTypes.yml"),
+with open(os.path.join(arg_path, "Common/argTypes.yml"),
     'r',
     encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
@@ -74,6 +76,8 @@ usrLvl   = "input/userSettingsUsr.yml"
 
 ############################################################################
 def main():
+    """ARG GUI userSettingsReaderWriter test main method
+    """
 
     # Initiate reader and writer
     reader = argUserSettingsReader(adminLvl, usrLvl)
@@ -87,16 +91,16 @@ def main():
             "paraview_site_package":reader.getParaviewSitePackage(),
             "paraview_libs":reader.getParaviewLibraries(),
             "latex_processor":reader.getLatexProcessor()}
-    writer.write("output/testUserSettingsReaderWriter.yml", data)
+    writer.write("{}/{}.yml".format(workingDir, testName), data)
 
     # Check saved content is correct
     input = yaml.safe_load(open(usrLvl, 'r'))
-    output = yaml.safe_load(open("output/testUserSettingsReaderWriter.yml", 'r'))
+    output = yaml.safe_load(open("{}/{}.yml".format(workingDir, testName), 'r'))
     return not missingAdmin and not missingSettings and input == output
 
 ########################################################################
 if __name__ == '__main__':
-    """Main readerWriter test routine
+    """ARG GUI userSettingsReaderWriter test main routine
     """
 
     main()

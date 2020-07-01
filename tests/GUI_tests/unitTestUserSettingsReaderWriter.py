@@ -37,26 +37,26 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+prefix     = "GUI_unittests"
+app        = "ARG-{}".format(prefix)
+workingDir = prefix
+testName   = "unitTestUserSettingsReaderWriter"
 
 ############################################################################
 # Import python packages
-import os
-import sys
-import unittest
-import yaml
+import os, sys, unittest, yaml
 
-# Import ARG-GUI modules
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argUserSettingsReader      import *
-    from src.GUI.argUserSettingsWriter      import *
 else:
-    from ..src.GUI.argUserSettingsReader    import *
-    from ..src.GUI.argUserSettingsWriter    import *
+    home_path = os.path.realpath("../..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from arg.GUI.argUserSettingsReader      import argUserSettingsReader
+from arg.GUI.argUserSettingsWriter      import argUserSettingsWriter
 
 ############################################################################
 class argUserSettingsReader_unittest(unittest.TestCase):
@@ -98,13 +98,13 @@ class argUserSettingsReader_unittest(unittest.TestCase):
                       "latex_processor"]]
     expectedAdmin = {"python_executable":"/opt/local/bin/python3.7",
                      "python_site_package":"/opt/local/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                     "arg_script":"/opt/local/arg/src/Applications/ARG.py",
+                     "arg_script":"/opt/local/arg/arg/Applications/ARG.py",
                      "paraview_site_package":"/opt/local/paraview-install/lib/python3.7/site-packages/",
                      "paraview_libs":"/opt/local/paraview-install/lib",
                      "latex_processor":"/opt/local/Latex/bin"}
     expectedUsr   = {"python_executable":"/Users/myuser/python3.7",
                      "python_site_package":"/Users/myuser/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                     "arg_script":"/Users/myuser/arg/src/Applications/ARG.py",
+                     "arg_script":"/Users/myuser/arg/arg/Applications/ARG.py",
                      "paraview_site_package":"/Users/myuser/paraview-install/lib/python3.7/site-packages/",
                      "paraview_libs":"/Users/myuser/paraview-install/lib",
                      "latex_processor":"/Users/myuser/Latex/bin"}
@@ -125,6 +125,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test read method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Specify admin lvl then usr lvl in constructor
         reader1 = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
         reader1.read()
@@ -144,6 +147,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test readSettingsFile method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Test admin lvl
         readerAdmin = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
         self.assertDictEqual(readerAdmin.readSettingsFile(argUserSettingsReader_unittest.adminLvl),
@@ -158,6 +164,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_readPythonExecutable(self):
         """Unit test readPythonExecutable method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
@@ -174,6 +183,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test readPythonSitePackage method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
         self.assertEqual(reader.readPythonSitePackage(argUserSettingsReader_unittest.adminLvl),
@@ -188,6 +200,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_readArgScript(self):
         """Unit test readArgScript method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
@@ -204,6 +219,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test readParaviewSitePackage method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
         self.assertEqual(reader.readParaviewSitePackage(argUserSettingsReader_unittest.adminLvl),
@@ -218,6 +236,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_readParaviewLibraries(self):
         """Unit test readParaviewLibraries method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
@@ -234,6 +255,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test readLatexProcessor method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Test admin lvl
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl, argUserSettingsReader_unittest.usrLvl)
         self.assertEqual(reader.readLatexProcessor(argUserSettingsReader_unittest.adminLvl),
@@ -248,6 +272,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_checkAllSettings(self):
         """Unit test checkAllSettings method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         for i in range(1):
             reader = argUserSettingsReader("{}{}".format(argUserSettingsReader_unittest.adminLvl, i),
@@ -266,6 +293,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test setSetting method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
         for key in argUserSettingsReader_unittest.keyValues:
@@ -282,6 +312,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test getPythonExecutable method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
         reader.read()
@@ -292,6 +325,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_getPythonSitePackage(self):
         """Unit test getPythonSitePackage method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
@@ -304,6 +340,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test getArgScript method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
         reader.read()
@@ -314,6 +353,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_getParaviewSitePackage(self):
         """Unit test getParaviewSitePackage method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
@@ -326,6 +368,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
         """Unit test getParaviewLibraries method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
         reader.read()
@@ -336,6 +381,9 @@ class argUserSettingsReader_unittest(unittest.TestCase):
     def test_getLatexProcessor(self):
         """Unit test getLatexProcessor method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         reader = argUserSettingsReader(argUserSettingsReader_unittest.adminLvl,
                                        argUserSettingsReader_unittest.usrLvl)
@@ -367,10 +415,13 @@ class argUserSettingsWriter_unittest(unittest.TestCase):
         """Unit test write method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         writer = argUserSettingsWriter()
         for i in range(len(argUserSettingsWriter_unittest.data)):
-            writer.write("output/unitTestUserSettingsReaderWriter{}.yml".format(i), argUserSettingsWriter_unittest.data[i])
-            with open("output/unitTestUserSettingsReaderWriter{}.yml".format(i),'r') as f:
+            writer.write("{}/{}{}.yml".format(workingDir, testName, i), argUserSettingsWriter_unittest.data[i])
+            with open("{}/{}{}.yml".format(workingDir, testName, i),'r') as f:
                 self.assertDictEqual(yaml.safe_load(f), argUserSettingsWriter_unittest.expected[i])
                 f.close()
 

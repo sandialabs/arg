@@ -37,15 +37,14 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+prefix     = "GUI_unittests"
+app        = "ARG-{}".format(prefix)
+workingDir = prefix
+testName   = "unitTestSettingsController"
 
 ############################################################################
 # Import python packages
-import os
-import random
-import sys
-import unittest
-import yaml
+import os, random, sys, unittest, yaml
 
 # Import GUI packages
 from PySide2.QtCore             import QCoreApplication, \
@@ -53,21 +52,22 @@ from PySide2.QtCore             import QCoreApplication, \
                                        Signal, \
                                        Slot
 
-# Import ARG-GUI modules
+# Add home and arg paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
-    from src.GUI.argApplication             import *
-    from src.GUI.argSettingsController     import *
-    from src.GUI.argSettingsController      import *
-    from tests.GUI_tests.tools              import *
 else:
-    from ..src.GUI.argApplication           import *
-    from ..src.GUI.argSettingsController   import *
-    from ..src.GUI.argSettingsController    import *
-    from ..tests.GUI_tests.tools            import *
+    home_path = os.path.realpath("../..")
+arg_path = os.path.join(home_path, "arg")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+arg_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(arg_path)
+
+# Import ARG modules
+from arg.GUI.argApplication            import argApplication
+from arg.GUI.argSettingsController     import argSettingsController
+from arg.GUI.argUserSettingsReader     import argUserSettingsReader
+from tests.tools                       import unittest_application
 
 ############################################################################
 class argSettingsController_unittest(unittest.TestCase):
@@ -76,7 +76,7 @@ class argSettingsController_unittest(unittest.TestCase):
 
     expected         = {"python_executable":"/Users/myuser/python3.7",
                          "python_site_package":"/Users/myuser/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/",
-                         "arg_script":"/Users/myuser/arg/src/Applications/ARG.py",
+                         "arg_script":"/Users/myuser/arg/arg/Applications/ARG.py",
                          "paraview_site_package":"/Users/myuser/paraview-install/lib/python3.7/site-packages/",
                          "paraview_libs":"/Users/myuser/paraview-install/lib",
                          "latex_processor":"/Users/myuser/Latex/bin"}
@@ -138,12 +138,24 @@ class argSettingsController_unittest(unittest.TestCase):
                          "ExecutiveSummary":["Executive Summary", False],
                          "Nomenclature":["Nomenclature", False],
                          "Final":["Final", False],
-                         "KeySeparator":["Key Separator", False]}
+                         "KeySeparator":["Key Separator", False],
+                         "DataDirectory": ["Model Directory", False],
+                         "DeckRoot": ["Input Deck", False],
+                         "GeometryRoot": ["Geometry Root", False],
+                         "ReportedCadMetaData": ["Reported CAD Metadata", False],
+                         "LogFile": ["Log File", False],
+                         "IgnoredBlockKeys": ["Ignored Blocks", False],
+                         "Mappings": ["Bijective Mapping", False],
+                         "CAD_to_FEM": ["CAD to FEM", False],
+                         "FEM_to_CAD": ["FEM to CAD", False]}
 
     ########################################################################
     def test_init(self):
         """Unit test __init__ contructor
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         appData_path = os.path.join(home_path, "APPDATA")
@@ -151,14 +163,14 @@ class argSettingsController_unittest(unittest.TestCase):
         # Create test parameterController
         controller1 = argSettingsController()
         # Check initialized values
-        self.assertEqual(controller1.scriptDirectory,
-                         os.path.join(src_path, "GUI"))
-        self.assertEqual(controller1.scriptDirectoryConfigFilePath,
-                         os.path.join(src_path, "GUI\\ARG-GUI-config.yml"))
-        self.assertEqual(controller1.homePath,
-                         appData_path)
-        self.assertEqual(controller1.userHomeConfigFilePath,
-                         os.path.join(appData_path, "ARG\\ARG-GUI-config.yml"))
+        self.assertEqual(controller1.scriptDirectory.lower(),
+                         os.path.join(arg_path, "GUI").lower())
+        self.assertEqual(controller1.scriptDirectoryConfigFilePath.lower(),
+                         os.path.join(arg_path, "GUI\\ARG-GUI-config.yml").lower())
+        self.assertEqual(controller1.homePath.lower(),
+                         appData_path.lower())
+        self.assertEqual(controller1.userHomeConfigFilePath.lower(),
+                         os.path.join(appData_path, "ARG\\ARG-GUI-config.yml").lower())
 
         # Delete APPDATA environment variable
         # and HOME environment vairable to home_path for test
@@ -167,19 +179,22 @@ class argSettingsController_unittest(unittest.TestCase):
         # Create new test parameterController
         controller2 = argSettingsController()
         # Check initialized values
-        self.assertEqual(controller2.scriptDirectory,
-                         os.path.join(src_path, "GUI"))
-        self.assertEqual(controller2.scriptDirectoryConfigFilePath,
-                         os.path.join(src_path, "GUI\\ARG-GUI-config.yml"))
-        self.assertEqual(controller2.homePath,
-                         home_path)
-        self.assertEqual(controller2.userHomeConfigFilePath,
-                         os.path.join(home_path, "ARG\\ARG-GUI-config.yml"))
+        self.assertEqual(controller2.scriptDirectory.lower(),
+                         os.path.join(arg_path, "GUI").lower())
+        self.assertEqual(controller2.scriptDirectoryConfigFilePath.lower(),
+                         os.path.join(arg_path, "GUI\\ARG-GUI-config.yml").lower())
+        self.assertEqual(controller2.homePath.lower(),
+                         home_path.lower())
+        self.assertEqual(controller2.userHomeConfigFilePath.lower(),
+                         os.path.join(home_path, "ARG\\ARG-GUI-config.yml").lower())
 
     ########################################################################
     def test_initialize(self):
         """Unit test initialize method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")
@@ -194,7 +209,7 @@ class argSettingsController_unittest(unittest.TestCase):
         # Test initialization on empty controller
         controllerEmpty.initialize()
         self.assertEqual(controllerEmpty.settings,
-                    argSettingsController_unittest.expectedSettings)
+                         argSettingsController_unittest.expectedSettings)
 
         # Tests initialization on set up controllers
         for i in range(len(argSettingsController_unittest.expectedMissings)):
@@ -247,6 +262,9 @@ class argSettingsController_unittest(unittest.TestCase):
     def test_initializeUserSettings(self):
         """Unit test initializeUserSettings method
         """
+
+        # Log total content in case of difference
+        self.maxDiff = None
 
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")
@@ -303,13 +321,16 @@ class argSettingsController_unittest(unittest.TestCase):
         """Unit test saveSettings method
         """
 
+        # Log total content in case of difference
+        self.maxDiff = None
+
         # Set APPDATA environment variable to specific path for test
         os.environ["APPDATA"] = os.path.join(home_path, "GUI/GUI_tests/input")
 
         # Create test parameterController
         controller = argSettingsController()
         controller.userHomeConfigFilePath = os.path.join(home_path,
-            "tests/GUI_tests/output/userSettingsController.yml")
+            "tests/GUI_tests/{}/userSettingsController.yml".format(workingDir))
         controller.argPythonExePath = "python"
         controller.argPythonSitePackagePath = "python/site-packages"
         controller.argScriptPath = "ARG.py"
@@ -331,7 +352,7 @@ class argSettingsController_unittest(unittest.TestCase):
             argSettingsController_unittest.data.get("paraview_libs", None))
         self.assertEqual(controller.argLatexProcessorPath,
             argSettingsController_unittest.data.get("latex_processor", None))
-        with open("output/userSettingsController.yml",'r') as f:
+        with open("{}/userSettingsController.yml".format(workingDir),'r') as f:
             self.assertDictEqual(yaml.safe_load(f), argSettingsController_unittest.data)
             f.close()
 
@@ -339,7 +360,7 @@ class argSettingsController_unittest(unittest.TestCase):
 if __name__ == '__main__':
 
     # Create test application
-    app = unittest_application()
+    app = unittest_application(workingDir, testName)
 
     # Run test main routine
     unittest.main()

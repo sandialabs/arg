@@ -1,5 +1,5 @@
 #HEADER
-#                      arg/tests/GUI_tests.py
+#                  arg/tests/GUI_tests/integration.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -37,20 +37,28 @@
 #HEADER
 
 ############################################################################
-# Import python packages
-import os
-import subprocess
-import sys
+prefix = "GUI_integrationtests"
+app    = "ARG-{}".format(prefix)
 
-# Add home and src paths
+############################################################################
+# Import python packages
+import getopt, os, shutil, subprocess, sys, time
+
+# Add home path
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    src_path = os.path.join(home_path, "src")
-    sys.path.append(home_path)
-    sys.path.append(src_path)
+else:
+    home_path = os.path.realpath("../..")
+home_path.lower() not in [path.lower() for path in sys.path] \
+    and sys.path.append(home_path)
+
+# Import ARG modules
+from tests.tools import clean
 
 ############################################################################
 def main():
+    """ARG GUI integration tests main method
+    """
 
     # Create output directory if does not exist
     if not os.path.exists("output") or not os.path.isdir("output"):
@@ -63,17 +71,47 @@ def main():
                    "testSettingsController"]
 
     for script in testScripts:
-        print("\n==================== [ARG-GUI_tests] {} ====================".format(script))
+        print("\n-------------------- [{}] {} --------------------".format(app, script))
         proc = subprocess.Popen(["python",
                              "{}.py".format(script),
                              "-b"])
         proc.wait()
 
-########################################################################
+############################################################################
 if __name__ == '__main__':
-    """Main readerWriter test routine
+    """ARG GUI integration tests main routine
     """
 
-    main()
+    # Start stopwatch
+    t_start = time.time()
 
-########################################################################
+    # Print startup information
+    sys_version = sys.version_info
+    print("[{}] ### Started with Python {}.{}.{}".format(
+        app,
+        sys_version.major,
+        sys_version.minor,
+        sys_version.micro))
+
+    # Parse commandline arguments to detect clean routine
+    opts, args = getopt.getopt(sys.argv[1:], "c")
+    if '-c' in [opt[0] for opt in opts] or 'c' in args:
+        print("\n-------------------- [{}] Clean previous results --------------------\n".format(app))
+        clean(prefix)
+        try:
+            shutil.rmtree(prefix)
+        except:
+            pass
+    # Otherwise, run main routine
+    else:
+        main()
+
+    # End stopwatch
+    dt = time.time() - t_start
+
+    # If this point is reached everything went fine
+    print("[{}] Process completed in {} seconds. ###".format(
+    app,
+    dt))
+
+############################################################################
