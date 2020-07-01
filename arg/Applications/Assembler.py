@@ -37,7 +37,7 @@
 #HEADER
 
 ########################################################################
-ARG_VERSION         = "1.0.0"
+ARG_VERSION         = "1.0.1"
 
 DEBUG_ARG_YAML      = False
 DEBUG_ARG_PYTHON    = True

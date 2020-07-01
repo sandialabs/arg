@@ -672,7 +672,7 @@ Upload in Gitlab.com:
     - echo "==================== Upload pyARG ==================="
     - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
     # Try to install pyARG from gitlab packages
-    #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.0
+    #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.1
     #- python -c "import arg"
     #- pip uninstall pyARG -y
   rules:
