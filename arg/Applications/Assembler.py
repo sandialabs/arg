@@ -36,46 +36,28 @@
 #
 #HEADER
 
-########################################################################
-ARG_VERSION         = "1.0.1"
+import os
+import sys
+import time
 
-DEBUG_ARG_YAML      = False
-DEBUG_ARG_PYTHON    = True
-DEBUG_ARG_LATEX     = True
-app                 = "Assembler"
+import yaml
 
-########################################################################
-assembler_module_aliases = {}
-for m in [
-    "distutils",
-    "distutils.spawn",
-    "os",
-    "sys",
-    "time",
-    "yaml",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in assembler_module_aliases:
-            globals()[assembler_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+from arg import __version__
+from arg.Applications import ARG
+from arg.Common.argReportParameters import argReportParameters
+from arg.Tools import Utilities
+
+
+ARG_VERSION = __version__
+
+app = "Assembler"
 
 # Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
-from arg.Common.argReportParameters         import argReportParameters
-from arg.Backend.argBackendBase             import argBackendBase
-from arg.Tools                              import Utilities
 
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -83,7 +65,7 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
           encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
 
-########################################################################
+
 def main(app, types, version=None):
     """ Assembler main method
     """
@@ -105,8 +87,6 @@ def main(app, types, version=None):
     # Parse command line arguments to get parameters file value
     if parameters.parse_line():
 
-        # Additional debug information when requested
-        ARG.print_debug(app, DEBUG_ARG_PYTHON, DEBUG_ARG_LATEX, parameters.LatexProcessor)
         # Execute
         execute(app, parameters)
 
@@ -126,7 +106,7 @@ def main(app, types, version=None):
         app,
         dt))
 
-########################################################################
+
 def execute(app, parameters):
     """ Assembler execute method
     """
@@ -134,7 +114,7 @@ def execute(app, parameters):
     # Check structure file location
     file = parameters.StructureFile
     if (not os.path.exists(parameters.StructureFile)
-        and os.path.exists(os.path.join(parameters.OutputDir, parameters.StructureFile))):
+            and os.path.exists(os.path.join(parameters.OutputDir, parameters.StructureFile))):
         file = os.path.join(parameters.OutputDir, parameters.StructureFile)
     report_map = Utilities.read_yml_file(file, parameters.Application)
 
@@ -147,11 +127,9 @@ def execute(app, parameters):
     # Log execution status
     parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
 
-########################################################################
+
 if __name__ == '__main__':
     """ Main report assembler routine
     """
 
     main(app, Types, ARG_VERSION)
-
-########################################################################

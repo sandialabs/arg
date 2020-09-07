@@ -36,39 +36,22 @@
 #
 #HEADER
 
-########################################################################
-argBackendBase_module_aliases = {}
-for m in [
-    "abc",
-    "datetime",
-    "os",
-    "shutil",
-    "yaml",
-    "subprocess",
-    "sys"
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argBackendBase_module_aliases:
-            globals()[argBackendBase_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import abc
+import datetime
+import os
+import shutil
+import sys
 
-# Import ARG modules
+import yaml
+
+from arg.Aggregation import argSummarize
+from arg.Common.argInformationObject import argInformationObject
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.Aggregation                     import argSummarize, argAggregate
-from arg.Tools                           import Utilities
 
-########################################################################
+
 class argBackendBase(object):
     __metaclass__ = abc.ABCMeta
 
-    ####################################################################
     @abc.abstractmethod
     def __init__(self, parameters=None):
 
@@ -94,7 +77,6 @@ class argBackendBase(object):
         # Retrieve supported templates information
         self.Templates = self.Types.get("TemplateFiles", {})
 
-    ####################################################################
     def get_type(self):
         """Convenience method to get backend type
         """
@@ -102,7 +84,6 @@ class argBackendBase(object):
         # Return value of instance variable
         return self.Type
 
-    ####################################################################
     def get_caption_extension(self):
         """Convenience method to get caption file extension for backend
         """
@@ -111,7 +92,6 @@ class argBackendBase(object):
         return argMultiFontStringHelper.Types.get(
             "BackendTypes", {}).get(self.Type, {}).get("captions", '')
 
-    ####################################################################
     def get_timestamp(self):
         """Convenience method to get timestamp under unified format
         """
@@ -119,7 +99,6 @@ class argBackendBase(object):
         # Return value of instance variable
         return datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d, %H:%M:%S")
 
-    ####################################################################
     def create_document_preamble(self, version=None):
         """Must be overwritten if concrete backend needs a preamble
         """
@@ -127,7 +106,6 @@ class argBackendBase(object):
         # No default preamble is provided
         return
 
-    ####################################################################
     def add_document_provenance(self, version=None):
         """Must be overwritten if concrete backend needs a document timestamp
         Add document provenance information on a new page
@@ -136,7 +114,6 @@ class argBackendBase(object):
         # No default preamble is provided
         return
 
-    ####################################################################
     def add_document_tocs(self, version=None):
         """Must be overwritten if concrete backend needs Table of Contents, List of Figures and List of Tables
         Add document Table of Contents, List of Figures and List of Tables on new pages
@@ -145,7 +122,6 @@ class argBackendBase(object):
         # No default preamble is provided
         return
 
-    ####################################################################
     def append_document_postamble(self):
         """Must be overwritten if concrete backend needs a postamble
         """
@@ -153,7 +129,6 @@ class argBackendBase(object):
         # No default postamble is provided
         return
 
-    ####################################################################
     @abc.abstractmethod
     def generate_multi_font_string(self, multi_font_string, handle=None):
         """Generate backend-end specific artifact for multi-font string
@@ -161,7 +136,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def generate_matrix_string(self, matrix):
         """Generate back-end specific string from matrix entries
@@ -169,7 +143,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_paragraph(self, item):
         """Add paragraph to the report
@@ -177,7 +150,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_list(self, item, number_items=False):
         """Add itemization or enumeration to the report
@@ -185,7 +157,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
@@ -193,7 +164,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_section(self, item, numbered=True):
         """Add section to the report
@@ -201,7 +171,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_chapter(self, item, numbered=True):
         """Add chapter to the report
@@ -209,7 +178,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_page_break(self):
         """Add page break to the report
@@ -217,7 +185,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_table(self, header, body, do_verbatim, position):
         """Add table to the report
@@ -225,7 +192,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def add_figure(self, arguments):
         """Add figure to the report
@@ -233,7 +199,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def recursively_build_report(self, structure_tree):
         """Recursively navigate tree sructure to build report
@@ -241,7 +206,6 @@ class argBackendBase(object):
 
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def assemble(self, report_map, version=None, latex_proc=None):
         """Create a report possibly including assembler version
@@ -256,17 +220,13 @@ class argBackendBase(object):
             print("** ERROR: Chapters are not defined in provided structure file. Exiting")
             sys.exit(1)
 
-    ####################################################################
     def add_meta_information(self, item):
         """Add meta-information about data to the report
         """
 
         # Retrieve required parameters
         data_type = item["datatype"]
-        data_set  = item["dataset"]
-
-        # Retrieve optional additional paramete
-        data_parameters = item.get("parameters", '')
+        data_set = item["dataset"]
 
         # Retrieve or assign optional verbosity parameter
         verbosity = self.VerbosityLevels.get("default")
@@ -275,7 +235,8 @@ class argBackendBase(object):
         datafile = os.path.join(self.Parameters.DataDir, data_set)
 
         # Retrieve meta-information
-        data = self.Parameters.DataFactory(data_type, datafile, data_parameters)
+        data = self.Parameters.DataFactory(
+            data_type, datafile, item.get("parameters", {}))
         meta_info = data.get_meta_information()
 
         # Break out early if no meta-information was retrieved
@@ -295,31 +256,47 @@ class argBackendBase(object):
             body_dict = {}
             for m in meta_info:
                 key = m.get(name_str)
-                
+
                 # Ensure consistency of meta-information across accessors
                 if not key or other_cols != [k for k in m if k != name_str]:
-                    print("*  WARNING: Inconsistent {} meta-information for {}. Ignoring dataset {}".format(
+                    print("*  WARNING: Inconsistent meta-information for {}. Ignoring dataset {}".format(
                         data_type, data_set))
                     return
 
                 # Update table body
-                body_dict[key] =  [m.get(c) for c in other_cols]
+                body_dict[key] = [m.get(c) for c in other_cols]
 
             caption_string = argMultiFontStringHelper(self)
             caption_string.append("Meta-information of ", "default")
-            if data_parameters:
+            data_extension = item.get("parameters", {}).get("extension")
+            if data_extension:
                 caption_string.append(" all files with extension ", "default")
-                caption_string.append(data_parameters, "typewriter")
-                caption_string.append(" in ", "default")
-                caption_string.append(datafile.replace('\\', '/'), "typewriter")
+                caption_string.append(data_extension, "typewriter")
+                caption_string.append(" in data directory.", "default")
             else:
                 caption_string.append(data_set, "typewriter")
+            caption_string.append(".", "default")
             self.add_table(
                 header_list,
                 body_dict,
                 caption_string,
                 True)
-            
+
+        # Generate meta-data for HDF5 file
+        if data_type == "HDF5":
+            # Iterate over per-file meta-information entries
+            for m in meta_info:
+                # Create caption string
+                caption_string = argMultiFontStringHelper(self)
+                caption_string.append("Meta-information of ", "default")
+                caption_string.append(data_set, "typewriter")
+
+                # Generate meta-information table
+                self.add_table(
+                    ["property", "value"],
+                    {k: ["{}".format(v)] for k, v in m.items() if k != "file name"},
+                    caption_string, False)
+
         # Generate meta-data for Exodus mesh
         elif data_type == "ExodusII":
             # Retrieve base name of file
@@ -334,10 +311,7 @@ class argBackendBase(object):
             caption_string = argMultiFontStringHelper(self)
             caption_string.append("Topological properties of ", "default")
             caption_string.append(file_name, "typewriter")
-            self.add_table(
-                header_list,
-                body_dict,
-                caption_string)
+            self.add_table(header_list, body_dict, caption_string, True)
 
             # Create table of mesh blocks if requested and at least one exists
             if verbosity > self.VerbosityLevels.get("terse"):
@@ -346,11 +320,7 @@ class argBackendBase(object):
                     caption_string.clear()
                     caption_string.append("Element blocks of ", "default")
                     caption_string.append(file_name, "typewriter")
-                    self.add_table(
-                        header_list,
-                        body_dict,
-                        caption_string,
-                        True)
+                    self.add_table(header_list, body_dict, caption_string, True)
 
             # Create table of node and side sets if requested and at least one exists
             if verbosity > self.VerbosityLevels.get("terse"):
@@ -361,11 +331,7 @@ class argBackendBase(object):
                         caption_string.append(set_type.title(), "default")
                         caption_string.append(" sets of ", "default")
                         caption_string.append(file_name, "typewriter")
-                        self.add_table(
-                            header_list,
-                            body_dict,
-                            caption_string,
-                            True)
+                        self.add_table(header_list, body_dict, caption_string, True)
 
             # Create table of variables if some are present
             header_list, body_list = argSummarize.summarize_exodus_variable(meta_info)
@@ -373,53 +339,94 @@ class argBackendBase(object):
                 caption_string.clear()
                 caption_string.append("Variables of ", "default")
                 caption_string.append(file_name, "typewriter")
-                self.add_table(
-                    header_list,
-                    body_list,
-                    caption_string,
-                    True)
+                self.add_table(header_list, body_list, caption_string, True)
 
-    ####################################################################
     def add_information(self, item):
         """Print information about given property to report and
            restrict information to specific items if provided
         """
 
-        # Unpack property request
+        # Unpack property request and bail out early if empty
         property_request = item["property_request"]
-        l = len(property_request)
-        if not l:
+        if not property_request:
             return
 
-        # Retrieve necessary parameters
+        # Retrieve request parameters
         data_type = item["datatype"]
-        data_set  = item["dataset"]
+        data_set = item["dataset"]
 
         # At least one data property was requested
         prop_type = property_request[0]
-
-        # Retrieve property items if provided
-        if l > 1:
-            prop_items = property_request[1:]
-        else:
-            prop_items = None
+        prop_items = property_request[1:]
 
         # Assemble data base name and instantiate reader
         datafile = os.path.join(self.Parameters.DataDir, data_set)
-        data = self.Parameters.DataFactory(data_type, datafile, '')
+        data = self.Parameters.DataFactory(
+            data_type, datafile, item.get("parameters", {}))
 
         # Retrieve information for given property
         prop_info = data.get_property_information(prop_type, prop_items)
 
         # If no property values were found report it and break out
         if not prop_info:
-            self.add_paragraph(
-                {"string": "No values for {} were found.".format(
-                    ", ".join(prop_items))})
+            # Report missing values for property type
+            multi_font_string = argMultiFontStringHelper(self)
+            multi_font_string.append("No values for ", "default")
+            p_items = False
+            for p in prop_items:
+                # Report missing values for property items
+                if p_items:
+                    multi_font_string.append(", ", "default")
+                p_items = True
+                multi_font_string.append(p, "typewriter")
+            if p_items:
+                multi_font_string.append(" items of ", "default")
+            multi_font_string.append(prop_type, "typewriter")
+            multi_font_string.append(" property were found.", "default")
+            self.add_paragraph({"string": multi_font_string})
+
+            # Do not add anything else when values are missing
             return
 
         # Some specific items were requested, build a summary table
-        if prop_items and isinstance(prop_info, dict):
+        elif isinstance(prop_info, argInformationObject):
+            # Create tables depending on information type
+            prop_info_type = prop_info.get_type()
+
+            # Handle dictionary of lists of values
+            if prop_info_type == "arg_dict_lists_lists":
+                # Create header common to all tables
+                tab_head = []
+                for p_name in prop_info.get_names():
+                    multi_font_string = argMultiFontStringHelper(self)
+                    multi_font_string.append(p_name, "typewriter")
+                    tab_head.append(multi_font_string)
+
+                # Iterate over property object items
+                for info_key, info_value in prop_info.iterator():
+                    multi_font_string = argMultiFontStringHelper(self)
+                    if prop_type:
+                        multi_font_string.append("Values of ", "default")
+                        multi_font_string.append(prop_type, "typewriter")
+                        multi_font_string.append(" property for ", "default")
+                    else:
+                        multi_font_string.append("Values for ", "default")
+                    multi_font_string.append(info_key, "typewriter")
+                    multi_font_string.append(".", "default")
+                    self.add_table(
+                        tab_head,
+                        info_value,
+                        multi_font_string,
+                        True)
+
+            # Unsupported type of information object
+            else:
+                print("*  WARNING: informtation type {} not supported by backend.".format(
+                    prop_info_type))
+                return
+
+        # Some specific items were requested, build a summary table
+        elif prop_items and isinstance(prop_info, dict):
             # Create table for property items only if needed
             tab_head = [argMultiFontStringHelper(self)]
             tab_head[0].append(prop_type, "typewriter")
@@ -428,7 +435,7 @@ class argBackendBase(object):
             map(lambda x, p: x.append(p, "typewriter"),
                 tab_head[1:], prop_items)
             multi_font_string = argMultiFontStringHelper(self)
-            multi_font_string.append("Summary of input deck ", "default")
+            multi_font_string.append("Values of ", "default")
             multi_font_string.append(prop_type, "typewriter")
             multi_font_string.append(" properties.", "default")
             self.add_table(
@@ -445,27 +452,27 @@ class argBackendBase(object):
                 if not props:
                     continue
 
-                # Create table if at least one property item and one value exist
-                prop_item = props[0]
-                prop_values = props[1]
-                if prop_item and prop_values and isinstance(prop_values, dict):
-                    tab_head = [argMultiFontStringHelper(self),
-                                argMultiFontStringHelper(self)]
-                    tab_head[0].append(prop_type, "typewriter")
-                    tab_head[1].append(prop_item, "typewriter")
-                    multi_font_string = argMultiFontStringHelper(self)
-                    multi_font_string.append("Input deck values of ", "default")
-                    multi_font_string.append(prop_item, "typewriter")
-                    multi_font_string.append(" for property ", "default")
-                    multi_font_string.append(prop_type, "typewriter")
-                    multi_font_string.append('.', "default")
-                    self.add_table(
-                        tab_head,
-                        list(prop_values.items()),
-                        multi_font_string,
-                        True)
+                # Handle list-based properties
+                if isinstance(props, list) and len(props) > 2:
+                    prop_item = props[0]
+                    prop_values = props[1]
+                    if prop_item and prop_values and isinstance(prop_values, dict):
+                        tab_head = [argMultiFontStringHelper(self),
+                                    argMultiFontStringHelper(self)]
+                        tab_head[0].append(prop_type, "typewriter")
+                        tab_head[1].append(prop_item, "typewriter")
+                        multi_font_string = argMultiFontStringHelper(self)
+                        multi_font_string.append("Values of ", "default")
+                        multi_font_string.append(prop_item, "typewriter")
+                        multi_font_string.append(" for property ", "default")
+                        multi_font_string.append(prop_type, "typewriter")
+                        multi_font_string.append('.', "default")
+                        self.add_table(
+                            tab_head,
+                            list(prop_values.items()),
+                            multi_font_string,
+                            True)
 
-    ####################################################################
     def fetch_image_and_caption(self, arguments):
         """Retrieve image and associated caption for figure creation
         """
@@ -509,15 +516,15 @@ class argBackendBase(object):
             if caption_file:
                 # Try to fetch caption string first from data then output directories
                 for d in (
-                    self.Parameters.DataDir,
-                    self.Parameters.OutputDir):
+                        self.Parameters.DataDir,
+                        self.Parameters.OutputDir):
                     try:
                         with open(os.path.join(d, caption_file), 'r') as f:
                             caption_string = f.read()
                             break
                     except IOError:
                         continue
-                else: # for d in target_dirs
+                else:  # for d in target_dirs
                     print("*  WARNING: could find caption file {} in neither {} nor {}.".format(
                         caption_file,
                         self.Parameters.DataDir,
@@ -526,5 +533,3 @@ class argBackendBase(object):
 
         # Return retrieve image file name
         return figure_file_name, caption_string
-
-########################################################################

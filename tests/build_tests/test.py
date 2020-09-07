@@ -82,9 +82,15 @@ def findTestCases():
         for testCase in Path(".").rglob(argFile):
             f.write(os.path.dirname(testCase))
             if "structure: %DOC_NAME%" in open(testCase, "r").read():
-                f.write("{}-e".format(parametersSep))
+                if testCase.parent.name == 'crush-E':
+                    f.write("{}-E".format(parametersSep))
+                else:
+                    f.write("{}-e".format(parametersSep))
             else:
-                f.write("{}-g".format(parametersSep))
+                if testCase.parent.name == 'plots-G':
+                    f.write("{}-G".format(parametersSep))
+                else:
+                    f.write("{}-g".format(parametersSep))
             f.write("\n")
         f.close()
 
@@ -95,17 +101,22 @@ def sed(fileName, str1, str2):
 
     # Open file in read mode
     f = open(fileName, "rt")
+
     # Read all file
     data = f.read()
+
     # Replace str1 by str2 in read data
     data = data.replace(str1, str2)
+
     # Close file
     f.close()
 
     # Open file in write mode
     f = open(fileName, "wt")
+
     # Dump modified data
     f.write(data)
+
     # Close file
     f.close()
 
@@ -167,26 +178,9 @@ def build_ind(machine, caseName, caseRunType, report, backend):
     sed(parametersFilePath, "%WORKING_DIR%", os.path.join(casePath, "data"))
 
     # Create output files
-    out = open(os.path.realpath("{}/{}".format(workingPath, argLogFile)), "a")
-    err = open(os.path.realpath("{}/{}".format(workingPath, argErrFile)), "a")
-
-    # Call ApreproSubstitutor if template exists
-    templateFilePath = os.path.realpath("{}/Results.template.yml".format(casePath))
-    dataFilePath = os.path.realpath("{}/params.dat".format(casePath))
-    resultsFilePath = os.path.realpath("{}/Results.yml".format(casePath))
-    if os.path.exists(templateFilePath) and os.path.isfile(templateFilePath):
-        subprocess.Popen(["python",
-                          os.path.realpath("{}/arg/Applications/ApreproSubstitutor.py".format(ARG_HOME)),
-                          "-a",
-                          dataFilePath,
-                          "-t",
-                          templateFilePath,
-                          "-o",
-                          resultsFilePath],
-                          stdout=out, stderr=err)
-
-    # Determine if structure file exists and save run type for ARG argument
-    argRunType = "-g" if checkStructureFileExists(parametersFilePath) else "-e"
+    err_file_path = os.path.realpath(f"{workingPath}/{argErrFile}")
+    out = open(os.path.realpath("{}/{}".format(workingPath, argLogFile)), "w")
+    err = open(err_file_path, "w")
 
     # Execute runner
     proc = subprocess.Popen(["python",
@@ -197,6 +191,12 @@ def build_ind(machine, caseName, caseRunType, report, backend):
                              stdout=out, stderr=err)
     proc.wait()
     out.flush()
+
+    with open(err_file_path, 'r') as err_file:
+        if err_file.readlines():
+            print(f"Some errors occured. Please check {err_file_path}")
+        else:
+            print("No errors when building this report.")
 
     # Copy generated report to case-level directory
     try:
@@ -223,9 +223,6 @@ def build_all(machine, caseName, caseType, reportTypes, backendTypes):
 def main():
     """ARG build tests main method
     """
-
-    # Generate test cases in dedicated file
-    findTestCases()
 
     # Iterate over all found test cases
     for case in open(testCaseRegex.format(os.path.join("tests", "build_tests"))):
@@ -254,12 +251,22 @@ if __name__ == '__main__':
         sys_version.minor,
         sys_version.micro))
 
+    findTestCases()
+
+    with open(testCaseRegex.format(os.path.join("tests", "build_tests"))) as cs_file:
+        test_cases = [line.strip().split(parametersSep) for line in cs_file.readlines() if
+                      line.strip().split(parametersSep)[0] in sys.argv]
+
     # Parse commandline arguments to detect clean routine
     opts, args = getopt.getopt(sys.argv[1:], "c")
     if '-c' in [opt[0] for opt in opts] or 'c' in args:
         print("\n-------------------- [{}] Clean previous results --------------------\n".format(app))
         clean(prefix)
-    # Otherwise, run main routine
+    elif test_cases:
+        for test_case in test_cases:
+            print("-------------------------------------------------------------------------")
+            print(f"Running build test {test_case[0]}...")
+            build_all(machine, test_case[0], test_case[1], reportTypes, backendTypes)
     else:
         main()
 

@@ -36,58 +36,40 @@
 #
 #HEADER
 
-########################################################################
-DEBUG_ARG_PLOT = False
+import math
+import os
+import string
+import sys
 
-########################################################################
-argPlot_module_aliases = {
-    "numpy": "np",
-    "matplotlib.pylab": "mpl"}
-for m in [
-    "string",
-    "math",
-    "matplotlib.pylab",
-    "numpy",
-    "os",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argPlot_module_aliases:
-            globals()[argPlot_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import matplotlib
+import matplotlib.pyplot
+import matplotlib.pylab as mpl
+import numpy as np
+import yaml
 
-# Import ARG modules
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import *
-from arg.Tools                           import Utilities
+from arg.DataInterface.argDataInterface import argDataInterface
 
-########################################################################
+matplotlib.use("Agg")
+
 # Available colors
-argPlot_colors = ["blue", "magenta","black", "green", "cyan ",
-                 "pink", "yellow", "red" , "gray", "darkgray",
-                 "lightgray", "brown", "lime", "olive", "orange",
-                 "purple", "teal", "violet"]
+argPlot_colors = [
+    "blue", "magenta", "black", "green", "cyan ",
+    "pink", "yellow", "red", "gray", "darkgray",
+    "lightgray", "brown", "lime", "olive", "orange",
+    "purple", "teal", "violet"]
 
 # Available styles
 argPlot_styles = ["solid", "dashed", "dashdot"]
 
 # Available mathematical expressions
-from math import *
-argPlot_expressions = dict([(f, globals().get(f, None))
-                            for f in ["sqrt", "pow",
-                                      "cos", "sin", "tan",
-                                      "e", "pi",
-                                      "acos", "asin", "atan", "atan2",
-                                      "cosh", "sinh", "tanh",
-                                      "exp", "log", "log10",
-                                      "ceil", "floor", "fabs"]])
+argPlot_expressions = dict([(f, getattr(math, f)) for f in [
+    "sqrt", "pow",
+    "ceil", "floor", "fabs",
+    "pi", "cos", "sin", "tan", "acos",
+    "asin", "atan", "atan2",
+    "e", "cosh", "sinh", "tanh",
+    "exp", "log", "log10"]])
 
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
@@ -101,11 +83,11 @@ plotting_functions = supported_types.get(
     "PlottingFunctions")
 
 # Figure extension constants
-constant_shift  =  .05
-decrease_factor =  .95
-increase_factor  = 1.05
+constant_shift = .05
+decrease_factor = .95
+increase_factor = 1.05
 
-########################################################################
+
 def safely_evaluate_expression(expr, x):
     """Evaluate expression at x only allowing for explicitly supported expressions
     """
@@ -122,7 +104,7 @@ def safely_evaluate_expression(expr, x):
     # Return value
     return y
 
-########################################################################
+
 def make_base_name(title, fct_label, var_x_name, var_y_name, suffix):
     """ Assemble image name from title, function label, variable names, and suffix
     """
@@ -140,7 +122,7 @@ def make_base_name(title, fct_label, var_x_name, var_y_name, suffix):
     base_name = ''.join(c for c in s if c in valid_chars)
 
     # Replace spaces and parentheses with underscores
-    base_name = base_name.replace(' ','_').replace('(', '_').replace(')', '_')
+    base_name = base_name.replace(' ', '_').replace('(', '_').replace(')', '_')
 
     # Prevent hidden or directory-like base names
     if base_name.startswith('.'):
@@ -149,7 +131,7 @@ def make_base_name(title, fct_label, var_x_name, var_y_name, suffix):
     # Return non-empty base name
     return base_name if base_name else '_'
 
-########################################################################
+
 def create_caption(backend,
                    prefix,
                    provenance=None,
@@ -233,7 +215,7 @@ def create_caption(backend,
         # Append variable name when available
         if var_name:
             caption_string += "{}".format(var_name)
-            
+
         # Connect variable name to provenance name when both are provided
         if var_name and provenance:
             caption_string += " in "
@@ -250,7 +232,7 @@ def create_caption(backend,
     # Return caption string
     return caption_string
 
-########################################################################
+
 def compute_aspect_ratio(x, y, stretch_factor):
     """Compute aspect ratio of chart from points coordinates and stretch factor
     """
@@ -279,7 +261,7 @@ def compute_aspect_ratio(x, y, stretch_factor):
     # Compute and return aspect ratio
     return ranges[0] / (stretch_factor * ranges[1])
 
-########################################################################
+
 def time(parameters, plot_params):
     """Create plot of specified variable versus time
     """
@@ -304,7 +286,7 @@ def time(parameters, plot_params):
 
     # Try to retrieve parameters
     function = plot_params.get("function")
-    model    = plot_params.get("model")
+    model = plot_params.get("model")
     material = plot_params.get("material")
     fct_temp = plot_params.get("temperature")
 
@@ -315,7 +297,7 @@ def time(parameters, plot_params):
     output_base_name = make_base_name(
         title,
         '-'.join([f for f in files]),
-        '' ,
+        '',
         var_name,
         "time_plot")
     image_full_name = os.path.join(parameters.OutputDir, output_base_name) + ".png"
@@ -338,12 +320,7 @@ def time(parameters, plot_params):
 
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
-
-    if DEBUG_ARG_PLOT:
-        print("# Generating {}".format(output_base_name))
 
     # Retrieve list of labels
     try:
@@ -352,7 +329,7 @@ def time(parameters, plot_params):
         return None, None, "** ERROR: no labels specified for time plot request. Ignoring it."
 
     # Sanity check: labels must correspond to files
-    if len(files) != len (labels):
+    if len(files) != len(labels):
         return None, None, "** ERROR: files and labels mismatch in time plot request. Ignoring it."
 
     # Retrieve value index
@@ -376,16 +353,12 @@ def time(parameters, plot_params):
             continue
 
         # Update time ranges
-        if DEBUG_ARG_PLOT:
-            print("[argPlot] Found {} available times in {}".format(
-                len(avail_times),
-                f))
         t_min.append(min(avail_times))
         t_max.append(max(avail_times))
 
         # Iterate over time steps
         values = []
-        for t in range(0,len(avail_times)):
+        for t in range(0, len(avail_times)):
             # Retrieve list of variable values at given time
             time_slice = data.get_variable_time_slice(t, var_name, True)
             values.append(time_slice[val_index])
@@ -406,7 +379,7 @@ def time(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Add title
     if parameters.BackendType == "LaTeX":
@@ -451,7 +424,7 @@ def time(parameters, plot_params):
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def xy(parameters, plot_params):
     """Create continuous piecewise linear plot joining provided x,y data
     """
@@ -484,7 +457,7 @@ def xy(parameters, plot_params):
 
     # Try to retrieve parameters
     function = plot_params.get("function")
-    model    = plot_params.get("model")
+    model = plot_params.get("model")
     material = plot_params.get("material")
     fct_temp = plot_params.get("temperature")
 
@@ -518,12 +491,7 @@ def xy(parameters, plot_params):
 
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
-
-    if DEBUG_ARG_PLOT:
-        print("# Generating {}".format(output_base_name))
 
     # Retrieve data for x and y variables
     try:
@@ -538,9 +506,10 @@ def xy(parameters, plot_params):
         # Distinguish between text and numeric data
         if isinstance(row, str):
             # Eliminate commas and split row to extract data
-            row = row.strip().replace(',',' ').split()
+            row = row.strip().replace(',', ' ').split()
         elif not isinstance(row, list):
             return None, None, "** ERROR: unsuited data format for xy plot request. Ignoring it."
+
         # Fetch first two dimensions
         try:
             x.append(float(row[var_x_col]))
@@ -556,7 +525,7 @@ def xy(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Add title
     if parameters.BackendType == "LaTeX":
@@ -579,7 +548,7 @@ def xy(parameters, plot_params):
             ax.set_ylabel(r"\texttt{{{}}}".format(var_y_name))
         else:
             ax.set_xlabel(var_y_name)
-    mpl.pyplot.grid(True)
+    matplotlib.pyplot.grid(True)
 
     # Determine type of marker if any
     marker_type = plot_params.get("marker")
@@ -600,6 +569,7 @@ def xy(parameters, plot_params):
         ax.plot(
             x, y,
             marker=marker_type, color="blue", ls="solid", lw=1, ms=2)
+
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
@@ -611,7 +581,7 @@ def xy(parameters, plot_params):
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def lin_exp(parameters, plot_params):
     """Create continuous linear then exponential plot with given parameters
     """
@@ -634,7 +604,7 @@ def lin_exp(parameters, plot_params):
 
     # Try to retrieve parameters
     function = plot_params.get("function")
-    model    = plot_params.get("model")
+    model = plot_params.get("model")
     material = plot_params.get("material")
     fct_temp = plot_params.get("temperature")
 
@@ -668,12 +638,7 @@ def lin_exp(parameters, plot_params):
 
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
-
-    if DEBUG_ARG_PLOT:
-        print("# Generating {}".format(output_base_name))
 
     # If no available or incorrect data values were found, do not do anything
     try:
@@ -688,7 +653,7 @@ def lin_exp(parameters, plot_params):
     y = [data[0][1], data[1][1]]
     lin_slope = x[1] / y[1]
     inv_const = 1. / data[3]
-    inv_exp   = 1. / data[4]
+    inv_exp = 1. / data[4]
 
     # Look for y intercept at given maximum x
     dy = (y[1] - y[0]) / 100.
@@ -704,7 +669,7 @@ def lin_exp(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Add title
     if parameters.BackendType == "LaTeX":
@@ -727,7 +692,7 @@ def lin_exp(parameters, plot_params):
             ax.set_ylabel(r"\texttt{{{}}}".format(var_y_name))
         else:
             ax.set_xlabel(var_x_name)
-    mpl.pyplot.grid(True)
+    matplotlib.pyplot.grid(True)
 
     # Create plot
     ax.set_aspect(compute_aspect_ratio(x, y, plot_params["xyratio"]))
@@ -752,7 +717,7 @@ def lin_exp(parameters, plot_params):
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def analytic(parameters, plot_params):
     """Create plot from analytic definition with given parameters
     """
@@ -775,7 +740,7 @@ def analytic(parameters, plot_params):
 
     # Try to retrieve parameters
     function = plot_params.get("function")
-    model    = plot_params.get("model")
+    model = plot_params.get("model")
     material = plot_params.get("material")
     fct_temp = plot_params.get("temperature")
 
@@ -806,11 +771,9 @@ def analytic(parameters, plot_params):
         function,
         model,
         material)
-    
+
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
 
     # If no available or incorrect data values were found, do not do anything
@@ -823,7 +786,7 @@ def analytic(parameters, plot_params):
 
     # Retrieve data
     f = data[0]
-    [x1, x2] = map(float, data[1])
+    [x1, x2] = [float(x) for x in data[1]]
     if x1 > x2:
         x1, x2 = x2, x1
 
@@ -846,7 +809,7 @@ def analytic(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Add title
     if parameters.BackendType == "LaTeX":
@@ -869,12 +832,11 @@ def analytic(parameters, plot_params):
             ax.set_ylabel(r"\texttt{{{}}}".format(var_y_name))
         else:
             ax.set_xlabel(var_y_name)
-    mpl.pyplot.grid(True)
+    matplotlib.pyplot.grid(True)
 
     # Create plot
     ax.set_aspect(compute_aspect_ratio(x, y, plot_params["xyratio"]))
-    ax.plot(x, y,
-            color="blue", ls="solid", lw=1)
+    ax.plot(x, y, color="blue", ls="solid", lw=1)
 
     # Export chart to PNG file
     try:
@@ -887,7 +849,7 @@ def analytic(parameters, plot_params):
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def histogram(parameters, plot_params):
     """Create histogram plot of provided map data
     """
@@ -926,12 +888,7 @@ def histogram(parameters, plot_params):
 
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
-
-    if DEBUG_ARG_PLOT:
-        print("# Generating {}".format(output_base_name))
 
     # Retrieve data for x and y variables
     try:
@@ -951,7 +908,7 @@ def histogram(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Add title
     if parameters.BackendType == "LaTeX":
@@ -966,7 +923,7 @@ def histogram(parameters, plot_params):
     # Set labels
     ax.set_xlabel(var_x_name)
     ax.set_ylabel(var_y_name)
-    mpl.pyplot.grid(True)
+    matplotlib.pyplot.grid(True)
 
     # Determine type of marker if any
     marker_type = plot_params.get("marker")
@@ -982,14 +939,17 @@ def histogram(parameters, plot_params):
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
-        
+
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def constant(parameters, plot_params):
     """Create constant plot joining provided data on [0;1]
     """
+
+    var_x_col = plot_params.get("var_x_column", 0)
+    var_y_col = plot_params.get("var_y_column", 1)
 
     # Retrieve plot title
     try:
@@ -1047,12 +1007,7 @@ def constant(parameters, plot_params):
 
     # Generate image only if not already present
     if os.path.isfile(image_full_name):
-        if DEBUG_ARG_PLOT:
-            print("# Skipping existing {}".format(image_full_name))
         return output_base_name, caption, None
-
-    if DEBUG_ARG_PLOT:
-        print("# Generating {}".format(output_base_name))
 
     # If no available or incorrect data values were found, do not do anything
     if not len(x):
@@ -1060,7 +1015,7 @@ def constant(parameters, plot_params):
 
     # Create chart
     mpl.rc("text", usetex=True)
-    fig, ax = mpl.pyplot.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
 
     # Hide x-axis tick labels
     ax.set_xticklabels([])
@@ -1086,7 +1041,7 @@ def constant(parameters, plot_params):
             ax.set_xlabel(r"\texttt{{{}}}".format(var_y_name))
         else:
             ax.set_xlabel(var_y_name)
-    mpl.pyplot.grid(True)
+    matplotlib.pyplot.grid(True)
 
     # Determine type of marker if any
     marker_type = plot_params.get("marker")
@@ -1118,14 +1073,10 @@ def constant(parameters, plot_params):
     # If this point was reached everything went well
     return output_base_name, caption, None
 
-########################################################################
+
 def execute_request(parameters, plot_params):
     """Execute MatPlotLib plotting request to find or create some artifact(s)
     """
-
-    # If MatPlotLib is not available, do not do anything
-    if not has_matplotlib_pylab:
-        return None, None
 
     # Bail out if no plot type was specified
     req_name = plot_params.get("type")
@@ -1136,15 +1087,13 @@ def execute_request(parameters, plot_params):
     # Proceed with request
     print("[argPlot] Processing {} plot request".format(
         req_name))
-    if DEBUG_ARG_PLOT:
-        
-        print("# Plot parameters are: {}".format(plot_params))
+
     # Try to execute requested visualization function
     for f in plotting_functions:
         if req_name.startswith(f):
             # Execute known plotting function and break out from loop
             output_base_name, caption, warn = globals()[f](
-            parameters, plot_params)
+                parameters, plot_params)
             break
     else:
         # Unsupported function was requested
@@ -1158,6 +1107,3 @@ def execute_request(parameters, plot_params):
     else:
         # Return plot base name and caption when everything went well
         return output_base_name, caption
-    
-
-########################################################################

@@ -36,49 +36,15 @@
 #
 #HEADER
 
-########################################################################
-DEBUG_ARG_AGGREGATE_TOOLS = False
+import os
 
-########################################################################
-# Workaround for MatPlotLib backend limitations
-from Aggregation                      import argSummarize
 import matplotlib
+import yaml
+
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+
 matplotlib.use("Agg")
 
-########################################################################
-argAggregateTools_module_aliases = {
-    "math"            : "mt",
-    "matplotlib.pylab": "mpl",
-    }
-for m in [
-    "math",
-    "matplotlib.pylab",
-    "os",
-    "re",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argAggregateTools_module_aliases:
-            globals()[argAggregateTools_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
-
-# Import additional Python packages
-from pylatex                            import *
-from pylatex.utils                      import NoEscape, verbatim
-
-# Import ARG modules
-from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import *
-from arg.Generation                      import argPlot
-from arg.Tools                           import Utilities
-
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -87,10 +53,9 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
     supported_types = yaml.safe_load(t_file)
 
 # Retrieve supported verbosity levels
-verbosity_levels = supported_types.get(
-    "VerbosityLevels")
+verbosity_levels = supported_types.get("VerbosityLevels")
 
-########################################################################
+
 def create_table(backend, body_list, key, value, types):
     """Retrieve and prepare data to invoke table creating function
     """
@@ -104,10 +69,12 @@ def create_table(backend, body_list, key, value, types):
         # Initiate row
         row = [argMultiFontStringHelper(backend),
                argMultiFontStringHelper(backend)]
+
         # Add key only if first row
         if i == 0:
             row[0].append(key, types[0])
             row[1].append(vals[i], types[1])
+
         # Only add value to next rows, for readibility
         else:
             row[0].append('', types[0])
@@ -115,5 +82,3 @@ def create_table(backend, body_list, key, value, types):
         body_list.append(row)
 
     return body_list
-
-########################################################################

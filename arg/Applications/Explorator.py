@@ -36,46 +36,26 @@
 #
 #HEADER
 
-########################################################################
-ARG_VERSION          = "1.0.1"
-DEBUG_EXPLORATOR     = False
-app                  = "Explorator"
+import os
+import sys
+import time
 
-########################################################################
-explorator_module_aliases = {}
-for m in [
-    "codecs",
-    "distutils",
-    "distutils.spawn",
-    "getopt",
-    "os",
-    "sys",
-    "time",
-    "yaml",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in explorator_module_aliases:
-            globals()[explorator_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import yaml
+
+from arg import __version__
+from arg.Applications import ARG
+from arg.Common.argReportParameters import argReportParameters
+
+ARG_VERSION = __version__
+
+app = "Explorator"
 
 # Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
-from arg.Common.argReportParameters         import argReportParameters
-from arg.DataInterface.argDataInterface     import *
-from arg.Backend.argBackendBase             import *
-from arg.Tools                              import Utilities
 
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -83,60 +63,58 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
           encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
 
-########################################################################
+
 class exploratorSolution:
     """A class to describe a solution file or partition
     """
 
-    ####################################################################
     def __init__(self):
         # Default instance variables
-        self.Type   = None
-        self.Name   = None
+        self.Type = None
+        self.Name = None
         self.Method = None
 
-########################################################################
+
 class exploratorCase:
     """A class to help discover and describe a case
     """
 
     def __init__(self, parameters):
         # Data directory and files provided by user
-        self.DataDir            = parameters.DataDir
-        self.DataPath           = os.path.join(parameters.DataDir, '')
-        self.ParametersFile     = parameters.ParametersFile
-        self.Mutables           = parameters.Mutables
-        self.RealDataDir        = os.path.realpath(parameters.DataDir)
+        self.DataDir = parameters.DataDir
+        self.DataPath = os.path.join(parameters.DataDir, '')
+        self.ParametersFile = parameters.ParametersFile
+        self.Mutables = parameters.Mutables
+        self.RealDataDir = os.path.realpath(parameters.DataDir)
 
         # Other parameters inherited from user specifications
-        self.Mappings           = parameters.Mappings
-        self.MetaData           = parameters.MetaData
-        self.IgnoredBlockKeys   = parameters.IgnoredBlockKeys
-        self.SolutionCases      = parameters.SolutionCases
-        self.Fragments          = parameters.Fragments
+        self.Mappings = parameters.Mappings
+        self.MetaData = parameters.MetaData
+        self.IgnoredBlockKeys = parameters.IgnoredBlockKeys
+        self.SolutionCases = parameters.SolutionCases
+        self.Fragments = parameters.Fragments
 
         # Discovered files
-        self.DeckFiles          = []
-        self.ExodusIIFiles      = []
+        self.DeckFiles = []
+        self.ExodusIIFiles = []
         self.ExodusIIPartitions = set()
-        self.LogNames           = []
-        self.Images             = []
-        self.TextFiles          = []
+        self.LogNames = []
+        self.Images = []
+        self.TextFiles = []
 
         # Variables determined by analysis
-        self.DiscoveredData     = {}
-        self.GeometryFiles      = []
-        self.ParametersFiles    = []
-        self.DeckType           = None
-        self.DeckRoot           = None
-        self.MeshType           = None
-        self.MeshName           = None
-        self.LogFile            = None
-        self.Solutions          = []
-        self.CaseNames          = []
-        self.Methods            = []
+        self.DiscoveredData = {}
+        self.GeometryFiles = []
+        self.ParametersFiles = []
+        self.DeckType = None
+        self.DeckRoot = None
+        self.MeshType = None
+        self.MeshName = None
+        self.LogFile = None
+        self.Solutions = []
+        self.CaseNames = []
+        self.Methods = []
 
-    ####################################################################
     def print_debug(self):
         """ Print debug information
         """
@@ -180,7 +158,6 @@ class exploratorCase:
 
         print(res)
 
-    ####################################################################
     def recursively_search_supported_files(self, current_dir, verbosity):
         """ Recursively retrieve supported files in given directory tree
         """
@@ -216,7 +193,7 @@ class exploratorCase:
                 elif last_extension in ('e', 'g', "ex2", "exo"):
                     # ExodusII files
                     self.ExodusIIFiles.append(file_name)
-                elif ante_penult_extension in ('e', 'g', "ex2", "exo" ):
+                elif ante_penult_extension in ('e', 'g', "ex2", "exo"):
                     # ExodusII partitions
                     self.ExodusIIPartitions.add(os.path.splitext(file_name)[0])
                 elif last_extension in ("log", "rslt"):
@@ -236,13 +213,13 @@ class exploratorCase:
                             file_name))
                         self.TextFiles.append(file_name)
 
-########################################################################
+
 def main(app, types, version=None):
     """ Explorator main method
     """
 
     # Start stopwatch
-    t_start = time. time()
+    t_start = time.time()
 
     # Print startup information
     sys_version = sys.version_info
@@ -251,9 +228,6 @@ def main(app, types, version=None):
         sys_version.major,
         sys_version.minor,
         sys_version.micro))
-
-    # Additional debug information when requested
-    ARG.print_debug(app, DEBUG_EXPLORATOR, None)
 
     # Instantiate parameters object from command line arguments
     parameters = argReportParameters(app, version=version, types=types)
@@ -268,7 +242,7 @@ def main(app, types, version=None):
         print("*  ERROR: cannot parse parameters. Exiting.")
 
     # End stopwatch
-    dt = time. time() - t_start
+    dt = time.time() - t_start
 
     # If this point is reached everything went fine
     success_apps = parameters.get_successful_apps(app)
@@ -279,7 +253,7 @@ def main(app, types, version=None):
         app,
         dt))
 
-########################################################################
+
 def execute(app, parameters):
     """ Explorator execute method
     """
@@ -293,7 +267,7 @@ def execute(app, parameters):
     # Retrieve supported parameters file extensions
     supported_parametersfile_extensions = parameters.Types.get("ParametersFileTypes")
 
-      # Parse parameters file
+    # Parse parameters file
     print("[{}] Parsing parameters file".format(app))
 
     # Retrieve all supported files inside data path tree
@@ -327,7 +301,7 @@ def execute(app, parameters):
     # Log execution status
     parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
 
-########################################################################
+
 def get_and_comment_property_value(meta_info, info_key):
     """ Convenience method to get property value and comment about it
     """
@@ -339,7 +313,7 @@ def get_and_comment_property_value(meta_info, info_key):
             app,
             info_key.capitalize(),
             ", ".join(info_val) if isinstance(info_val, list) else info_val
-            ))
+        ))
     else:
         print("[{}] No {} specified by input deck".format(
             app,
@@ -348,7 +322,7 @@ def get_and_comment_property_value(meta_info, info_key):
     # Return retrieved (possibly None) value
     return info_val
 
-########################################################################
+
 def find_solution_partition(case, sol_stem, sol_method, backend):
     """ Find Exodus II partition corresponding to given solution method
     """
@@ -367,13 +341,14 @@ def find_solution_partition(case, sol_stem, sol_method, backend):
                 app,
                 solution.Type,
                 f))
-            case.DiscoveredData.setdefault("{} solution".format(solution.Type), []).append(" in {}".format(backend.generate_text(solution.Name.replace('\\', '/'), "typewriter")))
+            case.DiscoveredData.setdefault("{} solution".format(solution.Type), []).append(
+                " in {}".format(backend.generate_text(solution.Name.replace('\\', '/'), "typewriter")))
 
             # Store corresponding solution and break out
             case.Solutions.append(solution)
             return
 
-########################################################################
+
 def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, backend):
     """ Insert text and image fragments into YAML structure file
     """
@@ -393,7 +368,7 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
                     txt[-10:]),
                 chapter_index,
                 section_index
-                ))
+            ))
             yaml_file.write("{}- n: paragraph\n".format(indent))
             yaml_file.write("{}  string: {}\n".format(indent, txt))
 
@@ -406,13 +381,14 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
                 img,
                 chapter_index,
                 section_index
-                ))
+            ))
             yaml_file.write("{}- n: figure\n".format(indent))
             yaml_file.write("{}  arguments:\n".format(indent))
             yaml_file.write("{}    width: 12cm\n".format(indent))
             yaml_file.write("{}    figure_file: {}\n".format(indent, img))
             img = img.replace(os.path.sep, '/').format(indent)
-            yaml_file.write("{}    caption_string: 'File {}'\n".format(indent, backend.generate_text(img, "typewriter")))
+            yaml_file.write(
+                "{}    caption_string: 'File {}'\n".format(indent, backend.generate_text(img, "typewriter")))
             yaml_file.write("{}    label: 'f:{}'\n".format(indent, img))
 
     # Ignore unknown fragment types
@@ -420,7 +396,7 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
         print("*  WARNING: ignoring unsupported fragment type: {}".format(
             frag_k))
 
-########################################################################
+
 def insert_introduction_chapter(yaml_file, case, chap_index, backend):
     """ Insert introduction chapter into YAML structure file
     """
@@ -435,7 +411,8 @@ def insert_introduction_chapter(yaml_file, case, chap_index, backend):
     yaml_file.write("  title: Introduction\n")
 
     # Create introduction text regarding explored data
-    yaml_file.write("  string: 'The structure of this report was built by the Explorator component of ARG, which explored the following directory:'\n")
+    yaml_file.write(
+        "  string: 'The structure of this report was built by the Explorator component of ARG, which explored the following directory:'\n")
     yaml_file.write("  sections:\n")
     yaml_file.write("  - n: paragraph\n")
     yaml_file.write("    verbatim: '{}'\n".format(case.RealDataDir))
@@ -449,9 +426,9 @@ def insert_introduction_chapter(yaml_file, case, chap_index, backend):
         for k, v in case.DiscoveredData.items():
             if type(v) == list:
                 for e in v:
-                    yaml_file.write("    - string: {}{}\n".format(k,e))
+                    yaml_file.write("    - string: {}{}\n".format(k, e))
             else:
-                yaml_file.write("    - string: {}{}\n".format(k,v))
+                yaml_file.write("    - string: {}{}\n".format(k, v))
     else:
         yaml_file.write("  - n: paragraph\n")
         yaml_file.write("    string:  No relevant data was discovered.")
@@ -460,7 +437,7 @@ def insert_introduction_chapter(yaml_file, case, chap_index, backend):
     for frag_k, frag_v in fragments.get(sect_index, {}).items():
         insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
 
-########################################################################
+
 def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index, backend):
     """ Insert CAD chapter into YAML structure file
     """
@@ -481,7 +458,7 @@ def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index,
     # Create CAD/FEM sections when corresponding mappings are available
     if case.Mappings:
         set_elements = {"CAD": "part", "FEM": "block"}
-        set_titles   = {"CAD": "Geometry", "FEM": "Finite Elements"}
+        set_titles = {"CAD": "Geometry", "FEM": "Finite Elements"}
         for src, dst in (("CAD", "FEM"), ("FEM", "CAD")):
             data_type = "{}_to_{}".format(src, dst)
             elements = case.Mappings.get(data_type, {}).get("elements")
@@ -492,8 +469,8 @@ def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index,
                 sect_index += 1
                 yaml_file.write("  - n: section\n")
                 yaml_file.write("    title: {} to {} Elements Mapping\n".format(
-                  set_titles.get(src, src),
-                  set_titles.get(dst, dst)))
+                    set_titles.get(src, src),
+                    set_titles.get(dst, dst)))
                 yaml_file.write("    string: 'This section describes the mapping from {} {}s to {} {}s:'\n".format(
                     src,
                     src_name,
@@ -527,7 +504,7 @@ def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index,
         yaml_file.write("    sections:\n")
         yaml_file.write("    - n: paragraph\n")
         yaml_file.write("      verbatim: {}\n".format(
-        os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
+            os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
         # Iterate over STL files
         for stl_file in case.GeometryFiles:
             yaml_file.write("    - n: aggregate\n")
@@ -549,16 +526,16 @@ def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index,
             yaml_file.write("    sections:\n")
             yaml_file.write("    - n: paragraph\n")
             yaml_file.write("      verbatim: {}\n".format(
-            os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
+                os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
             yaml_file.write("    - n: aggregate\n")
             yaml_file.write("      name: show_CAD_metadata\n")
             yaml_file.write("      metadata: %s\n" % case.MetaData)
             yaml_file.write("      parameters_root: {}\n".format(
-            os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
+                os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
             for frag_k, frag_v in fragments.get(sect_index, {}).items():
                 insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
 
-########################################################################
+
 def insert_mesh_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index, backend):
     """ Insert mesh chapter into YAML structure file
     """
@@ -585,8 +562,9 @@ def insert_mesh_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index
     sect_index += 1
     yaml_file.write("  - n: section\n")
     yaml_file.write("    title: Overview\n")
-    yaml_file.write("    string: This section provides an overview of the meta-data and global properties of this {} mesh.\n".format(
-        case.MeshType))
+    yaml_file.write(
+        "    string: This section provides an overview of the meta-data and global properties of this {} mesh.\n".format(
+            case.MeshType))
     yaml_file.write("    sections:\n")
     yaml_file.write("    - n: meta\n")
     yaml_file.write("      datatype: %s\n" % case.MeshType)
@@ -625,7 +603,7 @@ def insert_mesh_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index
         for frag_k, frag_v in fragments.get(sect_index, {}).items():
             insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
 
-########################################################################
+
 def insert_solution_chapter(yaml_file, case, solution, verbosity_levels, verbosity, chap_index, backend):
     """ Insert solution chapter into YAML structure file
     """
@@ -663,7 +641,7 @@ def insert_solution_chapter(yaml_file, case, solution, verbosity_levels, verbosi
     yaml_file.write("      dataset: %s\n" % solution.Name)
     yaml_file.write("      verbosity: 0\n")
 
-########################################################################
+
 def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
     """ Insert stand-alone images and text chapter into YAML structure file
     """
@@ -671,14 +649,16 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
     yaml_file.write("# Third-party artifacts chapter\n")
     yaml_file.write("- n: chapter\n")
     yaml_file.write("  title: Stand-Alone Artifacts\n")
-    yaml_file.write("  latex: 'This chapter integrates all standalone images and text fragments found in the following directory: {}.'\n".format(
-        backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+    yaml_file.write(
+        "  latex: 'This chapter integrates all standalone images and text fragments found in the following directory: {}.'\n".format(
+            backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
     yaml_file.write("  sections:\n")
     if case.Images:
         yaml_file.write("  - n: section\n")
         yaml_file.write("    title: PNG Images\n")
-        yaml_file.write("    latex: 'This section shows all stand-alone PNG images found in the following directory: {}.'\n".format(
-            backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+        yaml_file.write(
+            "    latex: 'This section shows all stand-alone PNG images found in the following directory: {}.'\n".format(
+                backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
         yaml_file.write("    sections:\n")
         for img in sorted(case.Images):
             print("[{}] Including image {}".format(
@@ -695,8 +675,9 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
     if case.TextFiles:
         yaml_file.write("  - n: section\n")
         yaml_file.write("    title: Text Fragments\n")
-        yaml_file.write("    latex: 'This section shows all stand-alone text fragments found in the following directory: {}.'\n".format(
-            backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+        yaml_file.write(
+            "    latex: 'This section shows all stand-alone text fragments found in the following directory: {}.'\n".format(
+                backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
         yaml_file.write("    sections:\n")
         for txt in sorted(case.TextFiles):
             print("[{}] Including text fragment {}".format(
@@ -705,7 +686,7 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
             yaml_file.write("    - n: paragraph\n")
             yaml_file.write("      include: %s\n" % os.path.join(case.DataDir, txt))
 
-########################################################################
+
 def generate_structure_file(parameters, case):
     """ Generate YAML structure file from discovered data
     """
@@ -773,7 +754,7 @@ def generate_structure_file(parameters, case):
 
         # Include third-party artifacts if available
         if parameters.Verbosity > 1 and (
-            case.Images or case.TextFiles):
+                case.Images or case.TextFiles):
             insert_stand_alone_chapter(yaml_file,
                                        case,
                                        chapter_index,
@@ -789,11 +770,9 @@ def generate_structure_file(parameters, case):
             parameters.StructureFile,
             chapter_index))
 
-########################################################################
+
 if __name__ == '__main__':
     """Main artifact explorator routine
     """
 
     main(app, Types, ARG_VERSION)
-
-########################################################################

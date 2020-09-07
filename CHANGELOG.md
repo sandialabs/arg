@@ -1,7 +1,11 @@
-This micro-release corresponds to the finalization of the open-sourcing of ARG with, in particular but not limited to:
-- minimal documentation on the Wiki
-- initial deployment of CI with 7 test cases on:
-    - 4 Linux distribution types using Docker
-    - macOS Mojave using a local runner
-- pip-ification via PyPi
-- architectural changes required for inclusion in other project
+This micro-release corresponds to:
+- substantial ARG refactoring, in particular but not limited to:
+    - tests harness and structure
+    - CI scripts decomposition into templates
+    - GUI module reorganization
+- Web-based GUI development:
+    - Flask server
+    - Angular front-end application
+- Addition of a novel approach to internal information representatoon:
+    - Development of the new argInformationObject class (with one concrete type)
+    - Refactoring of all property getters in the DataInterface to return instances of this novel object

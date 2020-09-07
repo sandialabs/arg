@@ -36,42 +36,20 @@
 #
 #HEADER
 
-########################################################################
-argLaTeXBackend_module_aliases = {
-    "pylatex": "pl"}
-for m in [
-    "os",
-    "platform",
-    "re",
-    "subprocess",
-    "sys",
-    "pylatex",
-    "pylatex.base_classes",
-    "yaml"
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argLaTeXBackend_module_aliases:
-            globals()[argLaTeXBackend_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import numbers
+import os
+import platform
+import re
+import sys
 
-# Import pylatex sub-packages
-from pylatex.utils                      import NoEscape, bold, italic, verbatim
+import pylatex as pl
+import yaml
+from pylatex.utils import NoEscape, bold, italic, verbatim
 
-# Import ARG modules
-from arg.Aggregation                     import argAggregate
-from arg.Backend.argBackendBase          import argBackendBase
+from arg.Aggregation import argAggregate
+from arg.Backend.argBackendBase import argBackendBase
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import argDataInterface
-from arg.Tools                           import Utilities
 
-########################################################################
 # Load supported colors
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -83,73 +61,72 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
 colors = supported_types.get(
     "FontColors")
 
-########################################################################
+
 class plAbstract(pl.base_classes.Environment):
     """A class representing the abstract as a LaTeX environment
     """
 
     _latex_name = "abstract"
 
-########################################################################
+
 class argLaTeXBackend(argBackendBase):
     """A concrete class providing a LaTeX backend
     """
 
     # Map from greek letters to their respective unicodes
     GreekLetters = {
-        "Alpha"   : r"A",
-        "Beta"    : r"B",
-        "Gamma"   : r"\Gamma",
-        "Delta"   : r"\Delta",
-        "Epsilon" : r"E",
-        "Zeta"    : r"Z",
-        "Eta"     : r"H",
-        "Theta"   : r"\Theta",
-        "Iota"    : r"I",
-        "Kappa"   : r"K",
-        "Lambda"  : r"\Lambda",
-        "Mu"      : r"M",
-        "Nu"      : r"N",
-        "Xi"      : r"\Xi",
-        "Omicron" : r"O",
-        "Pi"      : r"\Pi",
-        "Rho"     : r"P",
-        "Sigma"   : r"\Sigma",
-        "Tau"     : r"T",
-        "Upsilon" : r"\Upsilon",
-        "Phi"     : r"\Phi",
-        "Chi"     : r"X",
-        "Psi"     : r"\Psi",
-        "Omega"   : r"\Omega",
-        "alpha"   : r"\alpha",
-        "beta"    : r"\beta",
-        "gamma"   : r"\gamma",
-        "delta"   : r"\delta",
-        "epsilon" : r"\epsilon",
-        "zeta"    : r"\zeta",
-        "eta"     : r"\eta",
-        "theta"   : r"\theta",
-        "iota"    : r"\iota",
-        "kappa"   : r"\kappa",
-        "lambda"  : r"\lamdda",
-        "mu"      : r"\mu",
-        "nu"      : r"\nu",
-        "xi"      : r"\xi",
-        "omicron" : r"o",
-        "pi"      : r"\pi",
-        "rho"     : r"\rho",
-        "sigma"   : r"\sigma",
-        "tau"     : r"\tau",
-        "upsilon" : r"\upsilon",
-        "phi"     : r"\phi",
-        "chi"     : r"\chi",
-        "psi"     : r"\psi",
-        "omega"   : r"\omega"}
+        "Alpha": r"A",
+        "Beta": r"B",
+        "Gamma": r"\Gamma",
+        "Delta": r"\Delta",
+        "Epsilon": r"E",
+        "Zeta": r"Z",
+        "Eta": r"H",
+        "Theta": r"\Theta",
+        "Iota": r"I",
+        "Kappa": r"K",
+        "Lambda": r"\Lambda",
+        "Mu": r"M",
+        "Nu": r"N",
+        "Xi": r"\Xi",
+        "Omicron": r"O",
+        "Pi": r"\Pi",
+        "Rho": r"P",
+        "Sigma": r"\Sigma",
+        "Tau": r"T",
+        "Upsilon": r"\Upsilon",
+        "Phi": r"\Phi",
+        "Chi": r"X",
+        "Psi": r"\Psi",
+        "Omega": r"\Omega",
+        "alpha": r"\alpha",
+        "beta": r"\beta",
+        "gamma": r"\gamma",
+        "delta": r"\delta",
+        "epsilon": r"\epsilon",
+        "zeta": r"\zeta",
+        "eta": r"\eta",
+        "theta": r"\theta",
+        "iota": r"\iota",
+        "kappa": r"\kappa",
+        "lambda": r"\lamdda",
+        "mu": r"\mu",
+        "nu": r"\nu",
+        "xi": r"\xi",
+        "omicron": r"o",
+        "pi": r"\pi",
+        "rho": r"\rho",
+        "sigma": r"\sigma",
+        "tau": r"\tau",
+        "upsilon": r"\upsilon",
+        "phi": r"\phi",
+        "chi": r"\chi",
+        "psi": r"\psi",
+        "omega": r"\omega"}
 
     # List of special characters
     SpecialCharacters = "%^_#$"
 
-    ####################################################################
     def __init__(self, parameters=None):
 
         # Call superclass init
@@ -158,7 +135,6 @@ class argLaTeXBackend(argBackendBase):
         # Define backend type
         self.Type = "LaTeX"
 
-    ####################################################################
     def create_document_preamble(self, version=None):
         """Create document and its preamble given an Assembler version
         """
@@ -169,7 +145,6 @@ class argLaTeXBackend(argBackendBase):
         self.add_details()
         self.generate_title_page(version)
 
-    ####################################################################
     def create_LaTeX_output(self, document_class, document_options):
         """Create a LaTeX output file
         """
@@ -195,7 +170,6 @@ class argLaTeXBackend(argBackendBase):
         # No paragraph indentation
         self.Report.change_length(r"\parindent", "0pt")
 
-    ####################################################################
     def add_packages(self):
         """Add LaTeX packages
         """
@@ -232,15 +206,13 @@ class argLaTeXBackend(argBackendBase):
 
         # Handle path with url package
         self.Report.preamble.append(pl.Command("usepackage", "url", ["obeyspaces", "spaces"]))
-        
-    ####################################################################
+
     def generate_details(self):
         """Generate details: title, organization, address, authors, numbers, etc.
         """
 
         pass
 
-    ####################################################################
     def add_details(self):
         """Add details: title, number, issue, versions, authors, organizations, location, date, markings, etc.
         """
@@ -258,8 +230,8 @@ class argLaTeXBackend(argBackendBase):
         else:
             self.Report.preamble.append(pl.Command(
                 "author",
-                NoEscape(r"{}\\{}".format(self.Parameters.AllAuthors, self.Parameters.Address))))            
-        # Date
+                NoEscape(r"{}\\{}".format(self.Parameters.AllAuthors, self.Parameters.Address))))
+            # Date
         self.Report.preamble.append(pl.Command(
             "date",
             NoEscape(self.Report.Date)))
@@ -268,7 +240,6 @@ class argLaTeXBackend(argBackendBase):
         if self.Parameters.MarkingsFile:
             self.Report.preamble.append(pl.Command("input", NoEscape(self.Parameters.MarkingsFile)))
 
-    ####################################################################
     def generate_title_page(self, version=None):
         """Generate title page
         """
@@ -322,7 +293,6 @@ class argLaTeXBackend(argBackendBase):
         # Start next report core with clear double pages
         self.Report.append(pl.Command("cleardoublepage"))
 
-    ####################################################################
     def substitute_variable_values(self, src_file, dst_file, marker, ignore_comments=True):
         """Substitute variables with corresponding values given marker
         """
@@ -363,7 +333,6 @@ class argLaTeXBackend(argBackendBase):
                     # Print resulting line into destination file
                     f_out.write(l)
 
-    ####################################################################
     def generate_text(self, text, type="default"):
         """Add page break to the report
         """
@@ -371,7 +340,6 @@ class argLaTeXBackend(argBackendBase):
         # Append clearpage command in LaTeX
         return "\\texttt{{{}}}".format(text)
 
-    ####################################################################
     def generate_multi_font_string(self, multi_font_string, _=None):
         """Generate LaTeX markup from multi-font string helper instance
         """
@@ -404,9 +372,9 @@ class argLaTeXBackend(argBackendBase):
                 if color and colors.get(color):
                     sep = ','
                     rgb = colors.get(color).split(sep)
-                    string = r"\color[rgb]{{{}, {}, {}}}{}".format(int(rgb[0])/255.,
-                                                                   int(rgb[1])/255.,
-                                                                   int(rgb[2])/255.,
+                    string = r"\color[rgb]{{{}, {}, {}}}{}".format(int(rgb[0]) / 255.,
+                                                                   int(rgb[1]) / 255.,
+                                                                   int(rgb[2]) / 255.,
                                                                    string)
 
             # Append current decorated string to global one
@@ -415,7 +383,6 @@ class argLaTeXBackend(argBackendBase):
         # Return decorated string
         return decorated_string
 
-    ####################################################################
     def generate_matrix_string(self, matrix):
         """Generate LaTeX markup from matrix entries
         """
@@ -426,7 +393,7 @@ class argLaTeXBackend(argBackendBase):
 
         # Verify that matrix is well-formed
         n_cols = len(matrix[0])
-        if any(map(lambda x: len(x) != n_cols, matrix)):
+        if [x for x in matrix if len(x) != n_cols]:
             print("*  WARNING: {} is not a well-formed matrix.".format(matrix))
 
         # Otherwrise a LaTeX array one column per dimension
@@ -436,17 +403,12 @@ class argLaTeXBackend(argBackendBase):
             "{array}",
             "@{}",
             'r' * n_cols,
-            r"\\".join(
-                map(lambda v: '&'.join(
-                    map(lambda x: r"\mathtt{{{}}}".format(x),
-                        v)),
-                    matrix)),
+            r"\\".join(['&'.join([r"\mathtt{{{}}}".format(x) for x in v]) for v in matrix]),
             "right" if n_rows > 1 else "big")
 
         # Return un-escaped decorated string
         return NoEscape(m_string)
 
-    ####################################################################
     def add_list(self, item, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -459,7 +421,6 @@ class argLaTeXBackend(argBackendBase):
             for items in item.get("items"):
                 enum_it.add_item(NoEscape(items.get("string")))
 
-    ########################################################################
     def add_comment(self, comments, key):
         """Add text comment from a dict of comments, either as a text
            string or as a sub-paragraph depending on number of comment
@@ -480,7 +441,6 @@ class argLaTeXBackend(argBackendBase):
         # Comment was found and inserted
         return True
 
-    ####################################################################
     def add_paragraph(self, item):
         """Add paragraph to the report
         """
@@ -533,7 +493,6 @@ class argLaTeXBackend(argBackendBase):
                     if sep and len(font.split(sep)) > 1:
                         self.Report.append(NoEscape(font.split(sep)[1]))
 
-    ####################################################################
     def add_subdivision(self, item, command):
         """Add specified subdivision to the report
         """
@@ -556,7 +515,6 @@ class argLaTeXBackend(argBackendBase):
         self.Report.append(pl.Command(command, NoEscape(title_string)))
         self.add_paragraph(item)
 
-    ####################################################################
     def add_subtitle(self, item):
         """Add subsection to the report
         """
@@ -564,7 +522,6 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, '*')
 
-    ####################################################################
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -572,7 +529,6 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, "subsection" + ('' if numbered else '*'))
 
-    ####################################################################
     def add_section(self, item, numbered=True):
         """Add section to the report
         """
@@ -580,7 +536,6 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, "section" + ('' if numbered else '*'))
 
-    ####################################################################
     def add_chapter(self, item, numbered=True):
         """Add chapter to the report
         """
@@ -588,7 +543,6 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, "chapter" + ('' if numbered else '*'))
 
-    ####################################################################
     def add_page_break(self):
         """Add page break to the report
         """
@@ -596,7 +550,6 @@ class argLaTeXBackend(argBackendBase):
         # Append clearpage command in LaTeX
         self.Report.append(pl.Command("clearpage"))
 
-    ####################################################################
     def add_table(self, header_list, body, caption_string, do_verbatim=False, pos="ht!"):
         """Add table to the report
         """
@@ -629,7 +582,7 @@ class argLaTeXBackend(argBackendBase):
         else:
             # Handle list case
             l_body = max([sum([len(x) for x in l]) for l in body])
-        l_max =  n_cols + max([l_head, l_body])
+        l_max = n_cols + max([l_head, l_body])
         if l_max > 50:
             if l_max > 80:
                 if l_max > 110:
@@ -643,79 +596,83 @@ class argLaTeXBackend(argBackendBase):
 
         # Create function to generate decorated strings when needed
         decorator = (lambda x: NoEscape(x.execute_backend())
-                     if isinstance(x, argMultiFontStringHelper)
-                     else x)
+        if isinstance(x, argMultiFontStringHelper)
+        else x)
 
         # Create table
-        with self.Report.create(pl.Table(position=pos)) as top_table:
-            # with self.Report.create(pl.Center()) as center:
-            top_table.append(pl.Command('centering'))
-            tab_format = "@{}l" + (n_cols - 1) * 'r' + "@{}"
-            with self.Report.create(pl.Tabular(tab_format)) as table:
-                # Create table header
-                table.append(NoEscape(r"\toprule"))
-                header_list = list(map(decorator, header_list))
+        tab_format = "@{}l" + (n_cols - 1) * 'r' + "@{}"
+        with self.Report.create(pl.LongTable(tab_format)) as table:
+            # Create table header
+            table.append(NoEscape(r"\toprule"))
+            header_list = [decorator(x) for x in header_list]
 
-                # Resize header font except for non-verbatim lists
-                if is_dict or do_verbatim:
-                    header_list=[NoEscape("{}{}".format(row_size, h))
-                                 for h in header_list]
-                table.add_row(list(header_list))
-                table.append(NoEscape(r"\midrule"))
+            # Resize header font except for non-verbatim lists
+            if is_dict or do_verbatim:
+                header_list = [NoEscape("{}{}".format(row_size, h))
+                               for h in header_list]
+            table.add_row(list(header_list))
+            table.append(NoEscape(r"\midrule\endfirsthead"))
 
-                # Iterate over of contents to create table body
-                if do_verbatim:
-                    # Handle contents verbatim
-                    if is_dict:
-                        # Iterate over dictionary entries
-                        for k, v in sorted(body.items()):
-                            table.add_row(
-                                [row_size + verbatim("{}".format(k),
-                                                     delimiter='@')]
-                                + [row_size + verbatim("{}".format(x)
-                                                       if x else '',
-                                                       delimiter='@')
-                                   for x in v])
-                    else: # if not is_dict
-                        # Iterate over list entries
-                        for l in body:
-                            table.add_row(
-                                [row_size + verbatim(
-                                    "{}".format(x) if x else '',
-                                    delimiter='@') for x in l])
+            # Iterate over of contents to create table body
+            if do_verbatim:
+                # Handle contents verbatim
+                if is_dict:
+                    # Iterate over dictionary entries
+                    for k, v in sorted(body.items()):
+                        # Format value depending on it type
+                        if isinstance(v, list):
+                            v_f = [row_size + verbatim(
+                                "{}".format(x) if x else '',
+                                delimiter='@') for x in v]
+                        elif isinstance(v, str):
+                            v_f = [row_size + verbatim(v)]
+                        elif isinstance(v, numbers.Number):
+                            v_f = [row_size + "{}".format(v)]
+                        else:
+                            v_f = ''
+                        table.add_row(
+                            [row_size + verbatim("{}".format(k),
+                                                 delimiter='@')]
+                            + v_f)
+                else:  # if not is_dict
+                    # Iterate over list entries
+                    for l in body:
+                        table.add_row(
+                            [row_size + verbatim(
+                                "{}".format(x) if x else '',
+                                delimiter='@') for x in l])
 
-                else: # if not do_verbatim
-                    # Handle contents depending on type
-                    if is_dict:
-                        # Iterate over dictionary entries
-                        for k, v in sorted(body.items()):
-                            table.add_row(
-                                [NoEscape(row_size + k)]
-                                + [NoEscape("{}{}".format(row_size, x))
-                                   if x else '' for x in v])
-                    else: # if not is_dict
-                        # Iterate over list entries
-                        for l in body:
-                            table.add_row(list(map(decorator, l)))
+            else:  # if not do_verbatim
+                # Handle contents depending on type
+                if is_dict:
+                    # Iterate over dictionary entries
+                    for k, v in sorted(body.items()):
+                        table.add_row(
+                            [NoEscape(row_size + k)]
+                            + [NoEscape("{}{}".format(row_size, x))
+                               if x else '' for x in v])
+                else:  # if not is_dict
+                    # Iterate over list entries
+                    for l in body:
+                        table.add_row([decorator(x) for x in l])
 
-                # Create table footer
-                table.append(NoEscape(r"\bottomrule\\"))
+            # Create table footer
+            table.append(NoEscape(r"\bottomrule\\"))
 
             # Create table caption depending on its type
             if caption_string:
                 if isinstance(caption_string, str):
                     # Directly insert base strings
-                    top_table.append(pl.Command(
+                    table.append(pl.Command(
                         "caption",
                         NoEscape(caption_string)))
 
                 elif isinstance(caption_string, argMultiFontStringHelper):
                     # Insert LaTeX string created from multi-font string
-                    top_table.append(pl.Command(
+                    table.append(pl.Command(
                         "caption",
                         NoEscape(caption_string.execute_backend())))
 
-    ####################################################################
     def add_figure(self, arguments):
         """Add figure to the report
         """
@@ -751,7 +708,6 @@ class argLaTeXBackend(argBackendBase):
                     picture.append(pl.Command("label",
                                               NoEscape(figure_label)))
 
-    ####################################################################
     def recursively_build_report(self, item_tree):
         """Fallback LaTeX implementation method to recursively build report
         """
@@ -783,7 +739,7 @@ class argLaTeXBackend(argBackendBase):
 
             # Handle paragraph case
             elif item_type == "paragraph":
-               # Add paragraph to the report
+                # Add paragraph to the report
                 self.add_paragraph(item)
 
             # Handle itemization/enumeration case
@@ -797,7 +753,7 @@ class argLaTeXBackend(argBackendBase):
                 file_name = os.path.join(self.Parameters.DataDir,
                                          item["include"])
                 with open(file_name, 'r') as tex_file:
-                # Read each row and add it to LaTeX output
+                    # Read each row and add it to LaTeX output
                     for line in tex_file:
                         self.Report.append(verbatim(NoEscape(line.strip('\n\r'))))
                         self.Report.append(NoEscape(r"\\"))
@@ -826,7 +782,6 @@ class argLaTeXBackend(argBackendBase):
             if "sections" in item:
                 self.recursively_build_report(item["sections"])
 
-    ####################################################################
     def assemble(self, report_map, version=None, latex_proc=None):
         """Create LaTeX and PDF reports from given report map
         """
@@ -843,7 +798,7 @@ class argLaTeXBackend(argBackendBase):
 
         # Generate PDF report
         print("[argLaTeXBackend] Generating PDF report")
-        
+
         # Check specified LaTeX processor usability
         has_latex = self.check_latex_processor(latex_proc)
         if has_latex:
@@ -857,31 +812,28 @@ class argLaTeXBackend(argBackendBase):
                                      compiler_args=["-pdf", "-f"],
                                      silent=True)
 
-
-    ####################################################################
     def check_latex_processor(self, latex_proc):
         """Check specified LaTeX processor usability
         """
 
         # Check specified path existence
         if latex_proc and not os.path.exists(latex_proc):
-            print("*  WARNING: Specified path {} to LaTeX processor does not exist. "\
+            print("*  WARNING: Specified path {} to LaTeX processor does not exist. " \
                   "Using other LaTeX processor.".format(latex_proc))
             return False
 
         # Check specified path leads to file
         elif latex_proc and not os.path.isfile(latex_proc):
-            print("*  WARNING: Specified path {} to LaTeX processor is not a file. "\
+            print("*  WARNING: Specified path {} to LaTeX processor is not a file. " \
                   "Using other LaTeX processor.".format(latex_proc))
             return False
         else:
             return True
 
-    ####################################################################
     def add_document_provenance(self, version=None):
         """Add document provenance information on a new page
         """
-        
+
         # Start new page for provenance information
         self.Report.append(pl.Command("cleardoublepage"))
         self.Report.append(NoEscape(
@@ -891,7 +843,6 @@ class argLaTeXBackend(argBackendBase):
                 platform.system(),
                 r"\texttt{{{}}}".format(platform.node()))))
 
-    ####################################################################
     def add_document_tocs(self):
         """Add document Table of Contents, List of Figures and List of Tables on new pages
         """
@@ -901,5 +852,3 @@ class argLaTeXBackend(argBackendBase):
         self.Report.append(pl.Command("tableofcontents"))
         self.Report.append(pl.Command("listoffigures"))
         self.Report.append(pl.Command("listoftables"))
-
-########################################################################

@@ -36,40 +36,24 @@
 #
 #HEADER
 
-########################################################################
-argReportWordBackend_module_aliases = {}
-from arg.Backend.argWordBackend           import *
-argReportWordBackend_module_aliases.update(argWordBackend_module_aliases)
-for m in [
-    "os",
-    "datetime",
-    "sys",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in argReportWordBackend_module_aliases:
-            globals()[argReportWordBackend_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import datetime
+import os
+import sys
+
+import docx
+
+from arg.Backend.argWordBackend import argWordBackend
 
 
-########################################################################
 class argReportWordBackend(argWordBackend):
     """A concrete class providing a Word backend to generate a report
     """
 
-    ####################################################################
     def __init__(self, parameters):
 
         # Call superclass init
         super(argReportWordBackend, self).__init__(parameters)
 
-    ####################################################################
     def create_document_preamble(self, version=None):
         """Create document and its preamble given an Assembler version
         """
@@ -109,5 +93,3 @@ class argReportWordBackend(argWordBackend):
 
         # Append tables of contents, figures, tables
         self.add_document_tocs()
-
-########################################################################

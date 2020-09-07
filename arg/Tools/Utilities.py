@@ -36,27 +36,13 @@
 #
 #HEADER
 
-########################################################################
-Utilities_module_aliases = {}
-for m in [
-    "collections",
-    "os",
-    "sys",
-    "yaml",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in Utilities_module_aliases:
-            globals()[Utilities_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*WARNING: Failed to import " + m + ". {}.".format(e))
-        globals()[has_flag] = False
+import collections
+import os
+import sys
 
-########################################################################
+import yaml
+
+
 def update(dict1, dict2):
     """ Recursively update first dict with second dict entries
     """
@@ -68,7 +54,7 @@ def update(dict1, dict2):
             dict1[k] = v
     return dict1
 
-########################################################################
+
 def read_yml_file(file, blocking=False):
     """ Check extension and read YML file
     """
@@ -111,6 +97,4 @@ def read_yml_file(file, blocking=False):
 
     # Only return error string otherwise
     else:
-        return(errStr)
-
-########################################################################
+        return (errStr)

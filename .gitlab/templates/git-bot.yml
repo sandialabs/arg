@@ -1,0 +1,44 @@
+###########################
+######## git-bot  #########
+###########################
+
+# Tag master and hard reset develop
+Bot release job:
+  image: alpine:latest
+  stage: git-bot
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"'
+      allow_failure: true
+  needs: []
+  before_script:
+    - which git || (apk update && apk add git)
+    - which ssh-agent || (apk update && apk add openssh-client)
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - git config --global user.name "$GITBOT_NAME"
+    - git config --global user.email "$GITBOT_EMAIL"
+    - git config --list
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - echo "Clone arg git repository"
+    - git clone git@gitlab.com:AutomaticReportGenerator/arg.git
+    - cd arg/
+    - echo "Checkout branch master"
+    - git checkout master
+    - echo "Finding version to set a tag"
+    - GIT_TAG=$(awk '/__version__ = "/,/"/ { print }' arg/__version__.py | rev | cut -d" " -f1 | rev | tr -d '"')
+    - echo "Setting a tag $GIT_TAG"
+    - git tag $GIT_TAG
+    - echo "Checkout branch develop"
+    - git checkout develop
+    - echo "Hard reseting develop to master"
+    - git reset --hard master
+    - git push --force origin develop
+    - echo "Changing version on develop branch back to develop"
+    - sed -i 's/__version__ = "'$GIT_TAG'"/__version__ = "develop"/g' arg/__version__.py
+    - git add .
+    - git commit -m "spawn new develop branch from $GIT_TAG"
+    - git push

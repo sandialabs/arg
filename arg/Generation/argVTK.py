@@ -36,55 +36,28 @@
 #
 #HEADER
 
-#######################################################################
-DEBUG_ARG_VTK = False
+import math
+import os
+import subprocess
 
-########################################################################
-argVTK_module_aliases = {
-    "numpy":        "np",
-    "paraview.vtk": "vtk",
-    }
-for m in [
-    "math",
-    "numpy",
-    "os",
-    "paraview.vtk",
-    "subprocess",
-    "sys",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argVTK_module_aliases:
-            globals()[argVTK_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import numpy as np
+import vtkmodules.vtkCommonCore as vtkCommonCore
+import vtkmodules.vtkCommonDataModel as vtkCommonDataModel
+import vtkmodules.vtkFiltersCore as vtkFiltersCore
+import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
+import vtkmodules.vtkFiltersGeneral as vtkFiltersGeneral
+import vtkmodules.vtkFiltersGeometry as vtkFiltersGeometry
+import vtkmodules.vtkFiltersStatistics as vtkFiltersStatistics
+import vtkmodules.vtkFiltersVerdict as vtkFiltersVerdict
+import vtkmodules.vtkIOImage as vtkIOImage
+import vtkmodules.vtkRenderingAnnotation as vtkRenderingAnnotation
+import vtkmodules.vtkRenderingCore as vtkRenderingCore
+import yaml
 
-# Import ARG modules
-from arg.Common.argMultiFontStringHelper    import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface     import argDataInterface
-from arg.Tools                              import Utilities
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface import argDataInterface
 
-# Import VTK modules
-import vtkmodules.vtkCommonCore             as vtkCommonCore
-import vtkmodules.vtkCommonDataModel        as vtkCommonDataModel
-import vtkmodules.vtkFiltersCore            as vtkFiltersCore
-import vtkmodules.vtkFiltersExtraction      as vtkFiltersExtraction
-import vtkmodules.vtkFiltersGeneral         as vtkFiltersGeneral
-import vtkmodules.vtkFiltersGeometry        as vtkFiltersGeometry
-import vtkmodules.vtkFiltersStatistics      as vtkFiltersStatistics
-import vtkmodules.vtkFiltersVerdict         as vtkFiltersVerdict
-import vtkmodules.vtkIOImage                as vtkIOImage
-import vtkmodules.vtkRenderingAnnotation    as vtkRenderingAnnotation
-import vtkmodules.vtkRenderingCore          as vtkRenderingCore
-import vtkmodules.vtkRenderingFreeType      as vtkRenderingFreeType
-import vtkmodules.vtkRenderingOpenGL2       as vtkRenderingOpenGL2
-########################################################################
+
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -98,20 +71,19 @@ visualization_functions = supported_types.get(
 
 # Retrieve supported VTK quality functions
 quality_functions = {k: getattr(vtkFiltersVerdict, v, None)
-                    for k, v in supported_types.get(
-                         "QualityFunctions").items()}
+                     for k, v in supported_types.get(
+        "QualityFunctions").items()}
 
-########################################################################
 # Global VTK setting
 vtkRenderingCore.vtkMapper.SetResolveCoincidentTopologyToPolygonOffset()
 
-########################################################################
+
 class argVTKAttribute:
     """A class to encapsulate variable (VTK attribute) properties
     """
 
     def __init__(self, data, t=-1):
-        self.Point  = (data.get_attribute_type() == "point")
+        self.Point = (data.get_attribute_type() == "point")
 
         self.Scalar = (data.get_variable_type() == "scalar")
 
@@ -136,14 +108,14 @@ class argVTKAttribute:
     def GetTimeStep(self):
         return self.TimeStep
 
-########################################################################
+
 def absolute_zero_round(x):
     """Round to 0 values below a certain absolute threshold
     """
 
     return 0. if math.fabs(x) < 1.e-8 else x
 
-########################################################################
+
 def set_active_variable(variable, mesh):
     """Set active variable on a mesh based on its kind
     """
@@ -162,8 +134,8 @@ def set_active_variable(variable, mesh):
         else:
             mesh.GetCellData().SetActiveVectors(variable.GetAttributeName())
 
-########################################################################
-def get_ignored_block_flat_indices(ignored_block_keys, data, step = 0):
+
+def get_ignored_block_flat_indices(ignored_block_keys, data, step=0):
     """Determine ranks of blocks ignored by key: name or index
     """
 
@@ -190,13 +162,11 @@ def get_ignored_block_flat_indices(ignored_block_keys, data, step = 0):
 
         # Check for matching name (case insensitive) or ID
         if (b_nl in ignored_block_keys or
-            b_id in ignored_block_keys):
+                b_id in ignored_block_keys):
 
             # Retrieve flat index of current block and add it to list
             idx = it.GetCurrentFlatIndex()
             flat_indices.append(idx)
-            if DEBUG_ARG_VTK:
-                print("# Ignoring block {} with ID: {} and name: {}".format(idx, b_nl, b_id))
 
         # Iterate to next non-empty leaf
         it.GoToNextItem()
@@ -204,7 +174,7 @@ def get_ignored_block_flat_indices(ignored_block_keys, data, step = 0):
     # Return list of ignored block ranks
     return flat_indices
 
-########################################################################
+
 def get_element_types(mesh, i=0):
     """Retrieve mesh element and Verdict quality types
     """
@@ -256,8 +226,8 @@ def get_element_types(mesh, i=0):
     # Return first element type string and quality type
     return type_str, element_q_type
 
-########################################################################
-def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram = False):
+
+def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram=False):
     """Compute mesh quality for given mesh, Verdict quality, and element quality type
     """
 
@@ -295,7 +265,7 @@ def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram = False):
         os.AddColumn("Quality")
         os.SetLearnOption(True)
         os.SetDeriveOption(False)
-        os.SetTestOption(False )
+        os.SetTestOption(False)
         os.SetQuantize(True)
         os.SetMaximumHistogramSize(100)
         os.Update()
@@ -305,7 +275,7 @@ def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram = False):
         n = histo_tab.GetNumberOfRows()
         values = histo_tab.GetColumnByName("Value")
         counts = histo_tab.GetColumnByName("Cardinality")
-        q_histo = {values.GetValue(i):counts.GetValue(i) for i in range(n)}
+        q_histo = {values.GetValue(i): counts.GetValue(i) for i in range(n)}
 
     else:
         # No histogram was requested
@@ -314,7 +284,7 @@ def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram = False):
     # Return descriptive statistics and histogram of mesh quality
     return q_stats, q_histo
 
-########################################################################
+
 def create_color_transfer_function(variable, surface_mesh):
     """Create a color transfer function on variable and polygonal data set
     """
@@ -343,7 +313,7 @@ def create_color_transfer_function(variable, surface_mesh):
         var_range = var_data.GetRange(-1)
 
     # Set color transfer function
-    mid_point = (var_range[0] + var_range[1])*.5
+    mid_point = (var_range[0] + var_range[1]) * .5
     ctf.AddRGBPoint(var_range[0], .231, .298, .753)
     ctf.AddRGBPoint(mid_point, .865, .865, .865)
     ctf.AddRGBPoint(var_range[1], .706, .016, .149)
@@ -353,8 +323,8 @@ def create_color_transfer_function(variable, surface_mesh):
     # Return color transfer function and variable range
     return ctf, var_range
 
-########################################################################
-def create_axes_actor(dataset, renderer, masked_axis = 0):
+
+def create_axes_actor(dataset, renderer, masked_axis=0):
     """Create an actor for the axes of a given dataset in given renderer
     """
 
@@ -438,7 +408,7 @@ def create_axes_actor(dataset, renderer, masked_axis = 0):
     # Return edges actor
     return actor_axes
 
-########################################################################
+
 def create_edges_actor(dataset):
     """Create an actor for the edges of a given dataset
     """
@@ -460,7 +430,7 @@ def create_edges_actor(dataset):
     # Return edges actor
     return actor_edges
 
-########################################################################
+
 def create_scalar_bar_actor(mapper, variable):
     """Create a scalar bar actor based on variable and mapper properties
     """
@@ -492,7 +462,7 @@ def create_scalar_bar_actor(mapper, variable):
     # Return scalar bar actor
     return actor
 
-########################################################################
+
 def create_surface_or_wireframe_actor(mapper, mesh, opacity=1.):
     """Create surface mesh actor with wireframe if no faces are present
     """
@@ -512,7 +482,7 @@ def create_surface_or_wireframe_actor(mapper, mesh, opacity=1.):
     # Return actor
     return actor
 
-########################################################################
+
 def create_unique_renderer(mesh, view_direction):
     """Create renderer for single view to mesh center with given direction
     """
@@ -535,7 +505,7 @@ def create_unique_renderer(mesh, view_direction):
     # Return renderer
     return renderer
 
-########################################################################
+
 def create_caption(backend,
                    prefix,
                    file_input=None,
@@ -572,7 +542,7 @@ def create_caption(backend,
             caption_string.append(file_input, "typewriter")
 
         # Append step when provided
-        if not step is None and step > -1 :
+        if not step is None and step > -1:
             caption_string.append(" at time step {}".format(step), "default")
 
         # Close caption string
@@ -589,7 +559,7 @@ def create_caption(backend,
         # Append sub-input when provided
         if sub_input:
             caption_string += "{} {}".format(*sub_input)
-            
+
         # Connect sub-input to input file name when both are provided
         if file_input and sub_input:
             caption_string += " in "
@@ -599,7 +569,7 @@ def create_caption(backend,
             caption_string += file_input
 
         # Append step when provided
-        if not step is None and step > -1 :
+        if not step is None and step > -1:
             caption_string += " at time step {}".format(step)
 
         # Close caption string
@@ -610,7 +580,7 @@ def create_caption(backend,
     # Return caption string
     return caption_string
 
-########################################################################
+
 def trim_image(image_full_name):
     """Try to trim image depending on OS type
     """
@@ -631,7 +601,7 @@ def trim_image(image_full_name):
     except Exception:
         print("*  WARNING: could not trim {}.".format(image_full_name))
 
-########################################################################
+
 def create_PNG_from_window(window, image_full_name):
     """Generate a PNG image from given render window
     """
@@ -646,7 +616,7 @@ def create_PNG_from_window(window, image_full_name):
     writer.SetFileName(image_full_name)
     writer.Write()
 
-########################################################################
+
 def create_PNG_from_renderer(renderer, image_full_name, x_res, y_res):
     """Generate a PNG image with specified resolution from given renderer
     """
@@ -662,7 +632,7 @@ def create_PNG_from_renderer(renderer, image_full_name, x_res, y_res):
     # Create PNG image
     create_PNG_from_window(window, image_full_name)
 
-########################################################################
+
 def make_mapper(input_port, ctf, variable, variable_range):
     """Create mapper given variable, range, and color function
     """
@@ -684,7 +654,7 @@ def make_mapper(input_port, ctf, variable, variable_range):
     # Return prepared mapper
     return mapper
 
-########################################################################
+
 def make_base_name(filter_name,
                    variable,
                    view_direction,
@@ -698,15 +668,12 @@ def make_base_name(filter_name,
     base_name = "{}{}{}{}_{}_{}".format(
         variable.GetAttributeName() if variable else '',
         step if step > -1 else '',
-        "_ignored_" + '_'.join(map("{}".format, ignored))
-        if ignored else '',
-        '_' + '_'.join(map("{}".format, numbers))
-        if isinstance(numbers, (list, tuple)) else '',
-        '_'.join(map("{}".format, view_direction)),
-        filter_name)
+        "_ignored_" + '_'.join([f"{x}" for x in ignored]) if ignored else '',
+        '_' + '_'.join([f"{x}" for x in numbers]) if isinstance(numbers, (list, tuple)) else '',
+        '_'.join([f"{x}" for x in view_direction]), filter_name)
 
     # Replace spaces and parentheses with underscores
-    base_name = base_name.replace(' ','_').replace('(', '_').replace(')', '_')
+    base_name = base_name.replace(' ', '_').replace('(', '_').replace(')', '_')
 
     # Prevent hidden or directory-like base names
     if base_name.startswith('.'):
@@ -715,7 +682,7 @@ def make_base_name(filter_name,
     # Return non-empty base name
     return base_name if base_name else '_'
 
-########################################################################
+
 def surface(parameters, fig_params, data, variable, file_name):
     """Find or create a surface rendering figure for
        a specified point or cell data, scalar or vector variable
@@ -726,9 +693,9 @@ def surface(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure paraameters
-    show_edges     = fig_params.get("edges", False)
+    show_edges = fig_params.get("edges", False)
     view_direction = fig_params.get("view_direction", ())
-    opacity        = fig_params.get("opacity", 1.)
+    opacity = fig_params.get("opacity", 1.)
 
     # Assemble image and caption base names
     output_base_name = make_base_name(
@@ -742,10 +709,7 @@ def surface(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -803,17 +767,17 @@ def surface(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=False):
     """Add 4 surface rendering figures for each whole mesh at given step
        for a specified point or cell data, scalar or vector variable
     """
 
     # Retrieve figure parameters
-    show_edges         = fig_params.get("edges", False)
-    view_direction     = fig_params.get("view_direction", ())
-    show_scalar_bar    = fig_params.get("scalar_bar", False)
-    show_axes          = fig_params.get("axes", False)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    show_scalar_bar = fig_params.get("scalar_bar", False)
+    show_axes = fig_params.get("axes", False)
     ignored_block_keys = fig_params.get("ignore_blocks")
 
     # Get requested time step
@@ -823,7 +787,7 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
     output_base_name = make_base_name(
         "four_surfaces"
         + ("_with_edges" if show_edges else '')
-        + ("_clipped"    if do_clip    else ''),
+        + ("_clipped" if do_clip else ''),
         variable,
         view_direction,
         None,
@@ -832,10 +796,7 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Image must be generated
         var_name = variable.GetAttributeName()
         print("[argVTK] Creating four-surfaces visualization{}{}".format(
@@ -866,10 +827,6 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
                 # Extract current non-empty leaf only if not ignore
                 if idx not in ignored_blocks:
                     extract.AddIndex(idx)
-                elif DEBUG_ARG_VTK:
-                    print("# Ignoring block {} with name: {}".format(
-                        idx,
-                        it.GetCurrentMetaData().Get(vtkCommonDataModel.vtkCompositeDataSet.NAME())))
 
                 # Iterate to next non-empty leaf
                 it.GoToNextItem()
@@ -945,7 +902,7 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
                     actor_bar = create_scalar_bar_actor(mapper, variable)
 
         # No clipping requested
-        else: # if do_clip
+        else:  # if do_clip
             # Mappers
             mapper = vtkRenderingCore.vtkPolyDataMapper()
             mapper.SetInputConnection(geometry.GetOutputPort())
@@ -1033,15 +990,13 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
         y = r"{\color{green}Y}"
         z = r"{\color{blue}Z}"
         if ignored_block_keys:
-            ignored_set = "\{{{}\}}".format(
-                ", ".join(map(r"\texttt{{{}}}".format, ignored_block_keys)))
+            ignored_set = "\{{{}\}}".format(", ".join([r"\texttt{{{}}}".format(x) for x in ignored_block_keys]))
     else:
         x = 'X'
         y = 'Y'
         z = 'Z'
         if ignored_block_keys:
-            ignored_set = "{{{}}}".format(
-                ", ".join(map(str, ignored_block_keys)))
+            ignored_set = "{{{}}}".format(", ".join([str(x) for x in ignored_block_keys]))
     caption = create_caption(
         parameters.Backend,
         r"Perspective (top left) and parallel (top right: {}{}; bottom left: {}{}; bottom right: {}{})".format(
@@ -1059,7 +1014,7 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def many_modes(parameters, fig_params, data, variable, file_name):
     """Add surface rendering figures for several mode shapes
        for a specified point or cell data, scalar or vector variable,
@@ -1068,15 +1023,15 @@ def many_modes(parameters, fig_params, data, variable, file_name):
     """
 
     # Retrieve figure parameters
-    show_edges     = fig_params.get("edges", False)
+    show_edges = fig_params.get("edges", False)
     view_direction = fig_params.get("view_direction", ())
-    mode_range     = fig_params["range"]
-    disp_factor    = fig_params["displacement"]
-    block_range    = fig_params.get("range")
-    n_cols         = fig_params.get("n_cols")
-    n_rows         = fig_params.get("n_rows")
-    x_scaling      = fig_params.get("scaling") == 'x'
-    var_name       = variable.GetAttributeName()
+    mode_range = fig_params["range"]
+    disp_factor = fig_params["displacement"]
+    block_range = fig_params.get("range")
+    n_cols = fig_params.get("n_cols")
+    n_rows = fig_params.get("n_rows")
+    x_scaling = fig_params.get("scaling") == 'x'
+    var_name = variable.GetAttributeName()
 
     # Fix incomplete requests
     if mode_range[0] < 0:
@@ -1120,10 +1075,7 @@ def many_modes(parameters, fig_params, data, variable, file_name):
     image_full_name = os.path.join(parameters.OutputDir, output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Image must be generated
         print(viz_string)
 
@@ -1186,8 +1138,6 @@ def many_modes(parameters, fig_params, data, variable, file_name):
                     # Extract current non-empty leaf only if not ignore
                     if idx not in ignored_blocks:
                         extract.AddIndex(idx)
-                    elif DEBUG_ARG_VTK:
-                        print("# Ignoring block {} with name: {}".format(idx, it.GetCurrentMetaData().Get(vtkCommonDataModel.vtkCompositeDataSet.NAME())))
 
                     # Iterate to next non-empty leaf
                     it.GoToNextItem()
@@ -1216,13 +1166,11 @@ def many_modes(parameters, fig_params, data, variable, file_name):
                     nt = da.GetNumberOfTuples()
                     for t in range(nt):
                         dv = da.GetTuple3(t)
-                        d2 = sum([x*x for x in dv])
+                        d2 = sum([x * x for x in dv])
                         if d2 > max_norm:
                             max_norm = d2
                 it.GoToNextItem()
             f = disp_factor / math.sqrt(max_norm)
-            if DEBUG_ARG_VTK:
-                print("# Normalization factor for mode {}: {}".format(mode, f))
 
             # Warp each block of data set with computed factor
             warped_data = input_data.NewInstance()
@@ -1266,7 +1214,7 @@ def many_modes(parameters, fig_params, data, variable, file_name):
             text_actor = vtkRenderingCore.vtkTextActor()
             text_actor.SetInput("      %.1f" % times[mode] + " Hz")
             props = text_actor.GetTextProperty()
-            props.SetColor(0.,0.,0.)
+            props.SetColor(0., 0., 0.)
             props.SetFontSize(40 - 5 * n_cols)
 
             # Renderers
@@ -1301,12 +1249,9 @@ def many_modes(parameters, fig_params, data, variable, file_name):
     if ignored_block_keys:
         if parameters.BackendType == "LaTeX":
             ignored_set = "\{{{}\}}".format(
-                ", ".join(map(r"\texttt{{{}}}".format,
-                              ignored_block_keys)))
+                ", ".join([r"\texttt{{{}}}".format(x) for x in ignored_block_keys]))
         else:
-            ignored_set = "{{{}}}".format(
-                ", ".join(map("{}".format,
-                              ignored_block_keys)))
+            ignored_set = "{{{}}}".format(", ".join(["{}".format(x) for x in ignored_block_keys]))
     caption = create_caption(
         parameters.Backend,
         "Modes {} to {} ".format(
@@ -1316,19 +1261,20 @@ def many_modes(parameters, fig_params, data, variable, file_name):
         None,
         variable,
         None,
-        r". Blocks with indices or case-independent names in {} are omitted".format(
-            ignored_set)
+        r". Blocks with indices or case-independent names in {} are omitted".format(ignored_set)
         if ignored_block_keys else None)
 
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def many_blocks(parameters, fig_params, data, variable, file_name):
     """Add surface rendering figures for each mesh block
        for a specified point or cell data, scalar or vector variable,
        laid out in n_cols columns by n_rows rows
     """
+
+    step = variable.GetTimeStep()
 
     # Get handle on data reader output
     input_data = data.get_VTK_reader_output_data(0)
@@ -1337,12 +1283,12 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
         return
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    block_range     = fig_params.get("range")
-    n_cols          = fig_params.get("n_cols")
-    x_scaling       = fig_params.get("scaling") == 'x'
-    show_axes       = fig_params.get("axes", False)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    block_range = fig_params.get("range")
+    n_cols = fig_params.get("n_cols")
+    x_scaling = fig_params.get("scaling") == 'x'
+    show_axes = fig_params.get("axes", False)
 
     # Assemble image file name
     output_base_name = make_base_name(
@@ -1353,10 +1299,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
     image_full_name = os.path.join(parameters.OutputDir, output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Figure out number of non-empty blocks to determine number of viewports
         it = input_data.NewIterator()
         it.GoToFirstItem()
@@ -1428,7 +1371,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
             extract.SetInputData(input_data)
             extract.AddIndex(idx)
 
-           # Geometry
+            # Geometry
             geometry = vtkFiltersGeometry.vtkCompositeDataGeometryFilter()
             geometry.SetInputConnection(extract.GetOutputPort())
             geometry.Update()
@@ -1451,7 +1394,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
                 text_actor = vtkRenderingCore.vtkTextActor()
                 text_actor.SetInput("  " + meta_data.Get(vtkCommonDataModel.vtkCompositeDataSet.NAME()))
                 props = text_actor.GetTextProperty()
-                props.SetColor(0.,0.,0.)
+                props.SetColor(0., 0., 0.)
                 props.SetFontSize(50 - 6 * n_cols)
 
             # Renderers
@@ -1505,7 +1448,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def all_blocks(parameters, fig_params, data, variable, file_name):
     """Add surface rendering figures for each mesh block
        for a specified point or cell data, scalar or vector variable
@@ -1560,15 +1503,13 @@ def all_blocks(parameters, fig_params, data, variable, file_name):
         it.GoToNextItem()
 
     # Retrieve figure parameters
-    show_edges     = fig_params.get("edges", False)
+    show_edges = fig_params.get("edges", False)
     view_direction = fig_params.get("view_direction", ())
-    show_axes      = fig_params.get("axes", False)
+    show_axes = fig_params.get("axes", False)
 
     # Iterate over non-omitted blocks and create images and titles
     block_images_and_captions = {}
     for b_id, b_flat_ids in block_id_to_flat.items():
-        if DEBUG_ARG_VTK:
-            print("# Processing block with ID: {}".format(b_id))
 
         # Assemble image file name
         output_base_name = make_base_name(
@@ -1580,10 +1521,7 @@ def all_blocks(parameters, fig_params, data, variable, file_name):
                                        "{}.png".format(output_base_name))
 
         # Generate image only if not already present
-        if os.path.isfile(image_full_name):
-            if DEBUG_ARG_VTK:
-                print("# Skipping existing {}".format(image_full_name))
-        else:
+        if not os.path.isfile(image_full_name):
             # Image must be generated
             print("{} of block {}".format(
                 viz_string,
@@ -1683,7 +1621,7 @@ def all_blocks(parameters, fig_params, data, variable, file_name):
     # Return block map and per-block image base names and captions
     return block_id_to_flat, block_images_and_captions
 
-########################################################################
+
 def contour(parameters, fig_params, data, variable, file_name):
     """Find or create an iso-contour figure for
        a specified scalar point data variable and
@@ -1694,9 +1632,9 @@ def contour(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges     = fig_params.get("edges", False)
+    show_edges = fig_params.get("edges", False)
     view_direction = fig_params.get("view_direction", ())
-    iso_value      = fig_params.get("iso_value", 0.)
+    iso_value = fig_params.get("iso_value", 0.)
 
     # Assemble image and caption base names
     output_base_name = make_base_name(
@@ -1709,10 +1647,7 @@ def contour(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -1780,7 +1715,7 @@ def contour(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def cut(parameters, fig_params, data, variable, file_name):
     """Find or create a cut figure for
        a specified scalar point data variable and
@@ -1791,13 +1726,13 @@ def cut(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vector   = fig_params.get("normal_vector", (0., 0., 1.))
-    slice_number    = fig_params.get("slice_number", 1)
-    opacity         = fig_params.get("opacity", 1.)
+    normal_vector = fig_params.get("normal_vector", (0., 0., 1.))
+    slice_number = fig_params.get("slice_number", 1)
+    opacity = fig_params.get("opacity", 1.)
 
     # Assemble image and caption file names
     output_base_name = make_base_name(
@@ -1810,15 +1745,12 @@ def cut(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
         plane = vtkCommonDataModel.vtkPlane()
-        plane.SetOrigin(0.,0.,0.)
+        plane.SetOrigin(0., 0., 0.)
         plane.SetNormal(normal_vector)
 
         # Geometry
@@ -1838,7 +1770,7 @@ def cut(parameters, fig_params, data, variable, file_name):
         cutter = vtkFiltersCore.vtkCompositeCutter()
         cutter.SetInputData(input_data)
         cutter.SetCutFunction(plane)
-        cutter.SetSortByToSortByValue ()
+        cutter.SetSortByToSortByValue()
         cutter.GenerateValues(slice_number, -10, 10)
         cutter.Update()
 
@@ -1851,7 +1783,6 @@ def cut(parameters, fig_params, data, variable, file_name):
         # Plane mapper
         p_mapper = vtkRenderingCore.vtkPolyDataMapper()
         p_mapper.SetInputConnection(cutter.GetOutputPort())
-
 
         if variable.GetAttributeName():
             p_mapper.SetLookupTable(ctf)
@@ -1901,7 +1832,7 @@ def cut(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def clip(parameters, fig_params, data, variable, file_name):
     """Find or create a clipped figure for a specified scalar
     point data variable and a speficied normal vector
@@ -1912,12 +1843,12 @@ def clip(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vector   = fig_params.get("normal_vector", (0., 0., 1.))
-    opacity         = fig_params.get("opacity", 1.)
+    normal_vector = fig_params.get("normal_vector", (0., 0., 1.))
+    opacity = fig_params.get("opacity", 1.)
 
     # Assemble image and caption file names
     output_base_name = make_base_name(
@@ -1930,16 +1861,13 @@ def clip(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
         # Define plane clip
         plane = vtkCommonDataModel.vtkPlane()
-        plane.SetOrigin(0.,0.,0.)
+        plane.SetOrigin(0., 0., 0.)
         plane.SetNormal(normal_vector)
         clip = vtkFiltersGeneral.vtkClipDataSet()
         clip.SetInputData(input_data)
@@ -2041,7 +1969,7 @@ def clip(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def multiclip(parameters, fig_params, data, variable, file_name):
     """Find or create a figure clipped by any number of planes where
     all planes but the first are translucent
@@ -2051,12 +1979,12 @@ def multiclip(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vectors  = fig_params.get("normal_vector", [(0., 0., 1.)])
-    opacity         = fig_params.get("opacity", 1.)
+    normal_vectors = fig_params.get("normal_vector", [(0., 0., 1.)])
+    opacity = fig_params.get("opacity", 1.)
 
     # Assemble image and caption file names
     output_base_name = make_base_name(
@@ -2069,10 +1997,7 @@ def multiclip(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -2094,7 +2019,7 @@ def multiclip(parameters, fig_params, data, variable, file_name):
         for vector in normal_vectors:
             # Generate plane for this vector
             plane = vtkCommonDataModel.vtkPlane()
-            plane.SetOrigin(0.,0.,0.)
+            plane.SetOrigin(0., 0., 0.)
             plane.SetNormal(vector)
             planes.append(plane)
 
@@ -2168,33 +2093,29 @@ def multiclip(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def multicut(parameters, fig_params, data, variable, file_name):
     """Find or create a figure clipped by three sets of parallel planes.
     If only two are given, a third is made to be perpendicular to the two others.
     """
 
-    # If VTK or NumPy modules are missing, do not do anything
-    if not has_paraview_vtk or not has_numpy:
-        return False
-
     # Get requested time step
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vectors  = fig_params.get("normal_vector", [(0., 0., 1.)])
-    slice_number    = fig_params.get("slice_number", 1)
-    opacity         = fig_params.get("opacity", 1.)
+    normal_vectors = fig_params.get("normal_vector", [(0., 0., 1.)])
+    slice_number = fig_params.get("slice_number", 1)
+    opacity = fig_params.get("opacity", 1.)
 
     # Cross product to get 3 perpendicular vectors
     if len(normal_vectors) == 1:
-        normal_vectors.append(np.cross(normal_vectors[0], [-1,0,-1]))
+        normal_vectors.append(np.cross(normal_vectors[0], [-1, 0, -1]))
     if len(normal_vectors) == 2:
-        normal_vectors.append(np.cross(normal_vectors[0],normal_vectors[1]))
+        normal_vectors.append(np.cross(normal_vectors[0], normal_vectors[1]))
 
     # Assemble image and caption file names
     output_base_name = make_base_name(
@@ -2207,10 +2128,7 @@ def multicut(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -2243,7 +2161,7 @@ def multicut(parameters, fig_params, data, variable, file_name):
             cutter = vtkFiltersCore.vtkCompositeCutter()
             cutter.SetInputData(input_data)
             cutter.SetCutFunction(plane)
-            cutter.SetSortByToSortByValue ()
+            cutter.SetSortByToSortByValue()
             cutter.GenerateValues(slice_number, -10, 10)
             cutter.Update()
 
@@ -2289,7 +2207,7 @@ def multicut(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def cut3D(parameters, fig_params, data, variable, file_name):
     """Find or create a cut-like effect using clips figure for
        a specified scalar point data variable and
@@ -2300,15 +2218,15 @@ def cut3D(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vector   = fig_params.get("normal_vector", (0., 0., 1.))
-    slice_number    = fig_params.get("slice_number", 1)
-    slice_width     = fig_params.get("slice_width", 1.)
-    opacity         = fig_params.get("opacity", 1.)
-    slice_distance  = fig_params.get("gap_width", slice_width) + slice_width
+    normal_vector = fig_params.get("normal_vector", (0., 0., 1.))
+    slice_number = fig_params.get("slice_number", 1)
+    slice_width = fig_params.get("slice_width", 1.)
+    opacity = fig_params.get("opacity", 1.)
+    slice_distance = fig_params.get("gap_width", slice_width) + slice_width
     ghost_wireframe = fig_params.get("ghost_wireframe", False)
 
     # Assemble image and caption base names
@@ -2322,10 +2240,7 @@ def cut3D(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -2352,16 +2267,15 @@ def cut3D(parameters, fig_params, data, variable, file_name):
             ctf, variable_range = create_color_transfer_function(
                 variable, surface_mesh)
 
-        # minus_vector=map(lambda x: -x, normal_vector)
         minus_vector = [-x for x in normal_vector]
         for i in range(slice_number):
             plane1 = vtkCommonDataModel.vtkPlane()
-            i_offset_2 = (i - slice_number ) / 2
+            i_offset_2 = (i - slice_number) / 2
             width_2 = slice_width / 2
             if slice_number % 2:
                 position = [(i_offset_2 * slice_distance - width_2) * n for n in normal_vector]
             else:
-                position = [((i_offset_2 +.5) * slice_distance - width_2) * n for n in normal_vector]
+                position = [((i_offset_2 + .5) * slice_distance - width_2) * n for n in normal_vector]
             plane1.SetOrigin(position)
             plane1.SetNormal(normal_vector)
 
@@ -2424,7 +2338,7 @@ def cut3D(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def slice(parameters, fig_params, data, variable, file_name):
     """Find or create a figure that appears to be cut and spread apart
     """
@@ -2433,15 +2347,15 @@ def slice(parameters, fig_params, data, variable, file_name):
     step = variable.GetTimeStep()
 
     # Retrieve figure parameters
-    show_edges      = fig_params.get("edges", False)
-    view_direction  = fig_params.get("view_direction", ())
-    ghost_opacity   = fig_params.get("ghost_opacity", 0)
+    show_edges = fig_params.get("edges", False)
+    view_direction = fig_params.get("view_direction", ())
+    ghost_opacity = fig_params.get("ghost_opacity", 0)
     ghost_wireframe = fig_params.get("ghost_wireframe", 0)
-    normal_vector   = fig_params.get("normal_vector", (0., 0., 1.))
-    slice_number    = fig_params.get("slice_number", 1)
-    slice_width     = fig_params.get("slice_width", 1.)
-    opacity         = fig_params.get("opacity", 1.)
-    slice_distance  = fig_params.get("gap_width", slice_width) + slice_width
+    normal_vector = fig_params.get("normal_vector", (0., 0., 1.))
+    slice_number = fig_params.get("slice_number", 1)
+    slice_width = fig_params.get("slice_width", 1.)
+    opacity = fig_params.get("opacity", 1.)
+    slice_distance = fig_params.get("gap_width", slice_width) + slice_width
     ghost_wireframe = fig_params.get("ghost_wireframe", False)
 
     # Assemble image and caption base names
@@ -2455,10 +2369,7 @@ def slice(parameters, fig_params, data, variable, file_name):
                                    output_base_name + ".png")
 
     # Generate image only if not already present
-    if os.path.isfile(image_full_name):
-        if DEBUG_ARG_VTK:
-            print("# Skipping existing {}".format(image_full_name))
-    else:
+    if not os.path.isfile(image_full_name):
         # Get handle on data reader output
         input_data = data.get_VTK_reader_output_data(step)
 
@@ -2483,13 +2394,12 @@ def slice(parameters, fig_params, data, variable, file_name):
             set_active_variable(variable, surface_mesh)
             ctf, variable_range = create_color_transfer_function(variable, surface_mesh)
 
-
-        minus_vector=[-normal_vector[0],-normal_vector[1],-normal_vector[2]]
+        minus_vector = [-normal_vector[0], -normal_vector[1], -normal_vector[2]]
         for i in range(slice_number):
             # Generate plane
             plane1 = vtkCommonDataModel.vtkPlane()
-            i_offset_2 = (i - slice_number ) / 2
-            position = [((i_offset_2 - 1) * slice_width ) * n for n in normal_vector]
+            i_offset_2 = (i - slice_number) / 2
+            position = [((i_offset_2 - 1) * slice_width) * n for n in normal_vector]
             plane1.SetOrigin(position)
             plane1.SetNormal(normal_vector)
 
@@ -2548,14 +2458,10 @@ def slice(parameters, fig_params, data, variable, file_name):
     # Return image base name and caption
     return output_base_name, caption
 
-########################################################################
+
 def execute_request(parameters, fig_params):
     """Execute VTK visualization request to find or create some artifact(s)
     """
-
-    # If VTK module is missing, do not do anything
-    if not has_paraview_vtk:
-        return None, None
 
     # Bail out if no visualization type or no data set were specified
     req_name = fig_params.get("render")
@@ -2568,13 +2474,11 @@ def execute_request(parameters, fig_params):
         return None, None
 
     # Proceed with request
-    var_name  = fig_params.get("var_name")
+    var_name = fig_params.get("var_name")
     print("[argVTK] Processing {} visualization request of {}".format(
         req_name,
         model_name,
-         " for {}".format(var_name) if var_name else ''))
-    if DEBUG_ARG_VTK:
-        print("# Figure parameters are: {}".format(fig_params))
+        " for {}".format(var_name) if var_name else ''))
 
     # Ensure that a view direction is set
     fig_params.setdefault("view_direction", ())
@@ -2605,5 +2509,3 @@ def execute_request(parameters, fig_params):
 
     # No error occurred
     return output_base_name, caption
-
-########################################################################

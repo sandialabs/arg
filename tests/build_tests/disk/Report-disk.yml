@@ -128,8 +128,8 @@ chapters:
       sections:
       - n: enumerate
         items:
-        - number: "Tensile yield stress is 20000 psi"
-        - number: "Required factor of safety is 3."
+        - string: "Tensile yield stress is 20000 psi"
+        - string: "Required factor of safety is 3."
     - n: subsection 
       title: Calculated Performance
       sections:

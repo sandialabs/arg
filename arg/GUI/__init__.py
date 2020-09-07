@@ -35,5 +35,3 @@
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
 #HEADER
-
-############################################################################

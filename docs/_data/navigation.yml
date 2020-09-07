@@ -1,0 +1,33 @@
+- name: Home
+  link: /
+- name: About
+  link:
+  sublink:
+  - name: Functional Overview
+    link: /functional-overview.html
+  - name: License
+    link: /license.html
+- name: Using
+  link:
+  sublink:
+  - name: Installing on Linux
+    link: /installing-on-linux.html
+  - name: Installing on macOS
+    link: /installing-on-macos.html
+  - name: Installing on Windows
+    link: /installing-on-windows.html
+  - name: Command-line Examples
+    link: /command-line-examples.html
+  - name: GUI Examples
+    link: /gui-examples.html
+  - name: Tutorials
+    link: /tutorials.html
+- name: Developing
+  link:
+  sublink:
+  - name: Classes
+    link: /classes.html
+  - name: Contributing
+    link: /contributing.html
+- name: Search
+  link: /search.html

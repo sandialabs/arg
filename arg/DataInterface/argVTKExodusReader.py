@@ -36,51 +36,26 @@
 #
 #HEADER
 
-########################################################################
-DEBUG_ARG_VTK_EXO = True
+import math
+import os
+import sys
 
-########################################################################
-argVTKExodusReader_module_aliases = {
-    }
-for m in [
-    "math",
-    "os",
-    "paraview.vtk",
-    "sys",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argVTKExodusReader_module_aliases:
-            globals()[argVTKExodusReader_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import vtkmodules.vtkCommonDataModel as vtkCommonDataModel
+import vtkmodules.vtkCommonExecutionModel as vtkCommonExecutionModel
+import vtkmodules.vtkFiltersCore as vtkFiltersCore
+import vtkmodules.vtkIOExodus as vtkIOExodus
 
-from arg.DataInterface.argDataInterfaceBase import *
+from arg.Common.argInformationObject import argInformationObject
+from arg.DataInterface.argDataInterfaceBase import argDataInterfaceBase
 
-import vtkmodules.vtkCommonDataModel        as vtkCommonDataModel
-import vtkmodules.vtkCommonExecutionModel   as vtkCommonExecutionModel
-import vtkmodules.vtkFiltersCore            as vtkFiltersCore
-import vtkmodules.vtkIOExodus               as vtkIOExodus
 
-########################################################################
 class argVTKExodusReader(argDataInterfaceBase):
     """A concrete data interface to an ExodusII file based on VTK
     """
 
-    ####################################################################
     def __init__(self, *parameters):
         """Default constructor: serial or parallel reader
         """
-
-        # If VTK is not available, do not do anything
-        if not has_paraview_vtk:
-            self.Times = []
-            return
 
         # Initialize parallel VTK Exodus II readers
         self.Readers = []
@@ -116,7 +91,8 @@ class argVTKExodusReader(argDataInterfaceBase):
                 n_files = int(database_name.split('.')[-1])
             except ValueError:
                 # Partition name is inconsistent with naming convention
-                print("** ERROR: partition name {} is not consistent with naming convention. Exiting.".format(database_name))
+                print("** ERROR: partition name {} is not consistent with naming convention. Exiting.".format(
+                    database_name))
                 sys.exit(1)
 
             # Compute number of digits for possible 0-padding
@@ -144,24 +120,19 @@ class argVTKExodusReader(argDataInterfaceBase):
 
                 # Partition naming convention is inconsistent with possible subset file names
                 if not found_subset:
-                    print("** ERROR: partition name is {} but file with index {} was not found. Exiting.".format(database_name, i))
+                    print("** ERROR: partition name is {} but file with index {} was not found. Exiting.".format(
+                        database_name, i))
                     sys.exit(1)
 
-    ####################################################################
     def get_accessors(self):
         """Return list of Exodus II readers
         """
 
         return self.Readers
 
-    ####################################################################
     def get_meta_information(self):
         """Retrieve meta-information from data
         """
-
-        # If VTK is not available, return nothing
-        if not has_paraview_vtk:
-            return []
 
         # Initialize global meta-information
         meta = []
@@ -169,81 +140,65 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Iterate over all readers
         for r in self.Readers:
             # Initialize meta-information for this reader
-            r_meta = {}
-
-            # Keep track of file name
-            r_meta["name"] = r.GetFileName()
-
-            # Retrieve dataset topological properties
-            r_meta["nodes"]    = r.GetNumberOfNodesInFile()
-            r_meta["edges"]    = r.GetNumberOfEdgesInFile()
-            r_meta["faces"]    = r.GetNumberOfFacesInFile()
-            r_meta["elements"] = r.GetNumberOfElementsInFile()
-
-            # Retrieve number of time-steps in model
-            r_meta["time-steps"] = r.GetNumberOfTimeSteps()
+            r_meta = {"name": r.GetFileName(), "nodes": r.GetNumberOfNodesInFile(), "edges": r.GetNumberOfEdgesInFile(),
+                      "faces": r.GetNumberOfFacesInFile(), "elements": r.GetNumberOfElementsInFile(),
+                      "time-steps": r.GetNumberOfTimeSteps()}
 
             # Retrieve meta-information on element blocks
-            rng = range( r.GetNumberOfElementBlockArrays())
-            r_meta["block IDs"] = list(map(
-                lambda i: r.GetObjectId(vtkIOExodus.vtkExodusIIReader.ELEM_BLOCK, i),
-                rng))
-            r_meta["block names"] = list(map(r.GetElementBlockArrayName, rng))
-            #r_meta["block types"] = [m._get_element_type(i) for i in b_ids]
+            rng = range(r.GetNumberOfElementBlockArrays())
+            r_meta["block IDs"] = [r.GetObjectId(vtkIOExodus.vtkExodusIIReader.ELEM_BLOCK, i) for i in rng]
+            r_meta["block names"] = [r.GetElementBlockArrayName(x) for x in rng]
+            # r_meta["block types"] = [m._get_element_type(i) for i in b_ids]
 
             # Retrieve meta-information on node sets
             rng = range(r.GetNumberOfNodeSetArrays())
-            r_meta["node set IDs"] = list(map(
-                lambda i: r.GetObjectId(vtkIOExodus.vtkExodusIIReader.NODE_SET, i),
-                rng))
-            r_meta["node sets"] = list(map(r.GetNodeSetArrayName, rng))
+            r_meta["node set IDs"] = [r.GetObjectId(vtkIOExodus.vtkExodusIIReader.NODE_SET, i) for i in rng]
+            r_meta["node sets"] = [r.GetNodeSetArrayName(x) for x in rng]
 
             # Retrieve meta-information on edge sets
             rng = range(r.GetNumberOfEdgeSetArrays())
-            r_meta["edge set IDs"] = list(map(
-                lambda i: r.GetObjectId(vtkIOExodus.vtkExodusIIReader.EDGE_SET, i),
-                rng))
-            r_meta["edge sets"] = list(map(r.GetEdgeSetArrayName, rng))
+            r_meta["edge set IDs"] = [r.GetObjectId(vtkIOExodus.vtkExodusIIReader.EDGE_SET, i) for i in rng]
+            r_meta["edge sets"] = [r.GetEdgeSetArrayName(x) for x in rng]
 
             # Retrieve meta-information on side sets
             rng = range(r.GetNumberOfSideSetArrays())
-            r_meta["side set IDs"] = list(map(
-                lambda i: r.GetObjectId(vtkIOExodus.vtkExodusIIReader.SIDE_SET, i),
-                rng))
-            r_meta["side sets"] = list(map(r.GetSideSetArrayName, rng))
+            r_meta["side set IDs"] = [r.GetObjectId(vtkIOExodus.vtkExodusIIReader.SIDE_SET, i) for i in rng]
+            r_meta["side sets"] = [r.GetSideSetArrayName(x) for x in rng]
 
             # Retrieve meta-information on fields
-            r_meta["global variables"] = list(map(
-                r.GetGlobalResultArrayName, range(r.GetNumberOfGlobalResultArrays())))
-            r_meta["node fields"] = list(map(
-                r.GetPointResultArrayName, range(r.GetNumberOfPointResultArrays())))
-            r_meta["edge fields"] = list(map(
-                r.GetEdgeResultArrayName, range(r.GetNumberOfEdgeResultArrays())))
-            r_meta["face fields"] = list(map(
-                r.GetFaceResultArrayName, range(r.GetNumberOfFaceResultArrays())))
-            r_meta["element fields"] = list(map(
-                r.GetElementResultArrayName, range(r.GetNumberOfElementResultArrays())))
-            r_meta["node set fields"] = list(map(
-                r.GetNodeSetResultArrayName, range(r.GetNumberOfNodeSetResultArrays())))
-            r_meta["edge set fields"] = list(map(
-                r.GetEdgeSetResultArrayName, range(r.GetNumberOfEdgeSetResultArrays())))
-            r_meta["side set fields"] = list(map(
-                r.GetSideSetResultArrayName, range(r.GetNumberOfSideSetResultArrays())))
+            r_meta["global variables"] = [r.GetGlobalResultArrayName(x) for x in
+                                          range(r.GetNumberOfGlobalResultArrays())]
+            r_meta["node fields"] = [r.GetPointResultArrayName(x) for x in range(r.GetNumberOfPointResultArrays())]
+            r_meta["edge fields"] = [r.GetEdgeResultArrayName(x) for x in range(r.GetNumberOfEdgeResultArrays())]
+            r_meta["face fields"] = [r.GetFaceResultArrayName(x) for x in range(r.GetNumberOfFaceResultArrays())]
+            r_meta["element fields"] = [r.GetElementResultArrayName(x) for x in
+                                        range(r.GetNumberOfElementResultArrays())]
+            r_meta["node set fields"] = [r.GetNodeSetResultArrayName(x) for x in
+                                         range(r.GetNumberOfNodeSetResultArrays())]
+            r_meta["edge set fields"] = [r.GetEdgeSetResultArrayName(x) for x in
+                                         range(r.GetNumberOfEdgeSetResultArrays())]
+            r_meta["side set fields"] = [r.GetSideSetResultArrayName(x) for x in
+                                         range(r.GetNumberOfSideSetResultArrays())]
 
             # Append local meta-information to global list
             meta.append(r_meta)
-            
+
         # Return global meta-information
         return meta
 
-    ####################################################################
     def get_property_information(self, prop_type, prop_items=None):
-        """Not implemented for ExodusII data yet
+        """Retrieve all information about given sproperty from ExodusII file
         """
 
-        return None
+        # Not implemented for ExodusII data yet
+        print("*  WARNING: ExodusII property information getter not implemented yet")
 
-    ####################################################################
+        # Returned information is dictionary of lists of lists
+        info_obj = argInformationObject("arg_dict_lists_lists")
+
+        # Return computed information object
+        return info_obj
+
     def initialize_attribute(self):
         """Initialize attribute properties
         """
@@ -260,23 +215,18 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Data is supposed to be pseudo-continuous by default
         self.Discrete = False
 
-    ####################################################################
     def is_attribute_discrete(self):
         """Tell whether attribute is discrete or (pseudo) continuous
         """
 
         return self.Discrete
 
-    ####################################################################
     def get_available_times(self):
         """Return variable time steps
         """
 
         # If time-steps where already cached return those
         if self.Times:
-            if DEBUG_ARG_VTK_EXO:
-                print("[argDataInterface] Using {} cached time-steps".format(
-                    len(self.Times)))
             return self.Times
 
         # Otherwise, try to retrieve time-steps from data
@@ -291,8 +241,6 @@ class argVTKExodusReader(argDataInterfaceBase):
             vtk_exec = reader.GetExecutive()
             if not vtk_exec:
                 print("*  WARNING: VTK Exodus reader has null executive. No available timesteps")
-                if DEBUG_ARG_VTK_EXO:
-                    print(reader)
                 self.Times = []
                 return
 
@@ -300,8 +248,6 @@ class argVTKExodusReader(argDataInterfaceBase):
             vtk_info = vtk_exec.GetOutputInformation()
             if not vtk_info:
                 print("*  WARNING: VTK Exodus reader executive has no information. No available timesteps")
-                if DEBUG_ARG_VTK_EXO:
-                    print(vtk_exec)
                 self.Times = []
                 return
 
@@ -309,8 +255,6 @@ class argVTKExodusReader(argDataInterfaceBase):
             info_obj = vtk_info.GetInformationObject(0)
             if not info_obj:
                 print("*  WARNING: VTK Exodus reader executive has no information object. No available timesteps")
-                if DEBUG_ARG_VTK_EXO:
-                    print(vtk_info)
                 self.Times = []
                 return
 
@@ -327,31 +271,24 @@ class argVTKExodusReader(argDataInterfaceBase):
             print("[argDataInterface] No time-steps available to reader")
         return self.Times
 
-    ####################################################################
     def get_attribute_type(self):
         """Return attribute binding
         """
 
         return self.AttributeBinding
 
-    ####################################################################
     def get_variable_type(self):
         """Return variable type
         """
 
         return self.AttributeType
 
-    ####################################################################
     def get_variable_time_slice(self, t, var_name, modulus=False):
         """Get time slice of given variable
         """
 
         # Container for values
         values = []
-
-        # If VTK is not available, return nothing
-        if not has_paraview_vtk:
-            return values
 
         # Iterate over all readers
         for reader in self.Readers:
@@ -399,7 +336,6 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Return retrieved values
         return values
 
-    ####################################################################
     def get_VTK_reader_output_data(self, t):
         """Get time and possibly block slice of data set as VTK reader output data
         """
@@ -454,7 +390,6 @@ class argVTKExodusReader(argDataInterfaceBase):
             it_shards[0].GoToNextItem()
         return output
 
-    ####################################################################
     def create_VTK_reader(self, file_name, displace):
         """Create VTK reader and to existing ones
         """
@@ -476,7 +411,6 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Return reader
         return reader
 
-    ####################################################################
     def get_variable_from_VTK_reader(self, reader, var_name):
         """Retrieve variable and its type from VTK reader
         """
@@ -513,7 +447,7 @@ class argVTKExodusReader(argDataInterfaceBase):
                     # Determine data array type
                     n_c = reader.GetNumberOfObjectArrayComponents(t, i)
                     self.AttributeType = "scalar" if n_c == 1 else "vector3" if n_c == 3 else None
-                        
+
                     # Variable was found, no need to continue for this type
                     break
 
@@ -528,5 +462,3 @@ class argVTKExodusReader(argDataInterfaceBase):
         # No variable was found if this point is reached
         print("*  WARNING No data array {} found in dataset".format(
             var_name))
-
-########################################################################

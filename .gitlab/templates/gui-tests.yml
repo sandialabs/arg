@@ -1,0 +1,54 @@
+#####################################
+########### Run GUI tests ###########
+#####################################
+
+.gui_test:
+  image: nganalytics/nga:gui-test
+  stage: gui-test
+  needs: []
+  before_script: # Loading python virtualenv and workarounding vtk no X server bug
+    - echo "==================== [${GUI_TEST_NAME}] Activate virtualenv ===================="
+    - virtualenv venv
+    - source venv/bin/activate
+    - export PYTHONPATH=$(pwd)/venv/lib/python3.8/site-packages
+    - echo $PYTHONPATH
+    - pip install -r requirements.txt
+    - echo "==================== [${GUI_TEST_NAME}] Check Python dependencies ===================="
+    - python --version
+    - python .gitlab/ci/TestImport.py
+    - export DISPLAY=:99.0
+    - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+# GUI integration tests
+GUI integration tests:
+  variables:
+    GUI_TEST_NAME: "integration"
+  extends:
+    - .gui_test
+    - .with_python_cache
+  script:
+    - python -m tests.GUI_tests.integrationtests.integration
+  artifacts:
+    expire_in: 1 week
+    expose_as: "GUI integration tests reports"
+    paths:
+      - tests/GUI_tests/integrationtests/GUI_integrationtests/
+
+# GUI unit tests
+GUI unit tests:
+  variables:
+    GUI_TEST_NAME: "unit"
+  extends:
+    - .gui_test
+    - .with_python_cache
+  script:
+    - pip install coverage
+    - coverage run --source arg/GUI -m unittest discover -s "tests/GUI_tests" -p "test_*.py"
+    - coverage report -m
+    - coverage html -d coverage_html
+  artifacts:
+    expire_in: 1 week
+    expose_as: "GUI unit tests coverage"
+    paths:
+      - coverage_html/
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'

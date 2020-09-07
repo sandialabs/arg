@@ -36,27 +36,11 @@
 #
 #HEADER
 
-########################################################################
-argBackend_module_aliases = {}
-for m in [
-    "importlib",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argBackend_module_aliases:
-            globals()[argBackend_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import importlib
 
-########################################################################
+
 class argBackend(object):
 
-    ####################################################################
     @staticmethod
     def factory(parameters):
         """Produce the necessary concrete backend instance
@@ -80,6 +64,7 @@ class argBackend(object):
                     ret_object = argLaTeXBackend(parameters)
                 except:
                     print("*  WARNING: could not import module argLaTeXBackend. Ignoring it.")
+
             # Via Word backend
             elif backend_type == "Word":
                 try:
@@ -105,6 +90,7 @@ class argBackend(object):
                     ret_object = argReportLaTeXBackend(parameters)
                 except:
                     print("*  WARNING: could not import module argReportLaTeXBackend. Ignoring it.")
+
             # Via Word backend
             elif backend_type == "Word":
                 try:
@@ -125,5 +111,3 @@ class argBackend(object):
                 backend_type,
                 report_type))
         return ret_object
-
-########################################################################

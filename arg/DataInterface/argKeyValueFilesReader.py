@@ -36,35 +36,20 @@
 #
 #HEADER
 
-########################################################################
-argKeyValueFilesReader_module_aliases = {}
-for m in [
-    "os",
-    "sys",
-    "csv",
-    "re",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argKeyValueFilesReader_module_aliases:
-            globals()[argKeyValueFilesReader_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import csv
+import os
+import re
+import sys
 
-from arg.DataInterface.argDataInterfaceBase import *
+from arg.Common.argInformationObject import argInformationObject
+from arg.DataInterface.argDataInterfaceBase import argDataInterfaceBase
 
-########################################################################
+
 class argKeyValueFilesReader(argDataInterfaceBase):
-    """A concrete data interface to a CSV partition in a directory
+    """A concrete data interface to a key/value file
     """
 
-    ####################################################################
-    def __init__(self, *args, sep = '='):
+    def __init__(self, *args):
         """Constructor allows for multiple matching files in directory
         """
 
@@ -73,19 +58,31 @@ class argKeyValueFilesReader(argDataInterfaceBase):
             print("** ERROR: incorrect parameters for {} constructor. Exiting.".format(
                 type(self)))
             sys.exit(1)
-        
-        # Handle case of empty second parameter
-        elif not args[1]:
-            # Full file name signature
-            full_name = args[0]
-            self.Readers = [os.path.basename(full_name)]
 
-            # Retrieve corresponding dictionary
-            self.Dictionaries = [self.parse_key_value_file(full_name, sep)]
+        # Initialize storage for all matching files
+        self.Readers = []
 
-        # Otherwise search for a collection of files
-        else:
-            # Retrieve directory name
+        # Initialize storage for retrieved countents
+        self.Dictionaries = []
+
+        # Retrieve delimiter value when provided, = otherwise
+        delim = args[1].get("delimiter", '=')
+
+        # Decide whether key-value order must be reversed
+        reverse = args[1].get("reverse")
+
+        # Try to find file pattern or extension
+        re_file_names = args[1].get("expression")
+        if not isinstance(re_file_names, re.Pattern):
+            # Look for extension when no regexp was provided
+            ext = args[1].get("extension")
+            if ext:
+                # Build regular expression from provided file extension
+                re_file_names = re.compile(r"(.*)\.{}".format(ext))
+
+        # Search for a collection of files if regexp was found or built
+        if re_file_names:
+            # Assume first argument is a directory name
             dir_name = args[0]
 
             # Ensure that specified directory exists
@@ -94,20 +91,6 @@ class argKeyValueFilesReader(argDataInterfaceBase):
             except OSError:
                 print("** ERROR: specified directory {} was not found. Exiting.".format(dir_name))
                 sys.exit(1)
-
-            # Check type of second pattern
-            if not isinstance(args[1], re.Pattern):
-                # If not a regexp, assume it is an extension
-                re_file_names = re.compile(r"(.*)\.{}".format(args[1]))
-            else:
-                # Otherwise use regexp as-is
-                re_file_names = args[1]
-
-            # Initialize storage for all matching files
-            self.Readers = []
-
-            # Initialize storage for retrieved countents
-            self.Dictionaries = []
 
             # Iterate over all files in specified directory
             for base_name in list_in_dir:
@@ -122,24 +105,43 @@ class argKeyValueFilesReader(argDataInterfaceBase):
                     self.Readers.append(base_name)
 
                     # Append current dictionary to list of existing ones
-                    self.Dictionaries.append(self.parse_key_value_file(full_name, sep))
+                    self.Dictionaries.append(
+                        self.parse_key_value_file(full_name, delim, reverse))
 
-    ####################################################################
-    def parse_key_value_file(self, full_name, sep):
-        """Parse file with provided name and given separator
+        # Otherwise assume that passed argument is file name
+        else:
+            # Full file name signature
+            self.Readers.append(os.path.basename(args[0]))
+
+            # Retrieve corresponding dictionary
+            self.Dictionaries.append(
+                self.parse_key_value_file(args[0], delim, reverse))
+
+    def parse_key_value_file(self, full_name, delim='=', reverse=False):
+        """Parse file with provided name and given delimiter
         """
 
-        # Initialize storage for key<sep>values in this file
+        # Initialize storage for key<delim>values in this file
         d = {}
 
-        # Parse file as CSV file with specified separator
+        # Parse file as CSV file with specified delimiter
         try:
             with open(full_name, "r") as f:
-                reader = csv.reader(f, delimiter = sep)
+                # Instantiate CSV reader and iterate over rows
+                reader = csv.reader(f,
+                                    delimiter = delim,
+                                    skipinitialspace = True)
                 for r in reader:
-                    if len(r) == 2:
-                        # Store key<value> pair
+                    # Ignore non-conforming rows
+                    if len(r) != 2:
+                        continue
+
+                    # Store possibly reversed key:value entry
+                    if reverse:
+                        d[r[1].strip()] = r[0].strip()
+                    else:
                         d[r[0].strip()] = r[1].strip()
+
         except:
             print("*  WARNING: could not file with name {}.".format(
                 os.path.basename(full_name)))
@@ -147,14 +149,12 @@ class argKeyValueFilesReader(argDataInterfaceBase):
         # Return retrieved directory
         return d
 
-    ####################################################################
     def get_accessors(self):
         """Return list of base file names
         """
 
         return self.Readers
 
-    ####################################################################
     def get_meta_information(self):
         """Retrieve meta-information from data
         """
@@ -169,7 +169,7 @@ class argKeyValueFilesReader(argDataInterfaceBase):
 
             # Keep track of file name
             r_meta["file name"] = r
-            
+
             # Retrieve number of keys
             r_meta["number of keys"] = len(d)
 
@@ -178,20 +178,37 @@ class argKeyValueFilesReader(argDataInterfaceBase):
 
             # Append local meta-information to global list
             meta.append(r_meta)
-            
+
         # Return global meta-information
         return meta
 
-    ####################################################################
-    def get_property_information(self, prop_type, _=None):
+    def get_property_information(self, prop_type, prop_items=None):
         """Retrieve all information about given sproperty from key/value file
            NB: Sub-property is not supported for this type of files
         """
 
-        # Return requested property across all accessors
-        return [prop_type,
-                {f: d.get(prop_type)
-                 for f, d in zip(self.Readers, self.Dictionaries)},
-                prop_type]
+        # Returned information is dictionary of lists of lists
+        info_obj = argInformationObject("arg_dict_lists_lists")
 
-########################################################################
+        # Look for property item values when requested
+        if prop_items:
+            # Set information names
+            info_obj.set_names(["key", "value"])
+
+            # Search requested items across all accessors
+            for f, d in zip(self.Readers, self.Dictionaries):
+                # Update information object with property item values
+                info_obj.update(
+                    f, [[p, d.get(p, '')] for p in prop_items])
+
+        else:
+            # Set information names
+            info_obj.set_names([prop_type])
+
+            # Search requested items across all accessors
+            for f, d in zip(self.Readers, self.Dictionaries):
+                # Update information object with property values
+                info_obj.update(f, [[d.get(prop_type)]])
+
+        # Return computed information object
+        return info_obj

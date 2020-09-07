@@ -1,0 +1,16 @@
+__pycache__
+
+build_tests/build_tests-cases.txt
+build_tests-[a-z]*-Report-Latex/
+build_tests-[a-z]*-Report-Word/
+build_tests-[a-z]*-Report-LaTeX.pdf
+build_tests-[a-z]*-Report-Word.docx
+
+GUI_tests/output
+GUI_tests/GUI_unittests
+GUI_tests/GUI_integrationtests
+
+.pytest_cache
+
+!.gitignore
+!expected/*
