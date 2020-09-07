@@ -36,28 +36,11 @@
 #
 #HEADER
 
-########################################################################
-argSummarize_module_aliases = {"matplotlib.pylab": "mpl"}
-for m in [
-    "os",
-    "yaml"
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argSummarize_module_aliases:
-            globals()[argSummarize_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import os
 
-# Import ARG modules
-from arg.Tools  import Utilities
+import yaml
 
-########################################################################
+
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -68,6 +51,7 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
 # Retrieve supported VTK-based visualizations
 comparison_thresholds = supported_types.get(
     "ComparisonThresholds")
+
 
 ########################################################################
 def summarize_exodus_topology(meta_info):
@@ -91,9 +75,9 @@ def summarize_exodus_topology(meta_info):
     # Build table body
     body_dict = {
         "Exodus II files": [len(meta_info)],
-        "nodes"          : [n_nodes],
-        "elements"       : [n_elems]
-        }
+        "nodes": [n_nodes],
+        "elements": [n_elems]
+    }
 
     # Retrieve block IDs if any
     n = len(reader_meta.get("block IDs"))
@@ -128,7 +112,7 @@ def summarize_exodus_topology(meta_info):
     # Return summary table
     return header_list, body_dict
 
-########################################################################
+
 def summarize_exodus_blocks(meta_info):
     """Create a summary of Exodus II mesh blocks in the form of a
     table abstraction with a header list and a dict of contents
@@ -142,36 +126,15 @@ def summarize_exodus_blocks(meta_info):
     if not block_names:
         return None, None
 
-    # Block types must be aggregated across all distributed files
-    #block_types = reader_meta.get("block types")
-    #for r in meta_info[1:]:
-    #    current_types = r.get("block types")
-    #    i_list = [i for i, v in enumerate(block_types) if v == "NULL"]
-    #    if i_list:
-    #        # Update NULL values
-    #        for i in i_list:
-    #            block_types[i] = current_types[i]
-    #    else:
-    #        # Block types list is complete break out early
-    #        break
-
     # Generate block ID, name, and type rows
     body_dict = {i: [v]
-                for i, v in zip(
-                     reader_meta.get("block IDs"), block_names)}
+                 for i, v in zip(
+            reader_meta.get("block IDs"), block_names)}
 
     # Return summary table
     return ["block ID", "block name"], body_dict
 
-    # Generate block ID, name, and type rows
-    #body_dict = {i: [v, t]
-    #            for i, v, t in zip(
-    #                 reader_meta.get("block IDs"), block_names, block_types)}
 
-    # Return summary table
-    #return ["block ID", "block name", "block type"], body_dict
-
-########################################################################
 def summarize_exodus_sets(meta_info, set_type):
     """Create a summary of Exodus II node or side sets in the form of a
     table abstraction with a header list and a dict of contents
@@ -192,12 +155,12 @@ def summarize_exodus_sets(meta_info, set_type):
     # Generate node/side set ID, and name
     set_IDs = reader_meta.get("{} set IDs".format(set_type))
     body_dict = {i: [v]
-                for i, v in zip(set_IDs, set_names)}
+                 for i, v in zip(set_IDs, set_names)}
 
     # Return summary table
     return ["{} set ID".format(set_type), "{} set name".format(set_type)], body_dict
 
-########################################################################
+
 def summarize_exodus_variable(meta_info):
     """Create a summary of Exodus II mesh variables in the form of a
     table abstraction with a header list and a dict of contents
@@ -220,5 +183,3 @@ def summarize_exodus_variable(meta_info):
 
     # Return summary table
     return ["variable", "type"], body_list
-
-########################################################################

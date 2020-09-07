@@ -36,48 +36,29 @@
 #
 #HEADER
 
-########################################################################
-ARG_VERSION         = "1.0.1"
+import distutils.spawn
+import getopt
+import os
+import shutil
+import sys
+import time
 
-DEBUG_ARG_YAML      = False
-DEBUG_ARG_PYTHON    = True
-DEBUG_ARG_LATEX     = True
-app                 = "ARG"
+import yaml
 
-########################################################################
-ARG_module_aliases = {}
-for m in [
-    "collections",
-    "distutils",
-    "distutils.spawn",
-    "getopt",
-    "os",
-    "sys",
-    "time",
-    "yaml",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in ARG_module_aliases:
-            globals()[ARG_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*WARNING: Failed to import " + m + ". {}.".format(e))
-        globals()[has_flag] = False
+from arg import __version__
+from arg.Applications import Explorator, Generator, Assembler
+from arg.Common.argReportParameters import argReportParameters
+
+ARG_VERSION = __version__
+
+app = "ARG"
 
 # Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
-from arg.Common.argReportParameters    import argReportParameters
-from arg.Backend.argBackendBase        import argBackendBase
-from arg.Applications                  import Explorator, Generator, Assembler
 
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -85,24 +66,22 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
           encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
 
-########################################################################
+
 class Runner(object):
     """A class to describe ARG runner parameters
     """
 
-    ####################################################################
     def __init__(self, version=None):
 
         # Default values of variables that must exist
-        self.Explore        = False
-        self.Generate       = False
-        self.Assemble       = True
+        self.Explore = False
+        self.Generate = False
+        self.Assemble = False
         self.ParametersFile = None
-        self.Parameters     = None
-        self.Version        = version
+        self.Parameters = None
+        self.Version = version
         self.LatexProcessor = None
 
-    ####################################################################
     def usage(self):
         """Provide online help.
         """
@@ -115,7 +94,6 @@ class Runner(object):
         print("\t [-l <LaTeX processor>]    name of LaTeX processor")
         sys.exit(0)
 
-    ####################################################################
     def parse_line(self, app, default_parameters_filename, types=None):
         """Parse command line and fill artifact parameters
         """
@@ -125,7 +103,7 @@ class Runner(object):
 
         # Try to hash command line with respect to allowable flags
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "egp:l:")
+            opts, args = getopt.getopt(sys.argv[1:], "egEGAp:l:")
         except getopt.GetoptError:
             self.usage()
             sys.exit(1)
@@ -136,11 +114,22 @@ class Runner(object):
                 self.usage()
                 sys.exit(0)
             elif o == "-e":
+                self.Assemble = True
                 self.Explore = True
                 caller = "Explorator"
             elif o == "-g":
+                self.Assemble = True
                 self.Generate = True
                 caller = "Generator"
+            elif o == "-E":
+                self.Explore = True
+                caller = "Explorator"
+            elif o == "-G":
+                self.Generate = True
+                caller = "Generator"
+            elif o == "-A":
+                self.Assemble = True
+                caller = "Assembler"
             elif o == "-p":
                 self.ParametersFile = a
             elif o == "-l":
@@ -149,8 +138,7 @@ class Runner(object):
         # Inform user if missing argument
         if not self.ParametersFile:
             print("*  WARNING: no parameters file name provided; "
-                  "using '{}' by default.".format(
-                  default_parameters_filename))
+                  "using '{}' by default.".format(default_parameters_filename))
             self.ParametersFile = default_parameters_filename
 
         # Create parameters
@@ -162,10 +150,9 @@ class Runner(object):
 
         # Populate attributes based on parameters file content
         return (self.Parameters.check_parameters_file()
-            and self.Parameters.parse_parameters_file()
-            and self.Parameters.check_parameters(caller))
+                and self.Parameters.parse_parameters_file()
+                and self.Parameters.check_parameters(caller))
 
-    ####################################################################
     def run(self):
         """Run ARG applications based on parsed values
         """
@@ -188,19 +175,20 @@ class Runner(object):
         # Concatenate existing structure file content with generated content
         if concatenateStructureFile:
             with open(self.Parameters.StructureFile, 'w') as newFile:
-                with open(fname) as existingFile:
+                with open(self.Parameters.StructureFile, 'r') as existingFile:
                     newFile.write(existingFile.read())
 
-        # Assemble by default
-        Assembler.execute("Assembler", self.Parameters)
+        # Assemble when required
+        if self.Assemble:
+            Assembler.execute("Assembler", self.Parameters)
 
-########################################################################
+
 def main(app, types, version=None):
     """ ARG main method
     """
 
     # Start stopwatch
-    t_start = time. time()
+    t_start = time.time()
 
     # Print startup information
     sys_version = sys.version_info
@@ -216,14 +204,11 @@ def main(app, types, version=None):
     runner = Runner(version)
     runner.parse_line(app, default_parameters_filename, types)
 
-    # Additional debug information when requested
-    print_debug(app, DEBUG_ARG_PYTHON, DEBUG_ARG_LATEX, runner.Parameters.LatexProcessor)
-
     # Run
     runner.run()
 
     # End stopwatch
-    dt = time. time() - t_start
+    dt = time.time() - t_start
 
     # If this point is reached everything went fine
     success_apps = runner.Parameters.get_successful_apps(app)
@@ -234,7 +219,7 @@ def main(app, types, version=None):
         app,
         dt))
 
-########################################################################
+
 def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
     """ Print debug information when requested
     """
@@ -287,7 +272,7 @@ def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
                 else:
                     print("** WARNING: could not find a LaTeX to PDF processor. Generate a tex file only. ")
 
-########################################################################
+
 if __name__ == '__main__':
     """Main ARG routine
     """

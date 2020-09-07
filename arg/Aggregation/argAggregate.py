@@ -36,63 +36,30 @@
 #
 #HEADER
 
-########################################################################
-DEBUG_ARG_AGGREGATE = False
+import math as mt
+import os
+import re
+import vtk
 
-########################################################################
-# Workaround for MatPlotLib backend limitations
-from arg.Aggregation import argSummarize
 import matplotlib
+import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
+import yaml
+
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.DataInterface.argDataInterface import argDataInterface
+from arg.Generation import argPlot, argVTK
+
 matplotlib.use("Agg")
 
-########################################################################
-argAggregate_module_aliases = {
-    "math"            : "mt",
-    }
-for m in [
-    "math",
-    "matplotlib.pylab",
-    "os",
-    "paraview.vtk",
-    "re",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argAggregate_module_aliases:
-            globals()[argAggregate_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
-
-# Import additional Python package
-from collections                        import OrderedDict
-
-# Import ARG modules
-from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import *
-from arg.Generation                      import argPlot, argVTK
-
-# Import VTK module
-import vtkmodules.vtkFiltersExtraction  as vtkFiltersExtraction
-
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(common_dir, "../Common/argTypes.yml"),
-          'r',
-          encoding="utf-8") as t_file:
+with open(os.path.join(common_dir, "../Common/argTypes.yml"), 'r', encoding="utf-8") as t_file:
     supported_types = yaml.safe_load(t_file)
 
 # Retrieve supported verbosity levels
-verbosity_levels = supported_types.get(
-    "VerbosityLevels")
+verbosity_levels = supported_types.get("VerbosityLevels")
 
-########################################################################
+
 def map_composite_keys(in_dict, key1, separator):
     """Retrieve key1@...@keyN keys and corresponding values from input dict
        and build output dict with the form {key2:[key3, ..., keyN, value]}
@@ -105,7 +72,6 @@ def map_composite_keys(in_dict, key1, separator):
     # Iterate over input dict and filter by prefix with form key1@
     prefix = key1 + separator
     n = len(prefix)
-    # for key in filter(lambda l: l[:n] == prefix, in_dict):
     for key in [l for l in in_dict if l[:n] == prefix]:
         # Make sure that at least 2 keys were retrieved
         subkeys = key.split(separator)
@@ -120,7 +86,7 @@ def map_composite_keys(in_dict, key1, separator):
     # Return result
     return out_dict
 
-########################################################################
+
 def aggregate_descriptive_statistics(s_1, s_2):
     """Aggregate two sets of descriptive statistics (min/mean/max/M2/card)
        It is assumed that second set is an initialized 5-vector
@@ -160,7 +126,7 @@ def aggregate_descriptive_statistics(s_1, s_2):
         M2 / (n_tot - 1) if n_tot > 1 else M2,
         n_tot]
 
-########################################################################
+
 def aggregate_histograms(h_1, h_2):
     """Aggregate two histograms
        It is assumed that second histogram is a non-void dict
@@ -177,7 +143,7 @@ def aggregate_histograms(h_1, h_2):
     return {
         k: h_1.get(k, 0) + h_2.get(k, 0) for k in s_keys}
 
-########################################################################
+
 def update_or_create_dict_in_dict(dict_of_dicts, key1, key2, value, update_fct):
     """Update or create dict entry in a dict with given primary and
        secondary keys, and value to be used by provided updating function
@@ -192,15 +158,11 @@ def update_or_create_dict_in_dict(dict_of_dicts, key1, key2, value, update_fct):
     # Save current block quality stats
     return sub_dict
 
-########################################################################
+
 def show_mesh_surface(backend, fig_params, data, file_name, do_clip=False):
     """Add surface rendering figure of a dataset to the document
        for a specified point or cell data, scalar or vector variable
     """
-
-    # If argVTK module is missing, do not do anything
-    if not argVTK.has_paraview_vtk:
-        return
 
     # Create artifact generator variable
     variable = argVTK.argVTKAttribute(data, fig_params.get("time_step", -1))
@@ -216,11 +178,11 @@ def show_mesh_surface(backend, fig_params, data, file_name, do_clip=False):
 
     # Include figure in report
     backend.add_figure({
-        "figure_file"   : output_base_name + ".png",
+        "figure_file": output_base_name + ".png",
         "caption_string": caption,
-        "width"         : fig_params.get("width", "12cm")})
+        "width": fig_params.get("width", "12cm")})
 
-########################################################################
+
 def create_plot(parameters, base_plot_params, data_map, title, data_key, func_prop, pt_marker=None):
     """Retrieve and prepare data to invoke plotting function
     """
@@ -257,16 +219,16 @@ def create_plot(parameters, base_plot_params, data_map, title, data_key, func_pr
                 break
 
     # Set other plot parameters
-    plot_params["title"]      = title
-    plot_params["label"]      = data_key
+    plot_params["title"] = title
+    plot_params["label"] = data_key
     plot_params["var_x_name"] = var_x_name
     plot_params["var_y_name"] = var_y_name
-    plot_params["marker"]     = pt_marker
+    plot_params["marker"] = pt_marker
 
     # Execute artifact generator and return its results
     return argPlot.execute_request(parameters, plot_params)
 
-########################################################################
+
 def show_CAD_metadata(backend, request_params, metadata):
     """Add CAD metadata
     """
@@ -277,18 +239,18 @@ def show_CAD_metadata(backend, request_params, metadata):
     cad_metadata = argDataInterface.factory(
         "key-value",
         os.path.join(backend.Parameters.DataDir, parameters_root),
-        regexp)
+        {"expression": regexp})
 
     # Initialize body_lists
     all_body_lists = {}
 
     # Iterate over metadata items
     for metadatum in metadata:
-        prop_item, prop_dict, _ = cad_metadata.get_property_information(metadatum)
-
-        # Iterate over retrieved metadata
-        for file_name, value in prop_dict.items():
+        # Get information for current metadatum and iterate over it
+        prop_info = cad_metadata.get_property_information(metadatum)
+        for info_key, info_value in prop_info.iterator():
             # Initialize default values
+            value = info_value[0][0]
             color, style = None, "default"
 
             # Handle particular values
@@ -298,15 +260,15 @@ def show_CAD_metadata(backend, request_params, metadata):
                 color, value = "red", "NOT FOUND"
             else:
                 style = "typewriter"
-                
+
             # Update body list for this parameter file and value
             row = [argMultiFontStringHelper(backend),
                    argMultiFontStringHelper(backend)]
-            row[0].append(prop_item, "typewriter")
+            row[0].append(prop_info.get_names()[0], "typewriter")
             row[1].append("{}".format(value), style, color)
-            all_body_lists.setdefault(file_name, []).append(row)
+            all_body_lists.setdefault(info_key, []).append(row)
 
-    # Issue table
+    # Create one table per file
     for file_name, body_list in all_body_lists.items():
         backend.add_table(
             ["CAD parameter", "parameter value"],
@@ -314,25 +276,17 @@ def show_CAD_metadata(backend, request_params, metadata):
             "CAD metadata for part {}. ".format(
                 file_name.replace("_parameters.txt", '')))
 
-########################################################################
+
 def show_all_blocks(backend, fig_params, data, file_names, verbose):
     """Add surface rendering figures to the document for each mesh block
        for a specified point or cell data, scalar or vector variable
     """
 
-    # If argVTK module is missing, do not do anything
-    if not argVTK.has_paraview_vtk:
-        return
-
-    # Compute histograms only if argPlot module is available
-    if has_matplotlib_pylab:
-        do_histograms = True
-        # All histogram plots have identical sizes and aspects
-        histo_plot_params = {}
-        histo_plot_params["type"] = "histogram"
-        histo_plot_params["xyratio"] = 3.5
-    else:
-        do_histograms = False
+    do_histograms = True
+    # All histogram plots have identical sizes and aspects
+    histo_plot_params = {}
+    histo_plot_params["type"] = "histogram"
+    histo_plot_params["xyratio"] = 3.5
 
     # Retrieve mandatory figure parameters
     try:
@@ -345,13 +299,13 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
     # Get handle on input data in VTK form
     vtk_data = model_data.get_VTK_reader_output_data(0)
     if not vtk_data:
-        print("*  WARNING: ignoring request: could not read VTK data from input model",model_file)
+        print("*  WARNING: ignoring request: could not read VTK data from input model", model_file)
         return
 
     # Retrieve or create block names and IDs
     meta_data = model_data.get_meta_information()[0]
     block_names = meta_data.get("block names", [])
-    block_IDs   = meta_data.get("block IDs", [])
+    block_IDs = meta_data.get("block IDs", [])
 
     # Retrieve comments if provided
     comments = map_composite_keys(
@@ -398,9 +352,7 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
 
         # Skip ignored blocks
         if idx not in block_flat_to_id:
-            if DEBUG_ARG_AGGREGATE:
-                print("# Ignoring block with flat index {}".format(
-                    idx))
+            pass
         else:
             # Retrieve corresponding block ID and image file name
             b_id = block_flat_to_id[idx]
@@ -467,7 +419,7 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
         block_string.append(" (", "default")
         block_string.append(block_name, "typewriter")
         block_string.append(") summary", "default")
-        backend.add_subtitle({"title" : block_string})
+        backend.add_subtitle({"title": block_string})
 
         # Initialize storage for block properties table body
         body = [
@@ -496,6 +448,7 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
                         body.append([
                             "prescribed material model",
                             model_string])
+
                     # Break out as soon as block was found
                     break
             else:
@@ -512,9 +465,9 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
                 "type of first element in block",
                 type_string])
             backend.add_figure({
-                "figure_file"    : base_name + ".png",
-                "caption_string" : caption,
-                "width"          : fig_params.get("width", "12cm")})
+                "figure_file": base_name + ".png",
+                "caption_string": caption,
+                "width": fig_params.get("width", "12cm")})
         else:
             # Block element type is unknown
             body.append(["type of first element in block", "unknown"])
@@ -534,8 +487,9 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
             ["property", "value"],
             body,
             caption_string,
-            False, # Do not do verbatim
-            "hb!") # Put table at bottom of page
+            False,  # Do not do verbatim
+            "hb!")  # Put table at bottom of page
+
         # Append per-block mesh quality information when available
         eqs = q_stats.get(b_id)
         if not eqs:
@@ -550,7 +504,7 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
             quality_string.append(" (", "default")
             quality_string.append(block_name, "typewriter")
             quality_string.append(") element quality", "default")
-            backend.add_subtitle({"title" : quality_string})
+            backend.add_subtitle({"title": quality_string})
 
             # Create mesh quality table body
             body = []
@@ -633,9 +587,9 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
                             histo_string.append(block_name, "typewriter")
                             histo_string.append('.', "default")
                             backend.add_figure({
-                                "figure_file"    : "{}.png".format(histo_name[0]),
-                                "caption_string" : histo_string,
-                                "width"          : fig_params.get("histogram_width", "12cm")})
+                                "figure_file": "{}.png".format(histo_name[0]),
+                                "caption_string": histo_string,
+                                "width": fig_params.get("histogram_width", "12cm")})
 
         # Append comment when defined for current block
         if not backend.add_comment(comments, block_name):
@@ -644,17 +598,13 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
     # Clear page after last block
     backend.add_page_break()
 
-########################################################################
+
 def show_all_modes(backend, fig_params, data, file_name):
     """Add surface rendering figures for all mode shapes
        for the Disp variable,
        with a normalized displacement with given factor,
        laid out in n_cols columns by n_rows rows
     """
-
-    # If argVTK module is missing, do not do anything
-    if not argVTK.has_paraview_vtk:
-        return
 
     # Bail out early if no modes are present
     times = data.get_available_times()
@@ -760,19 +710,15 @@ def show_all_modes(backend, fig_params, data, file_name):
     fig_width = fig_params.get("width")
     for base_name, caption_string in zip(all_base_names, all_captions):
         backend.add_figure({
-                 "figure_file"    : base_name + ".png",
-                 "caption_string" : caption_string,
-                 "width"          : fig_width})
+            "figure_file": base_name + ".png",
+            "caption_string": caption_string,
+            "width": fig_width})
 
-########################################################################
+
 def show_enumerated_fields(backend, fig_params, data, file_name):
     """Add surface rendering figures to the document for a
        specified set of point or cell data, scalar or vector variables
     """
-
-    # If argVTK module is missing, do not do anything
-    if not argVTK.has_paraview_vtk:
-        return
 
     # Set default figure width
     fig_params.setdefault("width", "12cm")
@@ -801,7 +747,7 @@ def show_enumerated_fields(backend, fig_params, data, file_name):
 
             # Create un-numbered subsection
             variable_string.append(')', "default")
-            backend.add_subtitle({"title" : variable_string})
+            backend.add_subtitle({"title": variable_string})
 
             # Get handle on input data in VTK form
             vtk_data = d.get_VTK_reader_output_data(i)
@@ -817,13 +763,13 @@ def show_enumerated_fields(backend, fig_params, data, file_name):
     # Clear page after last field
     backend.add_page_break()
 
-########################################################################
+
 def arg_aggregate(backend, request_params):
     """Decide which aggregation operation is to be performed
     """
 
     # Switch between different aggregation types
-    request_name  = request_params["name"]
+    request_name = request_params["name"]
     print("[argAggregate] Processing {} request".format(
         request_name))
 
@@ -859,7 +805,7 @@ def arg_aggregate(backend, request_params):
 
     # Operation show_enumerated_fields: one figure page per field
     elif request_name == "show_enumerated_fields":
-       # Decide whether mesh edges are to be shown or not
+        # Decide whether mesh edges are to be shown or not
         request_params["edges"] = request_name.endswith("with_edges")
 
         # Add specific request parameters
@@ -875,7 +821,7 @@ def arg_aggregate(backend, request_params):
         data = [argDataInterface.factory(
             "ExodusII",
             os.path.join(backend.Parameters.DataDir, file_name), v, False)
-                for v in var_names]
+            for v in var_names]
 
         # Aggregate
         if data:
@@ -947,5 +893,3 @@ def arg_aggregate(backend, request_params):
         # Aggregate
         if metadata:
             show_CAD_metadata(backend, request_params, metadata)
-
-########################################################################

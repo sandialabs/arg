@@ -36,41 +36,22 @@
 #
 #HEADER
 
-#!/usr/bin/env python2.7
-########################################################################
-DEBUG_PYTHON = False
+import calendar
+import datetime
+import getopt
+import getpass
+import os
+import sys
+
+import yaml
+
+from arg.Backend.argBackend import argBackend
+from arg.DataInterface.argDataInterface import argDataInterface
+from arg.Tools import Utilities
+
 app = "argReportParameters"
 
-########################################################################
-argReportParameters_module_aliases = {}
-for m in [
-    "calendar",
-    "codecs",
-    "datetime",
-    "getopt",
-    "getpass",
-    "os",
-    "sys",
-    "yaml",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in argReportParameters_module_aliases:
-            globals()[argReportParameters_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
 
-# Import ARG modules
-from arg.Backend.argBackend               import argBackend
-from arg.DataInterface.argDataInterface   import argDataInterface
-from arg.Tools                            import Utilities
-
-########################################################################
 class argReportParameters(object):
     """A class to get and store ARG report parameters
     """
@@ -94,77 +75,76 @@ class argReportParameters(object):
     # Save default temp file name
     DEFAULT_TMPFILE = "ARG"
 
-    ####################################################################
     def __init__(self, application, parameters_file=None, version=None, types=None, latex_processor=None):
 
         # Default application settings
-        self.Application      = application
-        self.Version          = version
-        self.Types            = types
-        self.TmpFile          = None
-        self.LatexProcessor   = latex_processor
+        self.Application = application
+        self.Version = version
+        self.Types = types
+        self.TmpFile = None
+        self.LatexProcessor = latex_processor
 
         # Default static data interface factory
-        self.DataFactory      = argDataInterface.factory
+        self.DataFactory = argDataInterface.factory
 
         # Default assembler settings
-        self.Verbosity        = self.VerbosityLevels.get("default")
-        self.KeySeparator     = '@'
+        self.Verbosity = self.VerbosityLevels.get("default")
+        self.KeySeparator = '@'
 
         # Default file and directory names
-        self.ParametersFile   = parameters_file
-        self.FileName         = None
-        self.Mutables         = "mutables.yml"
-        self.StructureFile    = None
+        self.ParametersFile = parameters_file
+        self.FileName = None
+        self.Mutables = "mutables.yml"
+        self.StructureFile = None
         self.StructureEndFile = None
-        self.Abstract         = None
-        self.Thanks           = None
-        self.Preface          = None
+        self.Abstract = None
+        self.Thanks = None
+        self.Preface = None
         self.ExecutiveSummary = None
-        self.Nomenclature     = None
-        self.DataDir          = "."
-        self.OutputDir        = "."
-        self.GeometryRoot     = None
-        self.DeckRoot         = None
-        self.LogFile          = None
-        self.IsDeckFromLog    = False
+        self.Nomenclature = None
+        self.DataDir = "."
+        self.OutputDir = "."
+        self.GeometryRoot = None
+        self.DeckRoot = None
+        self.LogFile = None
+        self.IsDeckFromLog = False
 
         # Default report parameters
-        self.Title            = "ARG Report"
-        self.Year             = None
-        self.Month            = None
-        self.Number           = None
-        self.Issue            = None
-        self.Versions         = []
-        self.Final            = False
-        self.Title            = None
-        self.Authors          = []
-        self.Organizations    = []
-        self.MailStops        = []
-        self.Location         = ''
-        self.ReportType       = None
-        self.BackendType      = None
-        self.Backend          = None
-        self.Classification   = None
-        self.ArtifactFile     = None
-        self.Mappings         = {}
-        self.MetaData         = []
+        self.Title = "ARG Report"
+        self.Year = None
+        self.Month = None
+        self.Number = None
+        self.Issue = None
+        self.Versions = []
+        self.Final = False
+        self.Title = None
+        self.Authors = []
+        self.Organizations = []
+        self.MailStops = []
+        self.Location = ''
+        self.ReportType = None
+        self.BackendType = None
+        self.Backend = None
+        self.Classification = None
+        self.ArtifactFile = None
+        self.Mappings = {}
+        self.MetaData = []
         self.IgnoredBlockKeys = []
-        self.SolutionCases    = []
-        self.Fragments        = {}
+        self.SolutionCases = []
+        self.Fragments = {}
 
         # Backend specific parameters
-        self.MarkingsFile     = None
-        self.BackgroundFile   = None
-        self.Release          = None
-        self.Address          = None
-        self.AllAuthors       = None
+        self.MarkingsFile = None
+        self.BackgroundFile = None
+        self.Release = None
+        self.Address = None
+        self.AllAuthors = None
 
         # Parse parameters file if already provided
+        self.parsed_params = None
         if self.ParametersFile:
             self.parse_parameters_file()
 
-    ####################################################################
     def command_line_usage(self):
         """Provide online help on ARG with command line arguments
         """
@@ -180,7 +160,6 @@ class argReportParameters(object):
 
         sys.exit(0)
 
-    ####################################################################
     def explorator_command_line_usage(self):
         """Provide online help on Explorator with command line arguments
         """
@@ -194,7 +173,6 @@ class argReportParameters(object):
         print("\t [-s <structure>]    name of file report structure")
         print("\t [-a <structure>]    name of analyst authored result section structure file")
 
-    ####################################################################
     def generator_command_line_usage(self):
         """Provide online help on Generator with command line arguments
         """
@@ -205,7 +183,6 @@ class argReportParameters(object):
         print("\t [-f <file name>]      name of artifact input file")
         print("\t [-o <output dir>]     directory of output artifacts")
 
-    ####################################################################
     def assembler_command_line_usage(self):
         """Provide online help on Assembler with command line arguments
         """
@@ -219,7 +196,6 @@ class argReportParameters(object):
         print("\t [-o <output path>]        path to output files")
         print("\t [-s <structure>]          name of file report structure")
 
-    ####################################################################
     def parameters_file_usage(self):
         """Provide online help on ARG with parameters file
         """
@@ -232,7 +208,6 @@ class argReportParameters(object):
               + "please refer to User Manuals in \'arg/doc/user_manual\'.")
         sys.exit(0)
 
-    ####################################################################
     def verbosity_to_int(self, value):
         """Convert verbosity key into integer value in allowable range
         """
@@ -250,9 +225,10 @@ class argReportParameters(object):
             else:
                 # Integer value is in not in range, warn and return default
                 default_verb = verbosity_levels.get("default")
-                print("*  WARNING: {} is not a valid verbosity integer identifier, assigning default ({}) instead".format(
-                    value,
-                    default_verb))
+                print(
+                    "*  WARNING: {} is not a valid verbosity integer identifier, assigning default ({}) instead".format(
+                        value,
+                        default_verb))
                 return default_verb
         except:
             # Otherswise check that is one of the allowed keys
@@ -269,11 +245,6 @@ class argReportParameters(object):
                 # String key is defined, returned corresponding integer
                 return int_value
 
-        # Defensive coding: this point should never be reached
-        print("** ERROR: logical error in verbosity_to_int()")
-        sys.exit(1)
-
-    ####################################################################
     def parse_line(self):
         """Parse command line
         """
@@ -281,22 +252,18 @@ class argReportParameters(object):
         parsed = True
 
         # Try parsing command line arguments or get parameters file
-        if self.Application.capitalize() == "Explorator":
-            if not self.parse_explorator_command_line():
-                if not self.parse_parameters_line():
-                    parsed = False
-        if self.Application.capitalize() == "Generator":
-            if not self.parse_generator_command_line():
-                if not self.parse_parameters_line():
-                    parsed = False
-        if self.Application.capitalize() == "Assembler":
-            if not self.parse_assembler_command_line():
-                if not self.parse_parameters_line():
-                    parsed = False
+        if self.Application.capitalize() == "Explorator" and not self.parse_command_line(
+                'Explorator') and not self.parse_parameters_line():
+            parsed = False
+        if self.Application.capitalize() == "Generator" and not self.parse_command_line(
+                'Generator') and not self.parse_parameters_line():
+            parsed = False
+        if self.Application.capitalize() == "Assembler" and not self.parse_command_line(
+                'Assembler') and not self.parse_parameters_line():
+            parsed = False
         if self.Application.capitalize() == "ARG":
-            if not (self.parse_explorator_command_line()
-                and self.parse_generator_command_line()
-                and self.parse_assembler_command_line()):
+            if not (self.parse_command_line('Explorator') and self.parse_command_line('Generator')
+                    and self.parse_command_line('Assembler')):
                 if not self.parse_parameters_line():
                     parsed = False
 
@@ -314,114 +281,81 @@ class argReportParameters(object):
 
         return parsed
 
-    ####################################################################
-    def parse_explorator_command_line(self):
-        """Parse Explorator command line and fill report parameters
-        """
+    def arg_a(self, argument):
+        if "." in argument:
+            self.StructureEndFile = argument
+        else:
+            self.StructureEndFile = f"{argument}.yml"
 
+    def arg_b(self, argument):
+        if argument in self.Types.get("BackendTypes", {}):
+            self.BackendType = argument
+
+    def arg_d(self, argument):
+        self.DataDir = argument
+
+    def arg_f(self, argument):
+        self.ArtifactFile = argument
+
+    def arg_h(self, argument=None):
+        self.assembler_command_line_usage()
+        return True
+
+    def arg_l(self, argument):
+        self.LatexProcessor = argument
+
+    def arg_m(self, argument):
+        self.Mutables = argument
+
+    def arg_n(self, argument):
+        self.FileName = argument
+
+    def arg_o(self, argument):
+        self.OutputDir = argument
+
+    def arg_p(self, argument):
+        self.ParametersFile = argument
+
+    def arg_s(self, argument):
+        self.StructureFile = argument
+
+    def explorator_parse_return_value(self):
+        return self.check_explorator_parameters()
+
+    def generator_parse_return_value(self):
+        return self.check_generator_parameters()
+
+    def assembler_parse_return_value(self):
+        return (self.parse_parameters_file(self.ParametersFile)
+
+                # Set backend
+                and self.set_backend()
+
+                # Check provided arguments are acceptable
+                and self.check_assembler_parameters())
+
+    def parse_command_line(self, app_name: str):
+        """Parse app_name command line and fill report parameters
+        """
+        app_name = app_name.lower()
+        allowed_args = {'explorator': 'hc:d:m:o:s:a:', 'generator': 'hb:d:f:o:', 'assembler': 'hl:c:d:m:n:o:s:'}
+        args_dict = {'a': self.arg_a, 'b': self.arg_b, 'd': self.arg_d, 'f': self.arg_f, 'h': self.arg_h,
+                     'l': self.arg_l, 'm': self.arg_m, 'n': self.arg_n, 'o': self.arg_o, 'p': self.arg_p,
+                     's': self.arg_s}
+        apps_return_dict = {'explorator': self.explorator_parse_return_value,
+                            'generator': self.generator_parse_return_value,
+                            'assembler': self.assembler_parse_return_value}
         # Try to hash command line with respect to allowable flags
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "hc:d:m:o:s:a:")
-        except getopt.GetoptError as e:
-            return False
-
-        # First verify that the helper has not been requested (supersedes everything else)
-        for o, a in opts:
-            if o == "-h":
-                self.explorator_command_line_usage()
-                return True
-            elif o == "-c":
-                self.ParametersFile = a
-            elif o == "-d":
-                self.DataDir = a
-            elif o == "-m":
-                self.Mutables = a
-            elif o == "-o":
-                self.OutputDir = a
-            elif o == "-s":
-                if "." in a:
-                    self.StructureFile = a
-                else:
-                    self.StructureFile = "{}.yml".format(a)
-            elif o == "-a":
-                if "." in a:
-                    self.StructureEndFile = a
-                else:
-                    self.StructureEndFile = "{}.yml".format(a)
-
-        # Check provided arguments are acceptable
-        if self.check_explorator_parameters():
-            return True
-
-    ####################################################################
-    def parse_generator_command_line(self):
-        """Parse Generator command line and fill report parameters
-        """
-
-        # Try to hash command line with respect to allowable flags
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], "hb:d:f:o:")
-        except getopt.GetoptError as e:
-            return False
-
-        # First verify that the helper has not been requested (supersedes everything else)
-        for o, a in opts:
-            if o == "-h":
-                self.generator_command_line_usage()
-                return True
-            elif o == "-b":
-                if a in self.Types.get("BackendTypes", {}):
-                    self.BackendType = a
-            elif o == "-d":
-                self.DataDir = a
-            elif o == "-f":
-                self.ArtifactFile = a
-            elif o == "-o":
-                self.OutputDir = a
-
-        # Check provided arguments are acceptable
-        if self.check_generator_parameters():
-            return True
-
-    ####################################################################
-    def parse_assembler_command_line(self):
-        """Parse Assembler command line and fill report parameters
-        """
-
-        # Try to hash command line with respect to allowable flags
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], "hl:c:d:m:n:o:s:")
+            opts, args = getopt.getopt(sys.argv[1:], allowed_args.get(app_name, ''))
         except getopt.GetoptError:
             return False
 
-        # First verify that the helper has not been requested (supersedes everything else)
         for o, a in opts:
-            if o == "-h":
-                self.assembler_command_line_usage()
-                return True
-            elif o == "-l":
-                self.LatexProcessor = a
-            elif o == "-c":
-                self.ParametersFile = a
-            elif o == "-d":
-                self.DataDir = a
-            elif o == "-m":
-                self.Mutables = a
-            elif o == "-n":
-                self.FileName = a
-            elif o == "-o":
-                self.OutputDir = a
-            elif o == "-s":
-                self.StructureFile = a
+            args_dict[o.replace('-', '')](argument=a)
 
-        # Try to parse structure type
-        return (self.parse_parameters_file(self.ParametersFile)
-        # Set backend
-        and self.set_backend()
-        # Check provided arguments are acceptable
-        and self.check_assembler_parameters())
+        apps_return_dict[app_name]()
 
-    ####################################################################
     def parse_parameters_line(self):
         """Parse command line and fill report parameters
         """
@@ -447,19 +381,21 @@ class argReportParameters(object):
         if not self.ParametersFile:
             print("*  WARNING: no parameters file name provided; "
                   "using '{}' by default.".format(
-                  self.DEFAULT_PARAMETERSFILE))
+                self.DEFAULT_PARAMETERSFILE))
             self.ParametersFile = self.DEFAULT_PARAMETERSFILE
 
         # Check provided parameters file is acceptable
         return (self.check_parameters_file()
-        # Parse parameters file
-        and self.parse_parameters_file()
-        # Check completed parameters are acceptable
-        and self.check_assembler_parameters()
-        # Set backend
-        and self.set_backend())
 
-    ####################################################################
+                # Parse parameters file
+                and self.parse_parameters_file()
+
+                # Check completed parameters are acceptable
+                and self.check_assembler_parameters()
+
+                # Set backend
+                and self.set_backend())
+
     def check_parameters_file(self):
         """Check parameters file
         """
@@ -478,275 +414,261 @@ class argReportParameters(object):
                 else:
                     print("*  ERROR: provided parameters file is not supported. "
                           "{} formats are supported. Exiting. ".format(
-                          supported_parametersfile_extensions))
+                        supported_parametersfile_extensions))
                     sys.exit(1)
-                    return False
             else:
                 print("*  ERROR: provided parameters file is not a file. Exiting. ")
                 sys.exit(1)
-                return False
         else:
             print("*  ERROR: Provided parameters file does not exist. Exiting. ")
             sys.exit(1)
-            return False
 
-        return True
-
-    ####################################################################
     def parse_parameters_file(self, file=None):
         """Parse variables file and fill report parameters
         """
+        if self.parsed_params is None:
+            # Parse provided file if exists
+            if file:
+                parameters_file = file
 
-        # Parse provided file if exists
-        if file:
-            parameters_file = file
-        # Otherwise, parse parameters file
-        else:
-            parameters_file = self.ParametersFile
+            # Otherwise, parse parameters file
+            else:
+                parameters_file = self.ParametersFile
 
-        # Retrieve dictionary of parameters from file
-        param_dict = Utilities.read_yml_file(parameters_file, self.Application)
+            # Retrieve dictionary of parameters from file
+            param_dict = Utilities.read_yml_file(parameters_file, self.Application)
 
-        # Bail out early if dictionary is empty
-        if not param_dict:
-            print("[{}] No parameters found in {}".format(
-                self.Application,
-                parameters_file))
-            return False
-        # or file reading did not succeed
-        elif isinstance(param_dict, str):
-            print("[{}] {}".format(
-                self.Application,
-                param_dict.capitalize()))
-            return False
-
-        # Assemble possible report classification keys
-        class_keys = {}
-        for level, level_keys in self.Types.get(
-            "ClassificationLevels", {}).items():
-            for key, values in level_keys.items():
-                compound_key = "{}_{}".format(level, key)
-                class_keys[compound_key.lower()] = [compound_key, values]
-
-        # Process retrieved non-empty dictionary
-        print("[{}] Read {} parameter statements in {}".format(
-            self.Application,
-            len(param_dict),
-            parameters_file))
-        for key, value in param_dict.items():
-            # Keys are case-insensitive
-            key = key.lower()
-
-            # Start with Boolean statements
-            if key == "final" and value:
-                self.Final = True
-
-            # Then handle all straightforward key: value statements
-            elif key == "constants":
-                self.ParametersFile = value
-            elif key == "mutables":
-                if value: self.Mutables = value
-            elif key == "data":
-                self.DataDir = value
-            elif key == "file_name":
-                self.FileName = value
-            elif key == "output":
-                self.OutputDir = value
-                if not os.path.exists(self.OutputDir) or os.path.isfile(self.OutputDir):
-                    os.mkdir(self.OutputDir)
-            elif key == "structure":
-                self.StructureFile = value
-            elif key == "structure_end":
-                self.StructureEndFile = value
-            elif key == "year":
-                self.Year = value
-            elif key == "month":
-                self.Month = value
-            elif key == "number":
-                self.Number = value
-            elif key == "issue":
-                self.Issue = value
-            elif key == "version":
-                if value and value.split(',') not in self.Versions:
-                    self.Versions.append(value.split(','))
-            elif key == "title":
-                self.Title = value
-            elif key == "author":
-                if not value in self.Authors:
-                    self.Authors.append(value)
-            elif key == "organization":
-                if not value in self.Organizations:
-                    self.Organizations.append(value)
-            elif key == "abstract":
-                self.Abstract = value
-            elif key == "thanks":
-                self.Thanks = value
-            elif key == "preface":
-                self.Preface = value
-            elif key == "executive_summary":
-                self.ExecutiveSummary = value
-            elif key == "nomenclature":
-                self.Nomenclature = value
-            elif key == "location":
-                self.Location = value
-            elif key == "artifact":
-                self.ArtifactFile = value
-            elif key == "geometry_root":
-                self.GeometryRoot = value
-            elif key == "input_deck":
-                self.DeckRoot = value
-            elif key == "log_file":
-                self.LogFile = value
-            elif key == "input_deck_from_log":
-                self.DeckRoot = value
-                self.IsDeckFromLog = True
-
-            # Then interpret verbosity key as integer value
-            elif key == "verbosity":
-                self.Verbosity = self.verbosity_to_int(value)
-
-            # Key separator value must be a single character
-            elif key == "key_separator" and isinstance(value, str) and len(value) == 1:
-                self.KeySeparator = value
-
-            # Handle special cases of report and backend types
-            elif key == "report_type":
-                allow = self.Types.get("ReportTypes", [])
-                if value in allow:
-                    self.ReportType = value
-                    if value == "Report":
-                        self.Classification = "Generic"
-                else:
-                    print("** ERROR: `{}` is not a valid report type. Allowed values are `{}`".format(
-                        value,
-                        '`, `'.join(allow.keys())))
-                    sys.exit(1)
-            elif key == "backend_type":
-                allow = self.Types.get("BackendTypes", {})
-                if value in allow.keys():
-                    self.BackendType = value
-                else:
-                    print("** ERROR: `{}` is not a valid backend type. Allowed values are `{}`".format(
-                        value,
-                        '`, `'.join(allow.keys())))
-                    sys.exit(1)
-            elif key in ("ms", "mailstop"):
-                self.MailStops.append(value)
-
-            # Classification key
-            elif key == "classification":
-                # Ensure that value is allowed
-                # class_type = filter(
-                #     lambda x: x.lower() == value.lower(),
-                #     self.Types.get("ClassificationLevels", {}).keys())
-                class_type = [x for x in self.Types.get("ClassificationLevels", {}).keys() if x.lower() == value.lower()]
-                # Report on invalid values and error out
-                if not class_type:
-                    print("** ERROR: `{}` is not a valid classification. Allowed values are `{}`".format(
-                        value,
-                        '`, `'.join(self.Types.get("ClassificationLevels", {}).keys())))
-                    sys.exit(1)
-                self.Classification = class_type[0] if len(class_type) else None
-
-            # Classification sub-key
-            elif key in class_keys:
-                # Ensure that value is allowed
-                restricted_values = class_keys[key][1]
-                if not restricted_values or (
-                    restricted_values and value in restricted_values):
-                    setattr(self, class_keys[key][0], value)
-                # Report on invalid values and error out
-                elif restricted_values:
-                    print("** ERROR: `{}` is not allowed for `{}`. Allowed values are in {}".format(
-                        value,
-                        class_keys[key][0],
-                        restricted_values))
-                    sys.exit(1)
-
-            # Handle key=list of values statements
-            elif key in (
-                "reported_cad_metadata",
-                "ignored_blocks",
-                "solution_cases",
-                "insert_in",
-                ):
-                if not isinstance(value, list):
-                    print("*  WARNING: ill-formed {} directive: a {} was passed instead of a list".format(
-                        key,
-                        type(value)))
-                    continue
-                if key == "reported_cad_metadata":
-                    self.MetaData = list(map(
-                        lambda x: "{}".format(x),
-                        value))
-                elif key == "solution_cases":
-                    self.SolutionCases = value
-                elif key == "ignored_blocks":
-                    self.IgnoredBlockKeys = list(map(
-                        lambda x: "{}".format(x).lower(),
-                        value))
-                elif key == "insert_in":
-                    # Iterate over insertion statements
-                    for v in value:
-                        # Ensure that a subdivision index was well specified
-                        try:
-                            idx = list(map(
-                                int,
-                                "{}".format(v.pop("location")).split('.')))
-                            if len(idx) < 2:
-                                idx.append(0)
-                            self.Fragments.setdefault(
-                                idx[0], {}).setdefault(
-                                idx[1], {}).update(v)
-                        except:
-                            print("*  WARNING: ill-formed insert_in value: {}".format(
-                                value))
-
-            # Handle key=dictionary of values statements
-            elif key in (
-                "mappings",
-                ):
-                if not isinstance(value, dict):
-                    print("*  WARNING: ill-formed {} directive: a {} was passed instead of a dict".format(
-                        key,
-                        type(value)))
-                    continue
-                elif key == "mappings":
-                    self.Mappings = value
-
-            # Report unrecognized keys
-            elif DEBUG_PYTHON:
-                print("[{}] Ignoring key: {}".format(
+            # Bail out early if dictionary is empty
+            if not param_dict:
+                print("[{}] No parameters found in {}".format(
                     self.Application,
-                    key))
-
-        # Determine whether specified mutables file exists
-        mutables_file = os.path.join(self.OutputDir, self.Mutables)
-
-        # Print retrieved key=value pairs when requested
-        if self.Verbosity > self.VerbosityLevels.get("default"):
-            for key, value in param_dict.items():
-                print("[{}] Found {}={} in {}".format(
-                    self.Application,
-                    key,
-                    value,
                     parameters_file))
+                return False
 
-        # Genrate mutables
-        mutables = self.generate_mutables()
+            # or file reading did not succeed
+            elif isinstance(param_dict, str):
+                print("[{}] {}".format(
+                    self.Application,
+                    param_dict.capitalize()))
+                return False
 
-        # Save computed mutables
-        self.save_generated_mutables(mutables)
+            # Assemble possible report classification keys
+            class_keys = {}
+            for level, level_keys in self.Types.get(
+                    "ClassificationLevels", {}).items():
+                for key, values in level_keys.items():
+                    compound_key = "{}_{}".format(level, key)
+                    class_keys[compound_key.lower()] = [compound_key, values]
 
-        # Complete missing organization and mail stop lists if necessary
-        self.Organizations += [''] * (
-            len(self.Authors) - len(self.Organizations))
-        self.MailStops += ["N/A"] * (
-            len(self.Authors) - len(self.MailStops))
+            # Process retrieved non-empty dictionary
+            print("[{}] Read {} parameter statements in {}".format(
+                self.Application,
+                len(param_dict),
+                parameters_file))
+            for key, value in param_dict.items():
+                # Keys are case-insensitive
+                key = key.lower()
 
-        return True
+                # Start with Boolean statements
+                if key == "final" and value:
+                    self.Final = True
 
-    ####################################################################
+                # Then handle all straightforward key: value statements
+                elif key == "constants":
+                    self.ParametersFile = value
+                elif key == "mutables":
+                    if value: self.Mutables = value
+                elif key == "data":
+                    self.DataDir = value
+                elif key == "file_name":
+                    self.FileName = value
+                elif key == "output":
+                    self.OutputDir = value
+                    if not os.path.exists(self.OutputDir) or os.path.isfile(self.OutputDir):
+                        os.mkdir(self.OutputDir)
+                elif key == "structure":
+                    self.StructureFile = value
+                elif key == "structure_end":
+                    self.StructureEndFile = value
+                elif key == "year":
+                    self.Year = value
+                elif key == "month":
+                    self.Month = value
+                elif key == "number":
+                    self.Number = value
+                elif key == "issue":
+                    self.Issue = value
+                elif key == "version":
+                    if value and value.split(',') not in self.Versions:
+                        self.Versions.append(value.split(','))
+                elif key == "title":
+                    self.Title = value
+                elif key == "author":
+                    if not value in self.Authors:
+                        self.Authors.append(value)
+                elif key == "organization":
+                    if not value in self.Organizations:
+                        self.Organizations.append(value)
+                elif key == "abstract":
+                    self.Abstract = value
+                elif key == "thanks":
+                    self.Thanks = value
+                elif key == "preface":
+                    self.Preface = value
+                elif key == "executive_summary":
+                    self.ExecutiveSummary = value
+                elif key == "nomenclature":
+                    self.Nomenclature = value
+                elif key == "location":
+                    self.Location = value
+                elif key == "artifact":
+                    self.ArtifactFile = value
+                elif key == "geometry_root":
+                    self.GeometryRoot = value
+                elif key == "input_deck":
+                    self.DeckRoot = value
+                elif key == "log_file":
+                    self.LogFile = value
+                elif key == "input_deck_from_log":
+                    self.DeckRoot = value
+                    self.IsDeckFromLog = True
+
+                # Then interpret verbosity key as integer value
+                elif key == "verbosity":
+                    self.Verbosity = self.verbosity_to_int(value)
+
+                # Key separator value must be a single character
+                elif key == "key_separator" and isinstance(value, str) and len(value) == 1:
+                    self.KeySeparator = value
+
+                # Handle special cases of report and backend types
+                elif key == "report_type":
+                    allow = self.Types.get("ReportTypes", [])
+                    if value in allow:
+                        self.ReportType = value
+                        if value == "Report":
+                            self.Classification = "Generic"
+                    else:
+                        print("** ERROR: `{}` is not a valid report type. Allowed values are `{}`".format(
+                            value,
+                            '`, `'.join(allow.keys())))
+                        sys.exit(1)
+                elif key == "backend_type":
+                    allow = self.Types.get("BackendTypes", {})
+                    if value in allow.keys():
+                        self.BackendType = value
+                    else:
+                        print("** ERROR: `{}` is not a valid backend type. Allowed values are `{}`".format(
+                            value,
+                            '`, `'.join(allow.keys())))
+                        sys.exit(1)
+                elif key in ("ms", "mailstop"):
+                    self.MailStops.append(value)
+
+                # Classification key
+                elif key == "classification":
+                    # Ensure that value is allowed
+                    class_type = [x for x in self.Types.get("ClassificationLevels", {}).keys() if
+                                  x.lower() == value.lower()]
+
+                    # Report on invalid values and error out
+                    if not class_type:
+                        print("** ERROR: `{}` is not a valid classification. Allowed values are `{}`".format(
+                            value,
+                            '`, `'.join(self.Types.get("ClassificationLevels", {}).keys())))
+                        sys.exit(1)
+                    self.Classification = class_type[0] if len(class_type) else None
+
+                # Classification sub-key
+                elif key in class_keys:
+                    # Ensure that value is allowed
+                    restricted_values = class_keys[key][1]
+                    if not restricted_values or (
+                            restricted_values and value in restricted_values):
+                        setattr(self, class_keys[key][0], value)
+
+                    # Report on invalid values and error out
+                    elif restricted_values:
+                        print("** ERROR: `{}` is not allowed for `{}`. Allowed values are in {}".format(
+                            value,
+                            class_keys[key][0],
+                            restricted_values))
+                        sys.exit(1)
+
+                # Handle key=list of values statements
+                elif key in (
+                        "reported_cad_metadata",
+                        "ignored_blocks",
+                        "solution_cases",
+                        "insert_in",
+                ):
+                    if not isinstance(value, list):
+                        print("*  WARNING: ill-formed {} directive: a {} was passed instead of a list".format(
+                            key,
+                            type(value)))
+                        continue
+                    if key == "reported_cad_metadata":
+                        self.MetaData = [f"{x}" for x in value]
+                    elif key == "solution_cases":
+                        self.SolutionCases = value
+                    elif key == "ignored_blocks":
+                        self.IgnoredBlockKeys = [f"{x}".lower() for x in value]
+                    elif key == "insert_in":
+                        # Iterate over insertion statements
+                        for v in value:
+                            # Ensure that a subdivision index was well specified
+                            try:
+                                idx = [int(x) for x in "{}".format(v.pop("location")).split('.')]
+                                if len(idx) < 2:
+                                    idx.append(0)
+                                self.Fragments.setdefault(
+                                    idx[0], {}).setdefault(
+                                    idx[1], {}).update(v)
+                            except:
+                                print("*  WARNING: ill-formed insert_in value: {}".format(
+                                    value))
+
+                # Handle key=dictionary of values statements
+                elif key in (
+                        "mappings",
+                ):
+                    if not isinstance(value, dict):
+                        print("*  WARNING: ill-formed {} directive: a {} was passed instead of a dict".format(
+                            key,
+                            type(value)))
+                        continue
+                    elif key == "mappings":
+                        self.Mappings = value
+
+            # Determine whether specified mutables file exists
+            mutables_file = os.path.join(self.OutputDir, self.Mutables)
+
+            # Print retrieved key=value pairs when requested
+            if self.Verbosity > self.VerbosityLevels.get("default"):
+                for key, value in param_dict.items():
+                    print("[{}] Found {}={} in {}".format(
+                        self.Application,
+                        key,
+                        value,
+                        parameters_file))
+
+            # Generate mutables
+            mutables = self.generate_mutables()
+
+            # Save computed mutables
+            self.save_generated_mutables(mutables)
+
+            # Complete missing organization and mail stop lists if necessary
+            self.Organizations += [''] * (
+                    len(self.Authors) - len(self.Organizations))
+            self.MailStops += ["N/A"] * (
+                    len(self.Authors) - len(self.MailStops))
+
+            self.parsed_params = True
+            return True
+        else:
+            return True
+
     def set_backend(self):
         """ Set backend
         """
@@ -756,7 +678,6 @@ class argReportParameters(object):
 
         return not self.Backend is None
 
-    ####################################################################
     def check_explorator_parameters(self):
         """Check Explorator specific parameters
         """
@@ -789,7 +710,6 @@ class argReportParameters(object):
         # Checks passed successfully
         return True
 
-    ####################################################################
     def check_generator_parameters(self):
         """Check Generator specific parameters
         """
@@ -815,7 +735,6 @@ class argReportParameters(object):
 
         return True
 
-    ####################################################################
     def check_assembler_parameters(self):
         """Check Assembler specific parameters
         """
@@ -839,7 +758,6 @@ class argReportParameters(object):
 
         return True
 
-    ####################################################################
     def check_parameters(self, caller=None):
         """Check parameters
         """
@@ -849,12 +767,11 @@ class argReportParameters(object):
             self.check_explorator_parameters()
         if self.Application.capitalize() == "Generator" or caller.capitalize() == "Generator":
             self.check_generator_parameters()
-        if self.Application.capitalize() == "Assembler" or self.Application.upper() == "ARG":
+        if self.Application.capitalize() == "Assembler" or caller.capitalize() == "Assembler":
             self.check_assembler_parameters()
 
         return self.Backend
 
-    ####################################################################
     def check_geometry_root(self, case):
         """Check geometry root
         """
@@ -867,17 +784,11 @@ class argReportParameters(object):
                     self.Application,
                     self.GeometryRoot,
                     self.DataDir))
-                case.GeometryFiles = list(map(
-                    lambda x: os.path.join(self.GeometryRoot, x),
-                    filter(
-                        lambda x: os.path.splitext(x)[-1] == ".stl",
-                        os.listdir(geometry_full_path))))
+                case.GeometryFiles = [os.path.join(self.GeometryRoot, x) for x in os.listdir(geometry_full_path) if
+                                      os.path.splitext(x)[-1] == ".stl"]
                 case.GeometryFiles.sort()
-                case.ParametersFiles = list(map(
-                    lambda x: os.path.join(self.GeometryRoot, x),
-                    filter(
-                        lambda x: os.path.splitext(x)[-1] == ".txt" and "_parameters" in os.path.splitext(x)[-2],
-                        os.listdir(geometry_full_path))))
+                case.ParametersFiles = [os.path.join(self.GeometryRoot, x) for x in os.listdir(geometry_full_path) if
+                                        os.path.splitext(x)[-1] == ".txt" and "_parameters" in os.path.splitext(x)[-2]]
                 case.ParametersFiles.sort()
             else:
                 # Specified log file does not exist, terminate
@@ -885,7 +796,6 @@ class argReportParameters(object):
                     geometry_full_path))
                 sys.exit(1)
 
-    ####################################################################
     def check_deck_root(self, case):
         """Check deck root
         """
@@ -915,7 +825,7 @@ class argReportParameters(object):
                     else:
                         # Specified input deck root does not exist, terminate
                         print("** ERROR: specified input deck root {} was not found. "
-                            "Exiting.".format(
+                              "Exiting.".format(
                             self.DeckRoot))
                         sys.exit(1)
                 else:
@@ -927,7 +837,6 @@ class argReportParameters(object):
             # Specified file takes precedence over detected ones
             case.LogFile = self.LogFile
 
-    ####################################################################
     def check_structure_file(self):
         """Check structure file
         """
@@ -941,15 +850,14 @@ class argReportParameters(object):
         if not os.path.isdir(self.OutputDir):
             # Try to create output directory if it does not exist yet
             print("[{}] Creating output directory {}".format(
-                 self.Application,
-                 self.OutputDir))
+                self.Application,
+                self.OutputDir))
             try:
                 os.makedirs(self.OutputDir, 0o750)
             except OSError:
                 print("** ERROR: could not create output directory. Exiting.")
                 sys.exit(1)
 
-    ####################################################################
     def generate_mutables(self):
         """Write mutables dictionary to possibly existing YAML file
         """
@@ -979,7 +887,7 @@ class argReportParameters(object):
             if "title" in report_map:
                 title_params = report_map["title"]
                 self.get_title([title_params["datatype"],
-                                      title_params["dataset"]])
+                                title_params["dataset"]])
             else:
                 self.Title = "ARG Report"
                 mutables["title"] = self.Title
@@ -1009,7 +917,9 @@ class argReportParameters(object):
             self.Authors = [getpass.getuser()]
             mutables["author"] = self.Authors[0]
 
-    ####################################################################
+        # Return generated mutables
+        return (mutables)
+
     def save_generated_mutables(self, mutables_dict):
         """Write mutables dictionary to possibly existing YAML file
         """
@@ -1082,7 +992,6 @@ class argReportParameters(object):
                     value,
                     mutables_file))
 
-    ####################################################################
     def get_title(self, arguments):
         """ Generate report title depending on retrieved meta information
         """
@@ -1121,7 +1030,6 @@ class argReportParameters(object):
         # Assign created title
         self.Title = title_string
 
-    ########################################################################
     def is_file_in_list(self, spec_file, spec_type, disc_files):
         """Check whether specified file of given type was found
         """
@@ -1152,7 +1060,6 @@ class argReportParameters(object):
         # Specified file was found
         return True
 
-    ########################################################################
     def log_execution_status(self, app, tmp_file=None):
         """ Log execution status to tmp file
         """
@@ -1165,28 +1072,26 @@ class argReportParameters(object):
         f.write("{}\n".format(app))
         f.close()
 
-    ########################################################################
     def get_successful_apps(self, app):
         """ Retrieve successful app names from parameters TmpFile attribute
         """
 
         # Check if tmp file has been created
-        if os.path.exists(self.TmpFile):
-            # Open tmp file and read content
-            with open(self.TmpFile, 'r') as f:
-                apps = f.readlines()
-                res = ', '.join(apps).replace('\n', '')
-            f.close()
+        if self.TmpFile is not None:
+            if os.path.exists(self.TmpFile):
+                # Open tmp file and read content
+                with open(self.TmpFile, 'r') as f:
+                    apps = f.readlines()
+                    res = ', '.join(apps).replace('\n', '')
+                f.close()
 
-            # Remove tmp file
-            os.remove(self.TmpFile)
+                # Remove tmp file
+                os.remove(self.TmpFile)
 
-            # Return formatted apps
-            return res
+                # Return formatted apps
+                return res
 
         # Print error message otherwise
         else:
             print("[{}] No tmp file. ".format(
                 app))
-
-########################################################################

@@ -36,59 +36,40 @@
 #
 #HEADER
 
-########################################################################
-ARG_VERSION          = "1.0.1"
-DEBUG_GENERATOR      = False
-app                  = "Generator"
+import os
+import sys
+import time
 
-########################################################################
-generator_module_aliases = {}
-for m in [
-    "getopt",
-    "getpass",
-    "os",
-    "shutil",
-    "sys",
-    "time",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in generator_module_aliases:
-            globals()[generator_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import yaml
+
+from arg import __version__
+from arg.Applications import ARG
+from arg.Common.argReportParameters import argReportParameters
+from arg.Generation import argPlot, argVTK
+from arg.Tools import Utilities
+
+ARG_VERSION = __version__
+
+app = "Generator"
 
 # Import ARG modules
 if not __package__:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 else:
     sys.path.append("..")
-from arg.Common.argReportParameters         import argReportParameters
-from arg.Backend.argBackendBase             import argBackendBase
-from arg.Generation                         import argPlot, argVTK
-from arg.Tools                              import Utilities
 
-########################################################################
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(common_dir, "../Common/argTypes.yml"),
-          'r',
-          encoding="utf-8") as t_file:
+with open(os.path.join(common_dir, "../Common/argTypes.yml"), 'r', encoding="utf-8") as t_file:
     Types = yaml.safe_load(t_file)
 
-########################################################################
+
 def main(app, types, version=None):
     """ Generator main method
     """
 
     # Start stopwatch
-    t_start = time. time()
+    t_start = time.time()
 
     # Print startup information
     sys_version = sys.version_info
@@ -97,9 +78,6 @@ def main(app, types, version=None):
         sys_version.major,
         sys_version.minor,
         sys_version.micro))
-
-    # Additional debug information when requested
-    ARG.print_debug(app, DEBUG_GENERATOR, None)
 
     # Instantiate parameters object from command line arguments
     parameters = argReportParameters(app, version=version, types=types)
@@ -114,18 +92,14 @@ def main(app, types, version=None):
         print("*  ERROR: cannot parse parameters. Exiting.")
 
     # End stopwatch
-    dt = time. time() - t_start
+    dt = time.time() - t_start
 
     # If this point is reached everything went fine
     success_apps = parameters.get_successful_apps(app)
-    print("[{}] Ran {} successfully.".format(
-        app,
-        success_apps))
-    print("[{}] Process completed in {} seconds. ###".format(
-        app,
-        dt))
+    print("[{}] Ran {} successfully.".format(app, success_apps))
+    print("[{}] Process completed in {} seconds. ###".format(app, dt))
 
-########################################################################
+
 def execute(app, parameters):
     """ Generator execute method
     """
@@ -139,7 +113,7 @@ def execute(app, parameters):
     # Log execution status
     parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
 
-########################################################################
+
 def generate_artefacts(parameters):
     """ Generate artefacts from provided data
     """
@@ -181,10 +155,7 @@ def generate_artefacts(parameters):
         caption.write(parameters.Backend,
                       parameters.OutputDir,
                       base_name)
-        print("[{}] Created {} artifact/caption pair".format(
-            app,
-            base_name,
-            caption))
+        print("[{}] Created {} artifact/caption pair".format(app, base_name))
 
     # Report on missing items and terminate
     if n_missing:
@@ -195,11 +166,9 @@ def generate_artefacts(parameters):
         print("[{}] Process complete with no missing artifacts".format(
             app))
 
-########################################################################
+
 if __name__ == '__main__':
     """Main artifact generator routine
     """
 
     main(app, Types, ARG_VERSION)
-
-########################################################################

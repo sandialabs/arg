@@ -46,23 +46,19 @@ home_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 root_path = os.path.join(home_path, "arg")
 sys.path.append(home_path)
 sys.path.append(root_path)
-from arg.GUI.argApplication             import *
-from arg.GUI.argMainWindow              import *
+from arg.GUI.Logic.argApplication             import argApplication
+from arg.GUI.View.argMainWindow              import argMainWindow
 
 ########################################################################
-if __name__ == '__main__':
-    """ARG-GUI main routine
-    """
 
-    main()
-    
-########################################################################
+
 def main():
     """ ARG-GUI main method
     """
 
     # Instantiate Qt Application
     app = argApplication(sys.argv)
+
     # Create and display ARG-GUI main window
     window = argMainWindow()
     window.initRecentMenuFromSettings()
@@ -73,4 +69,9 @@ def main():
     # Run main Qt loop
     sys.exit(app.exec_())
 
-########################################################################
+
+if __name__ == '__main__':
+    """ARG-GUI main routine
+    """
+
+    main()

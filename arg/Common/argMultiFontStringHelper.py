@@ -36,28 +36,11 @@
 #
 #HEADER
 
-########################################################################
-argMultiFontStringHelper_module_aliases = {}
-for m in [
-    "os",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argMultiFontStringHelper_module_aliases:
-            globals()[argMultiFontStringHelper_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import os
 
-# Import ARG module
-from arg.Tools import Utilities
+import yaml
 
-########################################################################
+
 class argMultiFontStringHelper(object):
     """ A helper class to handle strings with multiple or non-default fonts
     """
@@ -72,7 +55,6 @@ class argMultiFontStringHelper(object):
     print("[argMultiFontStringHelper] Supported font types: {}".format(
         ", ".join(Types.get("FontTypes", {}))))
 
-    ####################################################################
     def __init__(self, backend=None):
         """ Constructor
         """
@@ -83,7 +65,6 @@ class argMultiFontStringHelper(object):
         # Create empty internal storage
         self.StringMap = []
 
-    ####################################################################
     def __len__(self):
         """ Length
         """
@@ -91,41 +72,37 @@ class argMultiFontStringHelper(object):
         # Return sum of internal string lengths
         return sum(len(s) for (s, _, _) in self.StringMap)
 
-    ####################################################################
     def clear(self):
         """ Clear internal storage
         """
 
         # Clear internal storage
-        del self.StringMap[:]
+        self.StringMap.clear()
 
-    ####################################################################
     def pop(self):
-        """ Pop last item from internal storage
+        """ Pop last value from internal storage
         """
 
-        # Pop from internal storage
-        return self.StringMap.pop()
+        # Safely pop value from internal storage
+        return self.StringMap.pop() if self.StringMap.pop() else None
 
-    ####################################################################
     def dump(self):
-        """ Print contents of internal storage for debug purposes
+        """ Print contents of internal storage for debugging purposes
         """
 
         # Print internal content
-        print("{} contains:".format(self))
-        print(''.join(map(str, self.StringMap)))
+        print("{} contains: {}".format(self, ", ".join([str(x) for x in self.StringMap])))
 
-    ####################################################################
     def write(self, backend, path_to_file, base_name):
-        """ Print contents of internal storage for debug purposes
+        """ Write to file as needed for given backend
         """
 
         # Bail out if an unsupported backend was passed
         backend_types = self.Types.get("BackendTypes", {})
         if backend.Type not in backend_types:
-            print("** ERROR: argMultiFontStringHelper cannot use backend of type {} to write to file. Ignoring it.".format(
-                backend.Type))
+            print(
+                "** ERROR: argMultiFontStringHelper cannot use backend of type {} to write to file. Ignoring it.".format(
+                    backend.Type))
             return
 
         # Delegate string creation to backend
@@ -139,15 +116,15 @@ class argMultiFontStringHelper(object):
                   'w') as f:
             f.write("%s" % caption_string)
 
-    ####################################################################
     def append(self, string, font, color=None):
         """ Try to append string/font pair to internal string
         """
 
         # Bail out if a non-string type was passed as first input
         if not isinstance(string, str):
-            print("*  WARNING: attempted to append {} instead of string to argMultiFontStringHelper. Ignoring it.".format(
-                type(string)))
+            print(
+                "*  WARNING: attempted to append {} instead of string to argMultiFontStringHelper. Ignoring it.".format(
+                    type(string)))
             return
 
         # Treat unrecognized font types as default
@@ -156,7 +133,6 @@ class argMultiFontStringHelper(object):
             self.Types.get("FontTypes", {}).get(font, 0),
             color))
 
-    ####################################################################
     def iterator(self):
         """ Provide iterator over internals
         """
@@ -165,12 +141,9 @@ class argMultiFontStringHelper(object):
         for (string, font_bytes, color) in self.StringMap:
             yield string, font_bytes, color
 
-    ####################################################################
     def execute_backend(self, handle=None):
         """ Delegate artifact creation to backend
         """
 
         # Create generator over list of doublets
         return self.Backend.generate_multi_font_string(self, handle)
-
-########################################################################

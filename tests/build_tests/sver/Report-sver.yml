@@ -1,0 +1,195 @@
+#HEADER
+#                         arg/tests/sver/Report-sver.yml
+#               Automatic Report Generator (ARG) v. 1.0
+#
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+# (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+# Government retains certain rights in this software.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+#
+#HEADER
+
+---
+chapters:
+- n: chapter
+  title: Introduction
+  string: 'This report summarizes one instance of the Pressure Vessel exemplar.  The model is an analytic double series displacement field for a pressurized cylindrical partially filled with fluid.  Strains and stresses are also calculated.  Boundary conditions are simple support at the ends of the vessel (zero displacement, zero reaction moment).'
+- n: chapter
+  title: Analysis Workflow Structure
+  sections:
+  - n: figure
+    arguments:
+      figure_file: 1.0-Construct.png
+      caption_string: 1.0-Construct
+      label: 1.0-Construct
+      width: 16cm
+  - n: figure
+    arguments:
+      figure_file: 1.1-Analyze.png
+      caption_string: 1.1-Analyze
+      label: 1.1-Analyze
+      width: 16cm
+  - n: figure
+    arguments:
+      figure_file: 1.2-QoIs.png
+      caption_string: 1.2-QoIs
+      label: 1.2-QoIs
+      width: 16cm
+  - n: figure
+    arguments:
+      figure_file: 1.3-Report.png
+      caption_string: 1.3-Report
+      label: 1.3-Report
+      width: 16cm
+  - n: figure
+    arguments:
+      figure_file: 1.3.1-Report-Detailed.png
+      caption_string: 1.3.1-Report-Detailed
+      label: 1.3.1-Report-Detailed
+      width: 16cm
+- n: chapter
+  title: Study Definition
+  string: 'List study with the following points:'
+  sections:
+  - n: meta
+    datatype: HDF5
+    dataset: dakota_results.h5
+- n: chapter
+  title: Study Workflow Structure
+  sections:
+  - n: figure
+    arguments:
+      figure_file: Solution-Verification-Workflow.png
+      caption_string: Solution-Verification-Workflow
+      label: Solution-Verification-Workflow
+      width: 16cm
+- n: chapter
+  title: 'Results -- Sample 1'
+  sections:
+  - n: section
+    title: Model Parameters
+    sections:
+    - n: properties
+      datatype: key-value
+      dataset: work_dir.1/params.txt
+      parameters:
+        delimiter: ' '
+        reverse: True
+      property_request:
+      - # This corresponds to a None property type
+      - accuracy
+      - h_ratio
+      - p
+      - FSY
+      - max_displ
+      - VESSEL_L_nom
+      - VESSEL_A_nom
+      - VESSEL_T_nom
+      - rho_nom
+      - EE_nom
+      - FTY_nom
+  - n: section
+    title: Quantities of Interest
+    sections:
+    - n: figure
+      arguments:
+        figure_file: Sample1-in.png
+        caption_string: Sample 1 - Contour plot of the inboard von Mises stress (psi)
+        label: Sample1-in
+        width: 14cm
+    - n: figure
+      arguments:
+        figure_file: Sample1-out.png
+        caption_string: Sample 1 - Contour plot of the outboard von Mises stress (psi)
+        label: Sample1-out
+        width: 14cm
+- n: chapter
+  title: 'Results -- Sample 2'
+  sections:
+  - n: section
+    title: Model Parameters
+    sections:
+    - n: properties
+      datatype: key-value
+      dataset: work_dir.2/params.txt
+      parameters:
+        delimiter: ' '
+        reverse: True
+      property_request:
+      - # This corresponds to a None property type
+      - accuracy
+      - h_ratio
+      - p
+      - FSY
+      - max_displ
+      - VESSEL_L_nom
+      - VESSEL_A_nom
+      - VESSEL_T_nom
+      - rho_nom
+      - EE_nom
+      - FTY_nom
+  - n: section
+    title: Quantities of Interest
+    sections:
+    - n: figure
+      arguments:
+        figure_file: Sample2-in.png
+        caption_string: Sample 2 - Contour plot of the inboard von Mises stress (psi)
+        label: Sample2-in
+        width: 14cm
+    - n: figure
+      arguments:
+        figure_file: Sample2-out.png
+        caption_string: Sample 2 - Contour plot of the outboard von Mises stress (psi)
+        label: Sample2-out
+        width: 14cm
+- n: chapter
+  title: 'Results -- Sample 3'
+  sections:
+  - n: itemize
+    items:
+    - string: ''
+    - string: ''
+    - string: ''
+- n: chapter
+  title: Ensemble Results
+  sections:
+  - n: figure
+    arguments:
+      figure_file: DisplacementMargin.png
+      caption_string: Displacement Margin Solution Verification
+      label: DisplacementMargin
+      width: 16cm
+  - n: figure
+    arguments:
+      figure_file: StressMargin.png
+      caption_string: Stress Margin Solution Verification
+      label: StressMargin
+      width: 16cm

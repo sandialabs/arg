@@ -1,0 +1,47 @@
+###########################
+######## Doc stage ########
+###########################
+
+# Publish the documentation to Gitlab Pages:
+#  - automatically if it is a protected branch (develop or master)
+#  - manually otherwise
+pages:
+  image: ruby:2.7
+  stage: doc
+  needs: []
+  before_script:
+    - echo "==================== Install ARG dependencies ===================="
+    - apt-get update -y
+    - apt-get install -y python3 python3-pip git
+    - pip3 install --upgrade pip
+    - pip3 install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - python -m pip install --upgrade pip
+    - pip3 install -r requirements.txt
+    - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/m.css/documentation:$(pwd)/m.css/documentation/../plugins:$PYTHONPATH
+    - git clone https://github.com/mosra/m.css.git
+  script:
+    - cp LICENSE docs/_includes/
+    - cp README.md docs/_includes/
+    - cd docs
+    - cp m.css.conf ../m.css/documentation/conf.py
+    - cd ../m.css/documentation/
+    - python python.py "conf.py"
+    - cd ../../docs
+    - python file_tag_swapper.py
+    - gem install jekyll bundler
+    - jekyll build -d ../public
+    - rm ../public/search.html
+    - python html_tag_swapper.py
+    - cd output
+    - rm index.html modules.html pages.html
+    - \cp -a . ../../public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+  allow_failure: true

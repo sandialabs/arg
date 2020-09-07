@@ -37,42 +37,53 @@
 #HEADER
 
 ############################################################################
-app      = "ARG-GUI_unittests"
+app = "ARG-GUI_unittests"
 
 ############################################################################
 # Import python packages
-import datetime, os, pathlib, shutil, sys
+import datetime
+import os
+import pathlib
+import shutil
 
 # Import GUI packages
-from PySide2.QtCore                  import Signal, Slot
-from PySide2.QtWidgets               import QApplication
+from PySide2.QtCore import Slot
+from PySide2.QtWidgets import QApplication
 
 # Add home and tests paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
-    home_path = os.path.realpath("../..")
-arg_path = os.path.join(home_path, "arg")
-sys.path.append(home_path)
-sys.path.append(arg_path)
+    home_path = os.path.realpath(".")
+# arg_path = os.path.join(home_path, "arg")
+# sys.path.append(home_path)
+# sys.path.append(arg_path)
 
 # Import ARG-GUI modules
-from arg.GUI.argSettingsController   import argSettingsController
+from arg.GUI.Logic.argSettingsController import argSettingsController
+from arg.GUI.Logic.argParameterController import argParameterController
+
 
 ############################################################################
 class unittest_application(QApplication):
     """A GUI application test tool class
     """
 
-    ########################################################################
-    def __init__(self, workingDir, testName):
+    def __init__(self):
         super(unittest_application, self).__init__()
         self.settingsController = argSettingsController()
+        self.settingsController.initialize()
 
-        # Create output directory and copy input parameters file template
-        os.mkdir(workingDir) if not os.path.isdir(workingDir) else False
-        inputFile = os.path.join(home_path, "tests", "GUI_tests", "input", "parameters.yml")
-        self.parametersFilePath = prepareParametersFile(inputFile, workingDir, testName)
+    ########################################################################
+    # def __init__(self, workingDir, testName):
+    #     super(unittest_application, self).__init__()
+    #     self.settingsController = argSettingsController()
+    #
+    #     # Create output directory and copy input parameters file template
+    #     os.mkdir(workingDir) if not os.path.isdir(workingDir) else False
+    #     inputFile = os.path.join(home_path, "tests", "GUI_tests", "input", "parameters.yml")
+    #     self.parametersFilePath = prepareParametersFile(inputFile, workingDir, testName)
+
 
 ############################################################################
 class unittest_signal(object):
@@ -89,6 +100,7 @@ class unittest_signal(object):
         self.callCount += 1
         self.dataReceived = data
 
+
 ############################################################################
 def sed(fileName, str1, str2):
     """Python wrapper of sed method
@@ -96,19 +108,25 @@ def sed(fileName, str1, str2):
 
     # Open file in read mode
     f = open(fileName, "rt")
+
     # Read all file
     data = f.read()
+
     # Replace str1 by str2 in read data
     data = data.replace(str1, str2)
+
     # Close file
     f.close()
 
     # Open file in write mode
     f = open(fileName, "wt")
+
     # Dump modified data
     f.write(data)
+
     # Close file
     f.close()
+
 
 ############################################################################
 def replaceInTemplate(filePath, testName):
@@ -123,6 +141,7 @@ def replaceInTemplate(filePath, testName):
     sed(filePath, "%TEST_NAME%", testName)
 
     return date
+
 
 ############################################################################
 def prepareParametersFile(fromFile, workingDir, testName):
@@ -149,6 +168,7 @@ def prepareParametersFile(fromFile, workingDir, testName):
 
     # Return parametersFilePath
     return parametersFilePath
+
 
 ############################################################################
 def clean(prefix):

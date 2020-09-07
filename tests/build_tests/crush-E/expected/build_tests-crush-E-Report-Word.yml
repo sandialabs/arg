@@ -1,0 +1,143 @@
+ARG version: develop
+
+# Chapters
+chapters:
+
+# Introduction
+- n: chapter_null
+  title: Introduction
+  string: 'The structure of this report was built by the Explorator component of ARG, which explored the following directory:'
+  sections:
+  - n: paragraph
+    verbatim: '/builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data'
+  - n: paragraph
+    string: 'and discovered the following relevant data:'
+  - n: itemize
+    items:
+    - string: ExodusII mesh in crush_assembly.g
+# CAD chapter
+- n: chapter
+  title: Geometry
+  string: 'This chapter describes the geometry as specified in the parameters file.'
+  sections:
+  - n: paragraph
+    string: The term Electronic Product Definition (EPD) is also often used to denote the CAD geometry of the case.
+  - n: section
+    title: Geometry Files
+    string: 'This section provides an overview of the geometry files found in:'
+    sections:
+    - n: paragraph
+      verbatim: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/Interface
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/box_shell.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/case.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/crusher.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/duct.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/foam.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/lid.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/plug.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/post.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/target.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: aggregate
+      name: show_mesh_surface
+      model: Interface/weld.stl
+      type: vtkSTL
+      width: 12cm
+      axes: True
+      merge: True
+    - n: paragraph
+      string: We note that this is a particular case with a bijection between CAD and FEM items.
+  - n: section
+    title: CAD metadata
+    string: 'This section describes the CAD metadata found in:'
+    sections:
+    - n: paragraph
+      verbatim: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/Interface
+    - n: aggregate
+      name: show_CAD_metadata
+      metadata: ['DWG_TITLE1', 'UNITS', 'MATERIAL']
+      parameters_root: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/Interface
+# Mesh chapter
+- n: chapter
+  title: ExodusII Mesh
+  string: 'This chapter describes the ExodusII mesh in:'
+  sections:
+  - n: paragraph
+    verbatim: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/crush_assembly.g
+  - n: section
+    title: Overview
+    string: This section provides an overview of the meta-data and global properties of this ExodusII mesh.
+    sections:
+    - n: meta
+      datatype: ExodusII
+      dataset: crush_assembly.g
+    - n: aggregate
+      name: show_mesh_surface
+      model: crush_assembly.g
+      type: ExodusII
+      var_name: ObjectId
+      width: 16cm
+      axes: True
+  - n: section
+    title: Mesh Blocks
+    string: This section provides a description of all blocks contained in the mesh.
+    sections:
+    - n: aggregate
+      name: show_all_blocks_with_edges
+      model: crush_assembly.g
+      width: 10cm
+      histogram_width: 14cm
+      axes: True

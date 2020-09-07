@@ -102,6 +102,7 @@ if __name__ == '__main__':
             shutil.rmtree(prefix)
         except:
             pass
+
     # Otherwise, run main routine
     else:
         main()

@@ -36,15 +36,11 @@
 #
 #HEADER
 
-########################################################################
-from arg.DataInterface.argKeyValueFilesReader import *
-from arg.DataInterface.argVTKExodusReader     import *
-from arg.DataInterface.argVTKSTLReader        import *
+import importlib
 
-########################################################################
+
 class argDataInterface(object):
 
-    ####################################################################
     @staticmethod
     def factory(data_type, database_name, *parameters):
         """Produce the necessary concrete data interface instance
@@ -55,25 +51,51 @@ class argDataInterface(object):
 
         # Collection of co-located key=value text files
         if data_type == "key-value":
-            ret_object = argKeyValueFilesReader(database_name, *parameters)
+            try:
+                argKeyValueFilesReader = getattr(
+                    importlib.import_module("arg.DataInterface.argKeyValueFilesReader"),
+                    "argKeyValueFilesReader")
+                ret_object = argKeyValueFilesReader(database_name, *parameters)
+            except:
+                print("*  WARNING: could not import module argKeyValueFilesReader. Ignoring it.")
+
+        # HDF5 file
+        elif data_type == "HDF5":
+            try:
+                argHDF5Reader = getattr(
+                    importlib.import_module("arg.DataInterface.argHDF5Reader"),
+                    "argHDF5Reader")
+                ret_object = argHDF5Reader(database_name, *parameters)
+            except:
+                print("*  WARNING: could not import module argHDF5Reader. Ignoring it.")
 
         # ExodusII file or partition
         elif data_type == "ExodusII":
-            ret_object = argVTKExodusReader(database_name, *parameters)
+            try:
+                argVTKExodusReader = getattr(
+                    importlib.import_module("arg.DataInterface.argVTKExodusReader"),
+                    "argVTKExodusReader")
+                ret_object = argVTKExodusReader(database_name, *parameters)
+            except:
+                print("*  WARNING: could not import module argVTKExodusReader. Ignoring it.")
 
         # STL file
         elif data_type == "vtkSTL":
-            ret_object = argVTKSTLReader(database_name, *parameters)
+            try:
+                argVTKSTLReader = getattr(
+                    importlib.import_module("arg.DataInterface.argVTKSTLReader"),
+                    "argVTKSTLReader")
+                ret_object = argVTKSTLReader(database_name, *parameters)
+            except:
+                print("*  WARNING: could not import module argVTKSTLReader. Ignoring it.")
 
         # Return instantiated object
-        if not ret_object:
-            print("[argDataInterface] Could not instantiate {} reader for {}".format(
-                data_type,
-                database_name))
-        else:
+        if ret_object:
             print("[argDataInterface] Instantiated {} reader for {}".format(
                 data_type,
                 database_name))
+        else:
+            print("[argDataInterface] Could not instantiate {} reader for {}".format(
+                data_type,
+                database_name))
         return ret_object
-
-########################################################################

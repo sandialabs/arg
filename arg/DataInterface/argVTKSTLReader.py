@@ -34,47 +34,25 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
+
 #HEADER
 
-########################################################################
-argVTKSTLReader_module_aliases = {
-    }
-for m in [
-    "math",
-    "os",
-    "paraview.vtk",
-    "sys",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argVTKSTLReader_module_aliases:
-            globals()[argVTKSTLReader_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import os
 
-from arg.DataInterface.argDataInterfaceBase import *
+import vtkmodules.vtkCommonDataModel as vtkCommonDataModel
+import vtkmodules.vtkIOGeometry as vtkIOGeometry
 
-import vtkmodules.vtkCommonDataModel    as vtkCommonDataModel
-import vtkmodules.vtkIOGeometry         as vtkIOGeometry
-########################################################################
+from arg.Common.argInformationObject import argInformationObject
+from arg.DataInterface.argDataInterfaceBase import argDataInterfaceBase
+
+
 class argVTKSTLReader(argDataInterfaceBase):
     """A concrete data interface to an STL file based on VTK
     """
 
-    ####################################################################
     def __init__(self, full_name, merge=True):
         """Default constructor: serial reader only, merge duplicates
         """
-
-        # If VTK is not available, do not do anything
-        if not has_paraview_vtk:
-            self.Times = []
-            return
 
         # Initialize single VTK STL file reader
         self.Reader = vtkIOGeometry.vtkSTLReader()
@@ -91,21 +69,15 @@ class argVTKSTLReader(argDataInterfaceBase):
         # Update reader meta-information
         self.Reader.UpdateInformation()
 
-    ####################################################################
     def get_accessors(self):
-        """Return possibly empty singleton of STL readers
+        """Return singleton of single VTK to STL reader
         """
 
         return [self.Reader]
 
-    ####################################################################
     def get_meta_information(self):
         """Retrieve meta-information from data
         """
-
-        # If VTK is not available, return nothing
-        if not has_paraview_vtk:
-            return []
 
         # Initialize global meta-information
         meta = []
@@ -113,35 +85,37 @@ class argVTKSTLReader(argDataInterfaceBase):
         # Return global meta-information
         return meta
 
-    ####################################################################
     def get_property_information(self, prop_type, prop_items=None):
-        """Not implemented for STL data yet
+        """Retrieve all information about given sproperty from STL file
         """
 
-        return None
+        # Not implemented for STL data yet
+        print("*  WARNING: STL property information getter not implemented yet")
 
-    ####################################################################
+        # Returned information is dictionary of lists of lists
+        info_obj = argInformationObject("arg_dict_lists_lists")
+
+        # Return computed information object
+        return info_obj
+
     def is_attribute_discrete(self):
         """STL tags are discrete
         """
 
         return True
 
-    ####################################################################
     def get_attribute_type(self):
         """STL tags are bound to elements
         """
 
         return "cell"
 
-    ####################################################################
     def get_variable_type(self):
         """STL tags are scalars
         """
 
         return "scalar"
 
-    ####################################################################
     def get_VTK_reader_output_data(self, _):
         """Get data set as VTK reader output data
         """
@@ -155,5 +129,3 @@ class argVTKSTLReader(argDataInterfaceBase):
 
         # Return constructed multi-block data set
         return output
-
-########################################################################

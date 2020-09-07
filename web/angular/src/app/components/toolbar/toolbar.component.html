@@ -1,0 +1,78 @@
+<!--
+HEADER
+       arg/web/angular/src/app/components/toolbar/toolbar.component.html
+               Automatic Report Generator (ARG) v. 1.0
+
+ Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+ (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+ Government retains certain rights in this software.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+ * Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+ Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+
+HEADER
+!-->
+<div class="toolbar">
+  <div class="row">
+    <div class="col">
+      <form class="form-inline" [formGroup]="form">
+        <div class="btn-group">
+          <button type="button" name="button" class="btn btn-outline-warning" (click)="openFileInput.click()">
+            <input #openFileInput accept="*/*" type="file" style="display:none;" (change)="openFile()" title="Load parameters file"/>
+            <i class="fa fa-folder-open"></i>
+          </button>
+          <button type="button" name="button" class="btn btn-outline-danger" (click)="reload()" title="Reload previously loaded parameters">
+            <i class="fa fa-refresh"></i>
+          </button>
+          <button type="button" name="button" class="btn btn-outline-danger" (click)="save()" title="Save parameters to file">
+            <i class="fa fa-save"></i>
+          </button>
+          &nbsp;
+        </div>
+        <div class="btn-group">
+          <button type="button" name="button" class="btn btn-outline-success" (click)="paint()">
+            <i class="fa fa-paint-brush"></i>
+          </button>
+          <button type="button" name="button" class="btn btn-success"(click)="run()" title="Run ARG">
+            <i class="fa fa-play"></i>
+          </button>
+          &nbsp;
+        </div>
+        <div class="d-block d-md-none w-100"><br></div>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="run_opt_e" value=-e formControlName="runOpt">
+          <label for="run_type_1">&nbsp;Run ARG with explorator</label>
+        </div>
+        <div class="custom-control custom-radio custom-control-inline">
+          <input type="radio" id="run_opt_g" value=-g formControlName="runOpt">
+          <label for="run_type_2">&nbsp;Run ARG with generator</label>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

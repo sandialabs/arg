@@ -40,13 +40,13 @@
 chapters:
 - n: chapter
   title: Introduction
-  latex: 'This sample report illustrates the automatic report generator (ARG).'
+  string: 'This sample report illustrates the automatic report generator (ARG).'
 - n: chapter
   title: Key/Value Files
   sections:
   - n: section
     title: Per-File Meta-Information
-    latex: 'This section provides an overview of each of the key/value files included in this directory.'
+    string: 'This section provides an overview of each of the key/value files included in the provided data directory.'
     sections:
     - n: meta
       datatype: key-value
@@ -56,9 +56,10 @@ chapters:
       dataset: repeat_tables.ini
   - n: section
     title: Directory Meta-Information
-    latex: 'This section provides an overview of all key/value files contained in the directory.'
+    string: 'This section provides an overview of all key/value files contained in the provided data directory.'
     sections:
     - n: meta
       datatype: key-value
       dataset: ''
-      parameters: ini 
+      parameters:
+        extension: ini 

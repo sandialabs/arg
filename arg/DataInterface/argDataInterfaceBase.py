@@ -36,47 +36,27 @@
 #
 #HEADER
 
-########################################################################
-argDataInterfaceBase_module_aliases = {}
-for m in [
-    "abc",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argDataInterfaceBase_module_aliases:
-            globals()[argDataInterfaceBase_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import abc
 
-########################################################################
+
 class argDataInterfaceBase(object):
     __metaclass__ = abc.ABCMeta
 
-    ####################################################################
     @abc.abstractmethod
     def get_accessors(self):
         """Return list of access points to data
         """
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def get_meta_information(self):
         """Retrieve meta-information from data
         """
         pass
 
-    ####################################################################
     @abc.abstractmethod
     def get_property_information(self, prop_type, prop_items=None):
         """Retrieve information about given property from data
            NB: Retrieve only specific item if provided
         """
         pass
-
-########################################################################

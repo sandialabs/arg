@@ -36,52 +36,30 @@
 #
 #HEADER
 
-########################################################################
-argReportLaTeXBackend_module_aliases = {}
-from arg.Backend.argLaTeXBackend            import *
-argReportLaTeXBackend_module_aliases.update(argLaTeXBackend_module_aliases)
-for m in [
-    "os",
-    "datetime",
-    "platform",
-    "sys",
-    ]:
-    has_flag = "has_" + m
-    try:
-        module_object = __import__(m)
-        if m in argReportLaTeXBackend_module_aliases:
-            globals()[argReportLaTeXBackend_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import pylatex as pl
 
+# Import superclass
+from arg.Backend.argLaTeXBackend import argLaTeXBackend
 
 # Define constants
 document_class = "report"
 document_options = "letter,titlepage,oneside,11pt"
 
-########################################################################
+
 class argReportLaTeXBackend(argLaTeXBackend):
     """A concrete class providing a LaTeX backend to generate a report
     """
 
-    ####################################################################
     def __init__(self, parameters):
-
         # Call superclass init
         super(argReportLaTeXBackend, self).__init__(parameters)
 
-    ####################################################################
     def create_LaTeX_output(self):
         """Create a LaTeX output file
         """
 
         super().create_LaTeX_output(document_class, document_options)
 
-    ####################################################################
     def add_packages(self):
         """Add Report backend specific packages to default LaTeX packages
         """
@@ -94,12 +72,9 @@ class argReportLaTeXBackend(argLaTeXBackend):
         # Support enriched colors
         self.Report.preamble.append(pl.Command("usepackage", "xcolor"))
 
-    ####################################################################
     def generate_details(self):
         """Generate Report LaTeX backend details
         """
 
         # Set date field to current day
         self.Report.Date = r"\today"
-
-########################################################################

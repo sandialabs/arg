@@ -36,45 +36,34 @@
 #
 #HEADER
 
-########################################################################
-app = "argWordBackend"
-########################################################################
-argWordBackend_module_aliases = {}
-for m in [
-    "clr",
-    "docx",
-    "inspect",
-    "os",
-    "platform",
-    "re",
-    "subprocess",
-    "sys",
-    "yaml",
-    ]:
-    has_flag = "has_" + m.replace('.', '_')
-    try:
-        module_object = __import__(m)
-        if m in argWordBackend_module_aliases:
-            globals()[argWordBackend_module_aliases[m]] = module_object
-        else:
-            globals()[m] = module_object
-        globals()[has_flag] = True
-    except ImportError as e:
-        print("*  WARNING: Failed to import {}. {}.".format(m, e))
-        globals()[has_flag] = False
+import numbers
+import os
+import platform
+import re
+import subprocess
 
-# Import python-docx subpackages
-from docx.enum.text         import WD_ALIGN_PARAGRAPH
-from docx.shared            import Mm, Cm, Inches, RGBColor
-from docx.oxml              import OxmlElement
-from docx.oxml.ns           import qn
+import clr
+import yaml
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Mm, Cm, Inches, RGBColor, Pt
+from pylatex import NoEscape
+
+from arg.Aggregation import argAggregate
+from arg.Backend.argBackendBase import argBackendBase
+from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+
+app = "argWordBackend"
 
 osn = os.name
+
 # Try importing Word Application in Python environment
 try:
     clr.AddReference("System")
     clr.AddReference("Microsoft.Office.Interop")
     from Microsoft.Office.Interop import Word
+
 # Find work-around
 except:
     try:
@@ -84,14 +73,6 @@ except:
     except:
         pass
 
-# Import ARG modules
-from arg.Aggregation                     import argAggregate
-from arg.Backend.argBackendBase          import *
-from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.DataInterface.argDataInterface  import argDataInterface
-from arg.Tools                           import Utilities
-
-########################################################################
 # Load supported colors
 common_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -105,63 +86,62 @@ colors = supported_types.get("FontColors")
 # Retrieve supported fonts
 fonts = supported_types.get("BackendTypes").get("Word").get("Fonts")
 
-########################################################################
+
 class argWordBackend(argBackendBase):
     """A concrete class providing a Word backend
     """
 
     # Map from greek letters to their respective unicodes
     GreekLetters = {
-        "Alpha"   : u'\u0391',
-        "Beta"    : u'\u0392',
-        "Gamma"   : u'\u0393',
-        "Delta"   : u'\u0394',
-        "Epsilon" : u'\u0395',
-        "Zeta"    : u'\u0396',
-        "Eta"     : u'\u0397',
-        "Theta"   : u'\u0398',
-        "Iota"    : u'\u0399',
-        "Kappa"   : u'\u039A',
-        "Lamda"   : u'\u039B',
-        "Mu"      : u'\u039C',
-        "Nu"      : u'\u039D',
-        "Xi"      : u'\u039E',
-        "Omicron" : u'\u039F',
-        "Pi"      : u'\u03A0',
-        "Rho"     : u'\u03A1',
-        "Sigma"   : u'\u03A3',
-        "Tau"     : u'\u03A4',
-        "Upsilon" : u'\u03A5',
-        "Phi"     : u'\u03A6',
-        "Chi"     : u'\u03A7',
-        "Psi"     : u'\u03A8',
-        "Omega"   : u'\u03A9',
-        "alpha"   : u'\u03B1',
-        "beta"    : u'\u03B2',
-        "gamma"   : u'\u03B3',
-        "delta"   : u'\u03B4',
-        "epsilon" : u'\u03B5',
-        "zeta"    : u'\u03B6',
-        "eta"     : u'\u03B7',
-        "theta"   : u'\u03B8',
-        "iota"    : u'\u03B9',
-        "kappa"   : u'\u03BA',
-        "lamda"   : u'\u03BB',
-        "mu"      : u'\u03BC',
-        "nu"      : u'\u03BD',
-        "xi"      : u'\u03BE',
-        "omicron" : u'\u03BF',
-        "pi"      : u'\u03C0',
-        "rho"     : u'\u03C1',
-        "sigma"   : u'\u03C3',
-        "tau"     : u'\u03C4',
-        "upsilon" : u'\u03C5',
-        "phi"     : u'\u03C6',
-        "chi"     : u'\u03C7',
-        "psi"     : u'\u03C8',
-        "omega"   : u'\u03C9'}
+        "Alpha": u'\u0391',
+        "Beta": u'\u0392',
+        "Gamma": u'\u0393',
+        "Delta": u'\u0394',
+        "Epsilon": u'\u0395',
+        "Zeta": u'\u0396',
+        "Eta": u'\u0397',
+        "Theta": u'\u0398',
+        "Iota": u'\u0399',
+        "Kappa": u'\u039A',
+        "Lamda": u'\u039B',
+        "Mu": u'\u039C',
+        "Nu": u'\u039D',
+        "Xi": u'\u039E',
+        "Omicron": u'\u039F',
+        "Pi": u'\u03A0',
+        "Rho": u'\u03A1',
+        "Sigma": u'\u03A3',
+        "Tau": u'\u03A4',
+        "Upsilon": u'\u03A5',
+        "Phi": u'\u03A6',
+        "Chi": u'\u03A7',
+        "Psi": u'\u03A8',
+        "Omega": u'\u03A9',
+        "alpha": u'\u03B1',
+        "beta": u'\u03B2',
+        "gamma": u'\u03B3',
+        "delta": u'\u03B4',
+        "epsilon": u'\u03B5',
+        "zeta": u'\u03B6',
+        "eta": u'\u03B7',
+        "theta": u'\u03B8',
+        "iota": u'\u03B9',
+        "kappa": u'\u03BA',
+        "lamda": u'\u03BB',
+        "mu": u'\u03BC',
+        "nu": u'\u03BD',
+        "xi": u'\u03BE',
+        "omicron": u'\u03BF',
+        "pi": u'\u03C0',
+        "rho": u'\u03C1',
+        "sigma": u'\u03C3',
+        "tau": u'\u03C4',
+        "upsilon": u'\u03C5',
+        "phi": u'\u03C6',
+        "chi": u'\u03C7',
+        "psi": u'\u03C8',
+        "omega": u'\u03C9'}
 
-    ####################################################################
     def __init__(self, parameters=None):
 
         # Call superclass init
@@ -170,7 +150,6 @@ class argWordBackend(argBackendBase):
         # Define backend type
         self.Type = "Word"
 
-    ####################################################################
     def generate_text(self, text, type="default"):
         """Add page break to the report
         """
@@ -178,7 +157,6 @@ class argWordBackend(argBackendBase):
         # Generate a backend dependent text
         return "{}".format(text)
 
-    ####################################################################
     def generate_multi_font_string(self, multi_font_string, paragraph=None):
         """Either append Word runs to paragraph or return text string
         """
@@ -196,7 +174,7 @@ class argWordBackend(argBackendBase):
                 # Add a run per string and set font per defined bits
                 run = paragraph.add_run(string)
                 run.italic = font_bits & 1 == 1
-                run.bold   = font_bits & 2 == 2
+                run.bold = font_bits & 2 == 2
                 if font_bits & 4 == 4:
                     run.font.name = fonts.get("typewriter", "default" if fonts.get("default") else None)
                 elif font_bits & 8 == 8:
@@ -206,16 +184,15 @@ class argWordBackend(argBackendBase):
                 if color:
                     rgb = colors.get(color).split(',')
                     if len(rgb) > 2:
-                        run.font.color.rgb = RGBColor(*map(int, rgb[:3]))
+                        run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
 
             # Nothing is returned in this case
             return
 
         # Return a plain string ignoring font specifications otherwise
         else:
-            return ''.join(map(lambda x: x[0], multi_font_string.StringMap))
+            return ''.join([x[0] for x in multi_font_string.StringMap])
 
-    ####################################################################
     def generate_matrix_string(self, matrix):
         """Generate Word string from matrix entries
         """
@@ -225,13 +202,8 @@ class argWordBackend(argBackendBase):
             return ''
 
         # Return plain text string
-        return ','.join(
-            map(lambda v: "[{}]".format(','.join(
-                map(lambda x: "{}".format(x),
-                    v))),
-                matrix))
+        return ','.join(["[{}]".format(','.join([f"{x}" for x in v])) for v in matrix])
 
-    ####################################################################
     def create_list(self, paragraph, list_type):
         """Create list
         """
@@ -241,9 +213,9 @@ class argWordBackend(argBackendBase):
 
         # Retrieve paragraph properties
         pPr = p.get_or_add_pPr()
-        
+
         # Create number properties element
-        numPr = OxmlElement('w:numPr') 
+        numPr = OxmlElement('w:numPr')
 
         # Create numId element to set bullet type
         numId = OxmlElement('w:numId')
@@ -257,7 +229,6 @@ class argWordBackend(argBackendBase):
         # Add number properties to paragraph
         pPr.append(numPr)
 
-    ####################################################################
     def add_list(self, item, num_lvl=1, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -267,11 +238,11 @@ class argWordBackend(argBackendBase):
             # Add string elements
             if "string" in it.keys():
                 self.Report.add_paragraph(it["string"])
+
             # Add numbered elements
             if "number" in it.keys():
                 self.Report.add_paragraph(it["number"])
 
-    ####################################################################
     def add_comment(self, comments, key):
         """Add text comment from a dict of comments, either as a text
            string or as a sub-paragraph depending on number of comment
@@ -293,7 +264,6 @@ class argWordBackend(argBackendBase):
         # Comment was found and inserted
         return True
 
-    ####################################################################
     def add_paragraph(self, item, p=None):
         """Add paragraph to the report
         """
@@ -368,10 +338,9 @@ class argWordBackend(argBackendBase):
                 if color:
                     rgb = color.split(',')
                     if len(rgb) > 2:
-                        run.font.color.rgb = RGBColor(*map(int, rgb[:3]))
+                        run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
                 if alignment:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                    # FIXME
                 if left_indent:
                     p.left_indent = Pt(left_indent)
                 if right_indent:
@@ -387,7 +356,6 @@ class argWordBackend(argBackendBase):
                 if keep_with_next:
                     run.keep_with_next = keep_with_next
 
-    ####################################################################
     def add_subdivision(self, item, level):
         """Add specified subdivision to the report
         """
@@ -409,7 +377,6 @@ class argWordBackend(argBackendBase):
         # Add subdivision paragraph header if provided
         self.add_paragraph(item)
 
-    ####################################################################
     def add_subtitle(self, item):
         """Add subsection to the report
         """
@@ -417,7 +384,6 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 3)
 
-    ####################################################################
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -425,7 +391,6 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 3)
 
-    ####################################################################
     def add_section(self, item, numbered=True):
         """Add section to the report
         """
@@ -433,7 +398,6 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 2)
 
-    ####################################################################
     def add_chapter(self, item, numbered=True):
         """Add chapter to the report
         """
@@ -444,7 +408,6 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 1)
 
-    ####################################################################
     def add_page_break(self):
         """Add page break to the report
         """
@@ -452,7 +415,6 @@ class argWordBackend(argBackendBase):
         # Use eponymous command from Word backend
         self.Report.add_page_break()
 
-    ####################################################################
     def add_heading(self, text, lvl=1, p=None):
         """Add heading to the report
         """
@@ -465,7 +427,6 @@ class argWordBackend(argBackendBase):
         else:
             self.Report.add_heading(text, lvl)
 
-    ####################################################################
     def add_table(self, header_list, body, caption_string, do_verbatim=False, pos='t'):
         """Add table to the report
         """
@@ -515,8 +476,15 @@ class argWordBackend(argBackendBase):
             for k, v in sorted(body.items()):
                 # Add a row of cells and fill those
                 cells = table.add_row().cells
-                for c, cell_string in zip(cells, [k] + v):
 
+                # Make key and values lists if they are strings or numbers
+                if isinstance(k, (str, numbers.Number)):
+                    k = [k]
+                if isinstance(v, (str, numbers.Number)):
+                    v = [v]
+
+                # Iterate to fill all cells
+                for c, cell_string in zip(cells, list(k) + list(v)):
                     # Distinguish argMultiFontStrings from other types
                     if isinstance(cell_string, argMultiFontStringHelper):
                         # Handle multi-font string helpers
@@ -572,7 +540,6 @@ class argWordBackend(argBackendBase):
             # Insert blank paragraph to ensure table is closed
             self.Report.add_paragraph()
 
-    ####################################################################
     def add_type_caption(self, caption_type, caption_string):
         """Add table caption
         """
@@ -587,14 +554,15 @@ class argWordBackend(argBackendBase):
         elif isinstance(caption_string, argMultiFontStringHelper):
             # Initiate caption with caption type
             c = self.add_caption("{} ".format(caption_type), "")
+
             # Insert multi-font string into the report
             self.generate_multi_font_string(
                 caption_string, c)
             c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
             # Append Word runs created from multi-font string
             caption_string.execute_backend()
 
-    ####################################################################
     def add_figure(self, arguments):
         """Add figure to report
         """
@@ -638,28 +606,14 @@ class argWordBackend(argBackendBase):
 
             # Append caption when available
             if caption_string:
-
                 self.add_type_caption("Figure", caption_string)
-                # # Distinguish between plain and multi-font strings
-                # if isinstance(caption_string, str):
-                #     # Directly insert Word fragment into the report
-                #     caption = self.add_caption("Figure", caption_string)
-                #     caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                #
-                # elif isinstance(caption_string, argMultiFontStringHelper):
-                #     caption = self.add_caption("Figure", "")
-                #     # Insert multi-font string into the report
-                #     caption = self.generate_multi_font_string(
-                #         caption_string, caption, "Figure")
-                #     caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    ####################################################################
     def add_caption(self, caption_type, caption_string):
         """ Create caption area in XML, with proper number
         """
 
         # Create new paragraph to populate
-        paragraph = self.Report.add_paragraph(caption_type.capitalize().strip() + ' ', style = "Caption")
+        paragraph = self.Report.add_paragraph(caption_type.capitalize().strip() + ' ', style="Caption")
         r = paragraph.add_run()._r
 
         # Create begin XML element
@@ -685,7 +639,6 @@ class argWordBackend(argBackendBase):
 
         return paragraph
 
-    ####################################################################
     def recursively_build_report(self, item_tree, list_lvl=1, p=None):
         """Recursively traverse structure tree to build Word report
         """
@@ -730,7 +683,8 @@ class argWordBackend(argBackendBase):
                                          item["include"])
                 verbatim_style = self.Report.styles["macro"]
                 with open(file_name, 'r') as tex_file:
-                # Read each row and add it to Word output
+
+                    # Read each row and add it to Word output
                     for line in tex_file:
                         self.Report.add_paragraph(line).style = verbatim_style
 
@@ -758,7 +712,6 @@ class argWordBackend(argBackendBase):
             if "sections" in item:
                 self.recursively_build_report(item["sections"], list_lvl)
 
-    ####################################################################
     def assemble(self, report_map, version=None, latex_proc=None):
         """Create a Word report from given report map
         """
@@ -798,7 +751,6 @@ class argWordBackend(argBackendBase):
             print("*  WARNING: Table of contents not automatically generated yet by Word backend on {} systems.".format(
                 osn))
 
-    ####################################################################
     def add_document_provenance(self, version=None):
         """Add document provenance information on a new page
         """
@@ -808,13 +760,12 @@ class argWordBackend(argBackendBase):
 
         # Compute provenance information
         timestamp = r'This document was generated on {} with the Automatic Report Generator (ARG) version "{}" on the {} system {}.'.format(
-                self.get_timestamp(),
-                version,
-                platform.system(),
-                platform.node())
+            self.get_timestamp(),
+            version,
+            platform.system(),
+            platform.node())
         self.Report.add_paragraph(timestamp)
 
-    ####################################################################
     def add_document_tocs(self):
         """Add document Table of Contents, List of Figures and List of Tables on new pages
         """
@@ -830,7 +781,6 @@ class argWordBackend(argBackendBase):
         self.add_index("Table")
         self.Report.add_page_break()
 
-    ####################################################################
     def update_tocs(self, docx_file):
         """Update table of contents, list of figures, list of tables
         """
@@ -848,6 +798,7 @@ class argWordBackend(argBackendBase):
                 try:
                     subprocess.check_call([r"../../arg/Backend/updateWordFields", docx_file])
                     return
+
                 # Return with warning message
                 except:
                     print("*  WARNING: Word report cannot be automatically updated.")
@@ -869,7 +820,6 @@ class argWordBackend(argBackendBase):
         doc.Close(SaveChanges=True)
         word.Quit()
 
-    ####################################################################
     def add_table_of_contents(self, heading_run=None, body_run=None, lvls="1-3"):
         """Add table of contents
         """
@@ -884,6 +834,7 @@ class argWordBackend(argBackendBase):
         # Use body run if provided
         if body_run:
             run = body_run
+
         # Otherwise, create a new run
         else:
             paragraph = self.Report.add_paragraph()
@@ -896,8 +847,9 @@ class argWordBackend(argBackendBase):
         # Create an interpreted XML text element
         instrText = OxmlElement('w:instrText')
         instrText.set(qn('xml:space'), 'preserve')
+
         # Add level 1 to level 3 contents
-        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)   # change 1-3 depending on heading levels you need
+        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)  # change 1-3 depending on heading levels you need
 
         # Add a separate character
         fldChar2 = OxmlElement('w:fldChar')
@@ -919,15 +871,16 @@ class argWordBackend(argBackendBase):
         r_element.append(fldChar2)
         r_element.append(fldChar4)
 
-    ####################################################################
     def add_index(self, string, heading_run=None, body_run=None):
         """Add table of contents
         """
 
         heading = "List of " + string.capitalize().strip() + "s"
+
         # Add a heading in existing run if provided
         if heading_run:
             heading_run.text = heading
+
         # Otherwise, create a heading
         else:
             self.Report.add_heading("List of " + string.capitalize().strip() + "s")
@@ -935,6 +888,7 @@ class argWordBackend(argBackendBase):
         # Use body run if provided
         if body_run:
             run = body_run
+
         # Otherwise, create a new run
         else:
             paragraph = self.Report.add_paragraph()
@@ -947,6 +901,7 @@ class argWordBackend(argBackendBase):
         # Create an interpreted XML text element
         instrText = OxmlElement('w:instrText')
         instrText.set(qn('xml:space'), 'preserve')
+
         # Add report elements defined by string
         instrText.text = 'TOC \\h \\z \\c "' + string + '" CHARFORMAT'
 
@@ -965,7 +920,6 @@ class argWordBackend(argBackendBase):
         r_element.append(fldChar4)
         p_element = paragraph._p
 
-    ####################################################################
     def iter_heading(self, paragraphs):
         """Iterate on headings to number them, a fix suggested by
            https://github.com/python-openxml/python-docx/issues/590
@@ -978,13 +932,12 @@ class argWordBackend(argBackendBase):
             if isItHeading:
                 yield int(isItHeading.groups()[0]), paragraph
 
-    ####################################################################
     def add_header_numbering(self):
         """Create the sub-tiered header number
         """
 
         # Allow for up to a maximum of five tiers
-        hNums = [0,0,0,0,0]
+        hNums = [0, 0, 0, 0, 0]
 
         # Iterate over headings
         for index, hx in self.iter_heading(self.Report.paragraphs):
@@ -1004,5 +957,3 @@ class argWordBackend(argBackendBase):
             hx.text = "{} {}".format(
                 hStr,
                 hx.text)
-
-########################################################################
