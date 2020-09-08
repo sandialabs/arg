@@ -6,6 +6,8 @@
 Bot release job:
   image: alpine:latest
   stage: git-bot
+  variables:
+    ARG_REPO_TMP_FOLDER: "arg_repo"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"'
       allow_failure: true
@@ -24,8 +26,8 @@ Bot release job:
     - chmod 644 ~/.ssh/known_hosts
   script:
     - echo "Clone arg git repository"
-    - git clone git@gitlab.com:AutomaticReportGenerator/arg.git
-    - cd arg/
+    - git clone git@gitlab.com:AutomaticReportGenerator/arg.git $ARG_REPO_TMP_FOLDER
+    - cd $ARG_REPO_TMP_FOLDER
     - echo "Checkout branch master"
     - git checkout master
     - echo "Finding version to set a tag"
