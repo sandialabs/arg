@@ -27,6 +27,7 @@ variables:
   ERR_PDF_FILE: "${BUILD_TEST_NAME}/build_tests-${BUILD_TEST_NAME}-Report-LaTeX/ARG.err"
   ERR_DOCX_FILE: "${BUILD_TEST_NAME}/build_tests-${BUILD_TEST_NAME}-Report-Word/ARG.err"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+# SECURE_LOG_LEVEL: "debug"
 
 # Stages definition
 stages:
@@ -72,3 +73,9 @@ Python Static Scan:
     expose_as: "PyLint Report"
     paths:
       - pylint/
+
+# Custom variable for Java projects
+spotbugs-sast:
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
