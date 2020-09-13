@@ -182,12 +182,17 @@ def build_ind(machine, caseName, caseRunType, report, backend):
     out = open(os.path.realpath("{}/{}".format(workingPath, argLogFile)), "w")
     err = open(err_file_path, "w")
 
+    # Tex only cases
+    tex_only = ['hello_world-tex']
+    tex_param = "-t" if caseName in tex_only else ""
+
     # Execute runner
     proc = subprocess.Popen(["python",
                              os.path.realpath("{}/arg/Applications/ARG.py".format(ARG_HOME)),
                              caseRunType,
                              "-p",
-                             parametersFilePath],
+                             parametersFilePath,
+                             tex_param],
                              stdout=out, stderr=err)
     proc.wait()
     out.flush()

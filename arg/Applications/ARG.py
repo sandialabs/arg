@@ -81,6 +81,7 @@ class Runner(object):
         self.Parameters = None
         self.Version = version
         self.LatexProcessor = None
+        self.TexFile = None
 
     def usage(self):
         """Provide online help.
@@ -90,8 +91,12 @@ class Runner(object):
         print("\t [-h]                      Help: print this message and exit")
         print("\t [-e]                      run Explorator then Assembler")
         print("\t [-g]                      run Generator then Assembler")
+        print("\t [-E]                      run Explorator")
+        print("\t [-G]                      run Generator")
+        print("\t [-A]                      run Assembler")
         print("\t [-p <parameters file>]    name of parameters file")
         print("\t [-l <LaTeX processor>]    name of LaTeX processor")
+        print("\t [-t]                      generate just .tex file")
         sys.exit(0)
 
     def parse_line(self, app, default_parameters_filename, types=None):
@@ -103,7 +108,7 @@ class Runner(object):
 
         # Try to hash command line with respect to allowable flags
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "egEGAp:l:")
+            opts, args = getopt.getopt(sys.argv[1:], "egEGAp:l:t")
         except getopt.GetoptError:
             self.usage()
             sys.exit(1)
@@ -134,6 +139,8 @@ class Runner(object):
                 self.ParametersFile = a
             elif o == "-l":
                 self.LatexProcessor = a
+            elif o == "-t":
+                self.TexFile = True
 
         # Inform user if missing argument
         if not self.ParametersFile:
@@ -147,6 +154,7 @@ class Runner(object):
                                               self.Version,
                                               types,
                                               self.LatexProcessor)
+        self.Parameters.TexFile = self.TexFile
 
         # Populate attributes based on parameters file content
         return (self.Parameters.check_parameters_file()

@@ -72,6 +72,13 @@ Build 'hello_world' case:
     BUILD_TEST_RUNTYPE: "-g"
   <<: *build_ind_test
 
+# 'hello_world-tex' case build variables
+Build 'hello_world-tex' case:
+  variables:
+    BUILD_TEST_NAME: "hello_world-tex"
+    BUILD_TEST_RUNTYPE: "-g"
+  <<: *build_ind_test
+
 # 'plots' case build variables
 Build 'plots' case:
   variables:
@@ -102,12 +109,19 @@ Build 'tables' case:
 .tpl_compare_individual_test_pdf: &compare_ind_test_pdf
   image: nganalytics/nga:alpine-pdftk-imgmagick
   stage: compare-individual-test-pdf
+  before_script:
+    - apk add diffutils
   script:
     - echo "==================== [${COMPARE_TEST_NAME}] Comparing results ===================="
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
         diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME}
+      fi
+    - |
+      if [ "$COMPARE_TEX_OUTPUT" == "true" ]; then
+        echo "---------- Explorator outputs ----------"
+        sdiff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_TEX_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_TEX_FILE_NAME} -I "${LINE_TO_IGNORE}"
       fi
     - |
       if [ "$COMPARE_PDF_OUTPUT" == "true" ]; then
@@ -195,6 +209,23 @@ Compare pdf 'hello_world' case:
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+  <<: *compare_ind_test_pdf
+
+# 'hello_world-tex' case comparison variables
+Compare pdf 'hello_world-tex' case:
+  needs: ["Build 'hello_world-tex' case"]
+  variables:
+    NEEDED_JOB: "Build 'hello_world-tex' case"
+    COMPARE_EXPLORATOR_OUTPUT: "false"
+    COMPARE_PDF_OUTPUT: "false"
+    COMPARE_TEX_OUTPUT: "true"
+    COMPARE_TEST_NAME: "hello_world-tex"
+    COMPARE_TEST_PAGE_RANGE: "3-6"
+    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
+    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+    COMPARE_TEST_TEX_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.tex"
+    LINE_TO_IGNORE: "This document was generated on"
   <<: *compare_ind_test_pdf
 
 # 'plots' case comparison variables

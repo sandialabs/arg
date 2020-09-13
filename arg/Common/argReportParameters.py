@@ -83,6 +83,7 @@ class argReportParameters(object):
         self.Types = types
         self.TmpFile = None
         self.LatexProcessor = latex_processor
+        self.TexFile = None
 
         # Default static data interface factory
         self.DataFactory = argDataInterface.factory

@@ -723,10 +723,6 @@ class argWordBackend(argBackendBase):
         print("[{}] Creating Word report".format(app))
         self.create_document_preamble(version)
 
-        # Create report with preamble
-        print("[{}] Creating Word report".format(app))
-        self.create_document_preamble(version)
-
         # Pass over data for report contents
         self.recursively_build_report(report_map["chapters"], list_lvl=1)
 
