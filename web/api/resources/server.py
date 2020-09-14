@@ -71,17 +71,16 @@ class StopResource(Resource):
         """Shutdown the server.
         To use only if the server is managed by the client app.
         When starting the server provide the following environment variable :
-            ARG_API_SERVER_STOP_KEY=[WHATEVER YOU WANT]
+            FLASK_SERVER_ADMIN_KEY=[WHATEVER YOU WANT]
         You will then need to pass this key when calling this method.
         """
 
-        
         # Try to retrieve key from arguments
         args = stop_server_query_parser.parse_args()
         key = args.get("key")
         if key:
             # Look for stop key in environment
-            if os.environ.get("ARG_API_SERVER_STOP_KEY") == key:
+            if os.environ.get("FLASK_SERVER_ADMIN_KEY") == key:
                 # Retrieve function
                 func = request.environ.get("werkzeug.server.shutdown")
                 if func is None:
@@ -89,6 +88,8 @@ class StopResource(Resource):
 
                 # Execute function
                 func()
+
+                return "[FLASK-SRV] Server has successfully shutdown. Python process will now be automatically ended.", 200
             else:
                 # Raise forbidden exception
                 raise Forbidden()

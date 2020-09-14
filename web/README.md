@@ -11,9 +11,16 @@ set FLASK_APP=<api_folder> && set FLASK_ENV=development && set FLASK_RUN_PORT=50
 where FLASK_APP is the path to the api folder, FLASK_ENV is either development or production, FLASK_RUN_PORT is a custom port to serve the api
 
 ## Execute the tests
-Tests are currently based on the unit testing framework named **pytest**
-from the project directory just run the `pytest` command.
-You might need to install the pytest package using the python package manager (pip) : `pip install pytest`
+Tests are currently based on the python integrated unit testing framework named **unittest**
+The web Api tests are located in tests/web_api_tests
+To execute the tests go to the Web Api Tests directory then run the following command `python -m unittest`.
+
+# Make angular front end available from the flask api
+Go to the arg/web/angular folder then run the following command :
+ng build --prod --base-href /static/
+Then copy generated files (from arg/web/angular/dist/ARG-GUI-angular) to the flask api
+    index.html to arg/web/api/templates 
+    other files to arg/web/api/static
 
 ## VS Code Debugging
 

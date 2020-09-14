@@ -37,6 +37,7 @@
 #HEADER
 
 import os
+import sys
 
 from flask import Flask, render_template, send_from_directory  # Add render_template
 from flask_cors import CORS
@@ -79,11 +80,11 @@ def create_app(test_config=None):
     werkzeug.cached_property = werkzeug.utils.cached_property
 
     # error handling layer
-    from web.api.error_handler import err
+    from .error_handler import err
     app.register_blueprint(err)
 
     # load API v1
-    from web.api.apiv1 import blueprint as v1
+    from .apiv1 import blueprint as v1
     app.register_blueprint(v1)
 
     @app.route('/', methods=['GET'])
