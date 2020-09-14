@@ -28,7 +28,7 @@
 		              <outputDirectory>${basedir}/src/main/resources/api</outputDirectory>
 		              <resources>          
 		                <resource>
-		                  <directory>../../../../../../arg/web/api</directory>
+		                  <directory>../../../../../web/api</directory>
 		                  <filtering>false</filtering>
 		                </resource>
 		              </resources>              

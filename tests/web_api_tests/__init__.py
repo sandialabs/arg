@@ -1,5 +1,5 @@
 #HEADER
-#                      arg/tests/api_tests/init.py
+#                      arg/tests/web_api_tests/init.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -35,3 +35,5 @@
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
 #HEADER
+#
+############################################################################

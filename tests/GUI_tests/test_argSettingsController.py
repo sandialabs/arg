@@ -140,9 +140,9 @@ class TestArgSettingsController(TestCase):
 
         # Check initialized values
         self.assertEqual(controller1.scriptDirectory.lower(),
-                         os.path.join(self.arg_path, "GUI/Logic").lower())
+                         os.path.join(self.arg_path, "GUI", "Logic").lower())
         self.assertEqual(controller1.scriptDirectoryConfigFilePath.lower(),
-                         os.path.join(self.arg_path, "GUI/Logic", "ARG-GUI-config.yml").lower())
+                         os.path.join(self.arg_path, "GUI", "Logic", "ARG-GUI-config.yml").lower())
         self.assertEqual(controller1.homePath.lower(),
                          appData_path.lower())
         self.assertEqual(controller1.userHomeConfigFilePath.lower(),
@@ -158,9 +158,9 @@ class TestArgSettingsController(TestCase):
 
         # Check initialized values
         self.assertEqual(controller2.scriptDirectory.lower(),
-                         os.path.join(self.arg_path, "GUI/Logic").lower())
+                         os.path.join(self.arg_path, "GUI", "Logic").lower())
         self.assertEqual(controller2.scriptDirectoryConfigFilePath.lower(),
-                         os.path.join(self.arg_path, "GUI/Logic", "ARG-GUI-config.yml").lower())
+                         os.path.join(self.arg_path, "GUI", "Logic", "ARG-GUI-config.yml").lower())
         self.assertEqual(controller2.homePath.lower(),
                          self.home_path.lower())
         self.assertEqual(controller2.userHomeConfigFilePath.lower(),
