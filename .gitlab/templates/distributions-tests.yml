@@ -4,12 +4,17 @@
 
 # Test on Mac OS 10.14.6
 Build on macOS 10.14.6:
-  stage:  test-distributions
+  stage: test-distributions
   tags:
     - macos
   variables:
     OS: "macOS"
   needs: []
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+      allow_failure: true
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - python --version
@@ -54,6 +59,11 @@ Build on Ubuntu latest Docker image:
   variables:
     OS: "Ubuntu"
   needs: []
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+      allow_failure: true
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -99,6 +109,11 @@ Build on Debian latest Docker image:
   variables:
     OS: "Debian"
   needs: []
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+      allow_failure: true
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -144,6 +159,11 @@ Build on fedora latest Docker image:
   variables:
     OS: "fedora"
   needs: []
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+      allow_failure: true
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -190,6 +210,11 @@ Build on CentOS latest Docker image:
   variables:
     OS: "CentOS"
   needs: []
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+      allow_failure: true
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv

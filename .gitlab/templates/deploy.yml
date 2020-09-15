@@ -6,7 +6,7 @@
 
 #Deploy pyARG-dep in Gitlab.com
 Upload pyARG-dep in Gitlab.com:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG-dep"
@@ -20,7 +20,7 @@ Upload pyARG-dep in Gitlab.com:
     - pip install twine
   script:
     - echo "==================== Upload pyARG ==================="
-    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/* --skip-existing
+    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
@@ -29,7 +29,7 @@ Upload pyARG-dep in Gitlab.com:
 
 #Deploy pyARG in Gitlab.com
 Upload pyARG in Gitlab.com:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG"
@@ -55,7 +55,7 @@ Upload pyARG in Gitlab.com:
 
 #Deploy pyARG-dep in pypi.org
 Upload pyARG-dep in pypi.org:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG-dep"
@@ -82,7 +82,7 @@ Upload pyARG-dep in pypi.org:
 
 #Deploy pyARG in pypi.org
 Upload pyARG in pypi.org:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG"
@@ -95,7 +95,7 @@ Upload pyARG in pypi.org:
     - pip install --upgrade twine
   script:
     - echo "========= Upload pyARG on pypi.org/legacy ==========="
-    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/*
+    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/* --skip-existing
     - pip install pyARG
     - python -c "import arg"
     - pip uninstall pyARG -y

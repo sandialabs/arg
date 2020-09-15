@@ -32,13 +32,18 @@ Bot release job:
     - git checkout master
     - echo "Finding version to set a tag"
     - GIT_TAG=$(awk '/__version__ = "/,/"/ { print }' arg/__version__.py | rev | cut -d" " -f1 | rev | tr -d '"')
+    - echo "Found a tag => $GIT_TAG"
+    - echo "Checking pyARG version"
+    - export PYARG=$(awk '/version="/,/",/ { print }' .gitlab/deployment/pypi/pyARG/setup.py | rev | cut -d'"' -f2 | rev)
+    - echo "Found pyARG version => $PYARG"
+    - if [ "$GIT_TAG" = "$PYARG" ]; then echo "----- VERSIONS ARE THE SAME -----"; else echo "----- __version__.py and setup.py ARE NOT THE SAME -----" && exit 1; fi
     - echo "Setting a tag $GIT_TAG"
     - git tag $GIT_TAG
     - echo "Checkout branch develop"
     - git checkout develop
     - echo "Hard reseting develop to master"
     - git reset --hard master
-    - git push --force origin develop
+    - git push origin develop
     - echo "Changing version on develop branch back to develop"
     - sed -i 's/__version__ = "'$GIT_TAG'"/__version__ = "develop"/g' arg/__version__.py
     - git add .
