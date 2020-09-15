@@ -2,11 +2,27 @@
 ####### Package stage #####
 ###########################
 
+#Check if package pyARG-dep can be prepared
+Check pyARG-dep:
+  image: python:slim-buster
+  stage: check-package
+  needs: []
+  script:
+    - echo "==================== Checking Version ===================="
+    - export VERSION_CHECK=$(python .gitlab/ci/version_checker.py pyARG-dep)
+    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG-dep -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - .gitlab/deployment/pypi/pyARG-dep/*
+        - requirements.txt
+
 #Package pyARG-dep for pypi
 Package pyARG-dep:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: package
-  needs: []
+  needs:
+    - job: "Check pyARG-dep"
   variables:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG-dep"
     PACKAGING_PATH: "package-pyARG-dep"
@@ -36,10 +52,24 @@ Package pyARG-dep:
         - .gitlab/deployment/pypi/pyARG-dep/*
         - requirements.txt
 
+#Check if package pyARG can be prepared
+Check pyARG:
+  image: python:slim-buster
+  stage: check-package
+  needs: []
+  script:
+    - echo "==================== Checking Version ===================="
+    - export VERSION_CHECK=$(python .gitlab/ci/version_checker.py pyARG)
+    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
+  rules:
+    - if: $CI_COMMIT_TAG
+
 #Package pyARG for pypi
 Package pyARG:
-  image: python:3.7-slim
+  image: python:slim-buster
   stage: package
+  needs:
+    - job: "Check pyARG"
   variables:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG"
     PACKAGING_PATH: "package"
