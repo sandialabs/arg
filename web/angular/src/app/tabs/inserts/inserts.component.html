@@ -41,32 +41,47 @@ HEADER
   <div class="form-group">
     <div class="row">
       <div class="col">
-        <label>Inserts</label>
+        <figure>
+          <figcaption>
+            <label>Inserts</label>
+          </figcaption>
         <table class="table table-bordered">
           <thead class="bg-primary text-white">
             <tr>
-              <th>Location</th>
-              <th>Type</th>
-              <th>Text/Image Path</th>
-              <th>Actions</th>
+              <th scope=col>Location</th>
+              <th scope=col>Type</th>
+              <th scope=col>Text/Image Path</th>
+              <th scope=col>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
+          <tr *ngFor="let insert of this.form.value.Insert; let i = index">
+            <td nowrap="nowrap" contenteditable="true" (blur)="updateLocation(i, insert, $event)" [innerHTML]="insert.location"></td>
+            <td>
+              <select (change)="updateTypes(i, insert, $event)">
+                <option *ngFor="let x of this.INSERTTYPES" [value]="x" [selected]="getInsertType(insert) == x">{{ x }}</option>
+               </select>
+            </td>
+            <td contenteditable="true" (blur)="updateTextOrImage(i, insert, $event)">
+                <div *ngIf="getInsertType(insert) == this.INSERTTYPES[0]; else elseBlock" [innerHTML]="insert.string.join('')"></div>
+                <ng-template #elseBlock>
+                    <div [innerHTML]="insert.image.join('')"> </div>
+                </ng-template>
+                </td>
+            <td>
+               <button type="button" (click)="removeInsert(i)" class="btn btn-success"><i class="fa fa-minus"></i>&nbsp;</button>
+            </td>
+          </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="4" class="text-right">
-                <button type="button" class="btn btn-success" id="add-cad-to-pem"><i class="fa fa-plus"></i>&nbsp;Add</button>
+               <button type="button" (click)="addInsert()" class="btn btn-success" id="add-cad-to-pem"><em class="fa fa-plus"></em>&nbsp;Add</button>
               </td>
             </tr>
           </tfoot>
-        </table>
+          </table>
+          </figure>
       </div>
     </div>
   </div>
