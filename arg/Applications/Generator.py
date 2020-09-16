@@ -110,7 +110,7 @@ def execute(app, parameters):
     generate_artefacts(parameters)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 def generate_artefacts(parameters):

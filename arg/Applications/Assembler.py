@@ -123,7 +123,7 @@ def execute(app, parameters):
         parameters.LatexProcessor)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 if __name__ == '__main__':

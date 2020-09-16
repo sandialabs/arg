@@ -292,7 +292,7 @@ def execute(app, parameters):
     generate_structure_file(parameters, case)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 def get_and_comment_property_value(meta_info, info_key):
