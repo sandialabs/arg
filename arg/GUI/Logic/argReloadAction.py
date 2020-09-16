@@ -48,8 +48,8 @@ class argReloadAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argReloadAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/reload.png")))
         self.setText("Reload...")
@@ -57,6 +57,7 @@ class argReloadAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'Reload' action detected.".format(app))
         QApplication.instance().reloadRequested()

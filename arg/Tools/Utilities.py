@@ -73,7 +73,7 @@ def read_yml_file(file, blocking=False):
             if os.path.isfile(file.strip()):
                 try:
                     return yaml.safe_load(open(file))
-                except yaml.YAMLError as e:
+                except yaml.MarkedYAMLError as e:
                     print("** ERROR: invalid YAML file {} in line {} ({} {}). Exiting.".format(
                         file,
                         e.problem_mark.line,
@@ -97,4 +97,4 @@ def read_yml_file(file, blocking=False):
 
     # Only return error string otherwise
     else:
-        return (errStr)
+        return errStr

@@ -52,7 +52,7 @@ from arg.Tools import Utilities
 app = "argReportParameters"
 
 
-class argReportParameters(object):
+class argReportParameters:
     """A class to get and store ARG report parameters
     """
 
@@ -161,7 +161,8 @@ class argReportParameters(object):
 
         sys.exit(0)
 
-    def explorator_command_line_usage(self):
+    @staticmethod
+    def explorator_command_line_usage():
         """Provide online help on Explorator with command line arguments
         """
 
@@ -174,7 +175,8 @@ class argReportParameters(object):
         print("\t [-s <structure>]    name of file report structure")
         print("\t [-a <structure>]    name of analyst authored result section structure file")
 
-    def generator_command_line_usage(self):
+    @staticmethod
+    def generator_command_line_usage():
         """Provide online help on Generator with command line arguments
         """
 
@@ -184,7 +186,8 @@ class argReportParameters(object):
         print("\t [-f <file name>]      name of artifact input file")
         print("\t [-o <output dir>]     directory of output artifacts")
 
-    def assembler_command_line_usage(self):
+    @staticmethod
+    def assembler_command_line_usage():
         """Provide online help on Assembler with command line arguments
         """
 
@@ -197,7 +200,8 @@ class argReportParameters(object):
         print("\t [-o <output path>]        path to output files")
         print("\t [-s <structure>]          name of file report structure")
 
-    def parameters_file_usage(self):
+    @staticmethod
+    def parameters_file_usage():
         """Provide online help on ARG with parameters file
         """
 
@@ -919,7 +923,7 @@ class argReportParameters(object):
             mutables["author"] = self.Authors[0]
 
         # Return generated mutables
-        return (mutables)
+        return mutables
 
     def save_generated_mutables(self, mutables_dict):
         """Write mutables dictionary to possibly existing YAML file
@@ -1000,10 +1004,6 @@ class argReportParameters(object):
         # Retrieve meta-information
         data = argDataInterface.factory(arguments[0], os.path.join(self.DataDir, arguments[1]))
         meta_info = data.get_meta_information()
-
-        # Initialize title fields
-        method = None
-        db_name = None
 
         # Iterate over all meta information dictionaries
         for meta_dict in meta_info:

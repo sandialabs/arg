@@ -36,10 +36,10 @@
 #
 #HEADER
 
-from collections import Hashable
+from collections.abc import Hashable
 
 
-class argInformationObject(object):
+class argInformationObject:
     """ A class to store and exchange information between ARG components
     """
 

@@ -98,19 +98,22 @@ class argVTKSTLReader(argDataInterfaceBase):
         # Return computed information object
         return info_obj
 
-    def is_attribute_discrete(self):
+    @staticmethod
+    def is_attribute_discrete():
         """STL tags are discrete
         """
 
         return True
 
-    def get_attribute_type(self):
+    @staticmethod
+    def get_attribute_type():
         """STL tags are bound to elements
         """
 
         return "cell"
 
-    def get_variable_type(self):
+    @staticmethod
+    def get_variable_type():
         """STL tags are scalars
         """
 

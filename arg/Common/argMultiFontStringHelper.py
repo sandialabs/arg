@@ -41,7 +41,7 @@ import os
 import yaml
 
 
-class argMultiFontStringHelper(object):
+class argMultiFontStringHelper:
     """ A helper class to handle strings with multiple or non-default fonts
     """
 

@@ -49,7 +49,7 @@ class argOpenRecentAction(QAction):
     """
 
     def __init__(self, recentFileName, parent=None, ):
-        super(argOpenRecentAction, self).__init__(parent)
+        super().__init__()
         self.fileName = recentFileName
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/open.png")))

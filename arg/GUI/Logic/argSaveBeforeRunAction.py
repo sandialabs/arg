@@ -46,8 +46,8 @@ class argSaveBeforeRunAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argSaveBeforeRunAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         # scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         # self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/clean.png")))
         self.setText("Save before run")

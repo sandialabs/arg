@@ -48,8 +48,8 @@ class argRunAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argRunAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/play.png")))
         self.setText("Run")
@@ -57,6 +57,7 @@ class argRunAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'Run' action detected.".format(app))
         QApplication.instance().runRequested()

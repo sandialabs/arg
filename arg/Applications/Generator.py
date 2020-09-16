@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Applications/Generator.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import os
 import sys
@@ -43,7 +43,6 @@ import time
 import yaml
 
 from arg import __version__
-from arg.Applications import ARG
 from arg.Common.argReportParameters import argReportParameters
 from arg.Generation import argPlot, argVTK
 from arg.Tools import Utilities
@@ -122,9 +121,7 @@ def generate_artefacts(parameters):
     artifact_map = Utilities.read_yml_file(parameters.ArtifactFile, parameters.Application)
 
     if isinstance(artifact_map, str):
-        print("*  WARNING: {} ".format(
-            parameters.Application,
-            artifact_map))
+        print("*  WARNING: {} {}".format(parameters.Application, artifact_map))
         return False
 
     # Iterate over requested artifacts

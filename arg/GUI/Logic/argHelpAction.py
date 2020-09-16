@@ -48,8 +48,8 @@ class argHelpAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argHelpAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/help.png")))
         self.setText("Help...")
@@ -57,6 +57,7 @@ class argHelpAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'Help' action detected.".format(app))
         QApplication.instance().helpRequested()

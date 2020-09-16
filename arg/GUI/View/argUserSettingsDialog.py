@@ -51,7 +51,7 @@ class argUserSettingsDialog(QDialog):
     """
 
     def __init__(self, parent=None):
-        super(argUserSettingsDialog, self).__init__(parent)
+        super().__init__()
         self.setWindowTitle("ARG settings")
 
         self.SettingController = argSettingsController()
@@ -279,28 +279,28 @@ class argUserSettingsDialog(QDialog):
         # Retrieve settings controller
         settings = QApplication.instance().settingsController
 
-        if (self.argPythonExePathLineEdit.text() == ""):
+        if self.argPythonExePathLineEdit.text() == "":
             accept = False
         else:
             settingsData[settings.getArgPythonExePathUserSettingsKey()] = self.argPythonExePathLineEdit.text()
 
-        if (self.argPythonSitePackageLineEdit.text() == ""):
+        if self.argPythonSitePackageLineEdit.text() == "":
             accept = False
         else:
             settingsData[
                 settings.getArgPythonSitePackagePathUserSettingsKey()] = self.argPythonSitePackageLineEdit.text()
 
-        if (self.argScriptPathLineEdit.text() == ""):
+        if self.argScriptPathLineEdit.text() == "":
             accept = False
         else:
             settingsData[settings.getArgScriptPathUserSettingsKey()] = self.argScriptPathLineEdit.text()
 
-        if (self.argLatexProcessorPathLineEdit.text() == ""):
+        if self.argLatexProcessorPathLineEdit.text() == "":
             accept = False
         else:
             settingsData[settings.getArgLatexProcessorPathUserSettingsKey()] = self.argLatexProcessorPathLineEdit.text()
 
-        if (accept == True):
+        if accept == True:
             self.close()
         else:
             self.messageBox.setText("Please fill all user parameters to access ARG-GUI")

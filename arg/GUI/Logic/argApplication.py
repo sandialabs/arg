@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                        arg/GUI/Logic/argApplication.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import datetime
 import os
@@ -54,8 +54,8 @@ class argApplication(QApplication):
     """An application class
     """
 
-    def __init__(self, parent=None):
-        super(argApplication, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Create controllers, runner and action manager
         self.settingsController = argSettingsController(self)
@@ -104,7 +104,7 @@ class argApplication(QApplication):
         """Set the application name using title parameter
         """
         title = self.applicationName()
-        if (parameterFile != ""):
+        if parameterFile != "":
             title = "{} - {}".format(title, parameterFile)
         else:
             title = "{} - {}".format(title, "Untitled")
@@ -130,7 +130,8 @@ class argApplication(QApplication):
         else:
             print("** ERROR: Failed to open parameters file: '{}'".format(filePath))
 
-    def quitRequested(self):
+    @staticmethod
+    def quitRequested():
         """Upon quit action request
         """
         sys.exit()
@@ -209,7 +210,8 @@ class argApplication(QApplication):
         # Reload backup data, as read from current parameters file initial state
         self.parameterController.reloadData()
 
-    def helpRequested(self):
+    @staticmethod
+    def helpRequested():
         """Upon help action request
         """
 
@@ -222,15 +224,16 @@ class argApplication(QApplication):
         helpWindow.setWindowFlags(Qt.Tool | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
 
         # Path to Word documentation -- contained in repository
-        helpWindow.setText("Word documentation on parameters file is located in " \
-                           "'<code>arg\\doc\\user_manual</code>'. <br><br>" \
-                           "Please refer to '<code>[User Manual] How to create a parameters.yml file_0.4.0.docx</code>'. ")
+        helpWindow.setText("Word documentation on parameters file is located in '<code>arg\\doc\\user_manual</code>'."
+                           " <br><br> Please refer to '<code>[User Manual] How to create a parameters.yml "
+                           "file_0.4.0.docx</code>'. ")
         helpWindow.setTextFormat(Qt.RichText)
         helpWindow.addButton(QMessageBox.Ok)
 
         helpWindow.exec()
 
-    def aboutRequested(self):
+    @staticmethod
+    def aboutRequested():
         """Upon help action request
         """
 
@@ -307,7 +310,8 @@ class argApplication(QApplication):
         currentRunFile.remove()
         self.settingsController.setCurrentParameterFileRun("")
 
-    def showConfigMissingSettings(self, missings, exitEarly):
+    @staticmethod
+    def showConfigMissingSettings(missings, exitEarly):
         """Create a message box listing all missing settings
         """
         app = 'ARG-GUI'
@@ -345,7 +349,6 @@ class argApplication(QApplication):
         # An empty string is considered as validated
         self.checkLineEditRecursive(lineEdit, isDirectory, lineEdit.text())
 
-
     def checkLineEditRecursive(self, lineEdit, isDirectory, filePath):
         # Check if the content of the linEdit exists.
         # if isDirectory, the content is considered as a directory.
@@ -374,9 +377,10 @@ class argApplication(QApplication):
                 else:
                     lineEdit.setStyleSheet(self.getStyleSheetLineEditError())
 
-    def getStyleSheetLineEditError(self):
+    @staticmethod
+    def getStyleSheetLineEditError():
         return "QLineEdit { background: rgb(255, 0, 0);}"
 
-
-    def getStyleSheetLineEditNormal(self):
+    @staticmethod
+    def getStyleSheetLineEditNormal():
         return "QLineEdit {}"

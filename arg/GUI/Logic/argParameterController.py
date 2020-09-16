@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                    arg/GUI/Logic/argParameterController.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,13 +34,13 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
-from PySide2.QtCore import QCoreApplication, QObject, Qt, Signal, Slot
+from PySide2.QtCore import QObject, Qt, Signal, Slot
 
 from arg.GUI.Logic.argParameterReader import argParameterReader
 from arg.GUI.Logic.argParameterWriter import argParameterWriter
-from arg.GUI.Logic.argSettingsController      import argSettingsController
+from arg.GUI.Logic.argSettingsController import argSettingsController
 
 app = "ARG-GUI"
 
@@ -53,8 +53,8 @@ class argParameterController(QObject):
     dataCreated = Signal(dict)
     errorDetected = Signal(str)
 
-    def __init__(self, parent=None):
-        super(argParameterController, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.reader = argParameterReader(self)
         self.reader.dataCreated.connect(self.onDataCreated, Qt.DirectConnection)
         self.reader.errorDetected.connect(self.errorDetected, Qt.DirectConnection)
@@ -66,7 +66,6 @@ class argParameterController(QObject):
     def setSettingsController(self, settingsController: argSettingsController):
         self.settingsController = settingsController
 
-    
     def read(self, filePath):
         print("[{}] Reading file: '{}'".format(app, filePath))
         res = self.reader.read(filePath)

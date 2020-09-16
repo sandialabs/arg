@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                         arg/Generation/argVTK.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import math
 import os
@@ -56,7 +56,6 @@ import yaml
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.DataInterface.argDataInterface import argDataInterface
-
 
 # Load supported types
 common_dir = os.path.dirname(os.path.realpath(__file__))
@@ -155,7 +154,7 @@ def get_ignored_block_flat_indices(ignored_block_keys, data, step=0):
     # Iterate over non-empty leaves to find ignored blocks
     it = input_data.NewIterator()
     it.GoToFirstItem()
-    while (not it.IsDoneWithTraversal()):
+    while not it.IsDoneWithTraversal():
         # Retrieve name and ID of current non-empty leaf
         b_nl = it.GetCurrentMetaData().Get(vtkCommonDataModel.vtkCompositeDataSet.NAME()).lower()
         b_id = block_IDs[block_names_lower.index(b_nl)]
@@ -163,7 +162,6 @@ def get_ignored_block_flat_indices(ignored_block_keys, data, step=0):
         # Check for matching name (case insensitive) or ID
         if (b_nl in ignored_block_keys or
                 b_id in ignored_block_keys):
-
             # Retrieve flat index of current block and add it to list
             idx = it.GetCurrentFlatIndex()
             flat_indices.append(idx)
@@ -260,18 +258,18 @@ def get_mesh_quality(mesh, verdict_q, eq_type, do_histogram=False):
         q_table.AddColumn(q_out.GetCellData().GetArray("Quality"))
 
         # Compute quantized histogram
-        os = vtkFiltersStatistics.vtkOrderStatistics()
-        os.SetInputData(vtkFiltersStatistics.vtkStatisticsAlgorithm.INPUT_DATA, q_table)
-        os.AddColumn("Quality")
-        os.SetLearnOption(True)
-        os.SetDeriveOption(False)
-        os.SetTestOption(False)
-        os.SetQuantize(True)
-        os.SetMaximumHistogramSize(100)
-        os.Update()
+        os_ = vtkFiltersStatistics.vtkOrderStatistics()
+        os_.SetInputData(vtkFiltersStatistics.vtkStatisticsAlgorithm.INPUT_DATA, q_table)
+        os_.AddColumn("Quality")
+        os_.SetLearnOption(True)
+        os_.SetDeriveOption(False)
+        os_.SetTestOption(False)
+        os_.SetQuantize(True)
+        os_.SetMaximumHistogramSize(100)
+        os_.Update()
 
         # Convert VTK histogram table into Python map
-        histo_tab = os.GetOutputDataObject(vtkFiltersStatistics.vtkStatisticsAlgorithm.OUTPUT_MODEL).GetBlock(0)
+        histo_tab = os_.GetOutputDataObject(vtkFiltersStatistics.vtkStatisticsAlgorithm.OUTPUT_MODEL).GetBlock(0)
         n = histo_tab.GetNumberOfRows()
         values = histo_tab.GetColumnByName("Value")
         counts = histo_tab.GetColumnByName("Cardinality")
@@ -317,7 +315,7 @@ def create_color_transfer_function(variable, surface_mesh):
     ctf.AddRGBPoint(var_range[0], .231, .298, .753)
     ctf.AddRGBPoint(mid_point, .865, .865, .865)
     ctf.AddRGBPoint(var_range[1], .706, .016, .149)
-    if variable.IsScalar() == False:
+    if not variable.IsScalar():
         ctf.SetVectorModeToMagnitude()
 
     # Return color transfer function and variable range
@@ -820,7 +818,7 @@ def four_surfaces(parameters, fig_params, data, variable, file_name, do_clip=Fal
             # Iterate over non-empty blocks
             it = input_data.NewIterator()
             it.GoToFirstItem()
-            while (not it.IsDoneWithTraversal()):
+            while not it.IsDoneWithTraversal():
                 # Retrieve flat index of current non-empty leaf
                 idx = it.GetCurrentFlatIndex()
 
@@ -1131,7 +1129,7 @@ def many_modes(parameters, fig_params, data, variable, file_name):
                 # Iterate over non-empty blocks
                 it = input_data.NewIterator()
                 it.GoToFirstItem()
-                while (not it.IsDoneWithTraversal()):
+                while not it.IsDoneWithTraversal():
                     # Retrieve flat index of current non-empty leaf
                     idx = it.GetCurrentFlatIndex()
 
@@ -1162,7 +1160,7 @@ def many_modes(parameters, fig_params, data, variable, file_name):
             it.InitTraversal()
             while not it.IsDoneWithTraversal():
                 da = it.GetCurrentDataObject().GetPointData().GetArray(var_name)
-                if da != None:
+                if da is not None:
                     nt = da.GetNumberOfTuples()
                     for t in range(nt):
                         dv = da.GetTuple3(t)
@@ -1206,7 +1204,7 @@ def many_modes(parameters, fig_params, data, variable, file_name):
             mapper.SetLookupTable(ctf)
             mapper.SelectColorArray(var_name)
             mapper.SetScalarModeToUsePointFieldData()
-            if variable_range != None:
+            if variable_range is not None:
                 mapper.SetScalarRange(variable_range)
             actor = create_surface_or_wireframe_actor(mapper, surface_mesh)
 
@@ -1304,7 +1302,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
         it = input_data.NewIterator()
         it.GoToFirstItem()
         n_blocks = 0
-        while (not it.IsDoneWithTraversal()):
+        while not it.IsDoneWithTraversal():
             if n_blocks < block_range[0]:
                 # Index below range, continue loop
                 it.GoToNextItem()
@@ -1351,7 +1349,7 @@ def many_blocks(parameters, fig_params, data, variable, file_name):
         y_offset_done = False
         it.GoToFirstItem()
         i = -1
-        while (not it.IsDoneWithTraversal()):
+        while not it.IsDoneWithTraversal():
             # Increment block index and check if in range
             i += 1
             if i < block_range[0]:
@@ -2339,7 +2337,7 @@ def cut3D(parameters, fig_params, data, variable, file_name):
     return output_base_name, caption
 
 
-def slice(parameters, fig_params, data, variable, file_name):
+def slice_(parameters, fig_params, data, variable, file_name):
     """Find or create a figure that appears to be cut and spread apart
     """
 
@@ -2475,9 +2473,7 @@ def execute_request(parameters, fig_params):
 
     # Proceed with request
     var_name = fig_params.get("var_name")
-    print("[argVTK] Processing {} visualization request of {}".format(
-        req_name,
-        model_name,
+    print("[argVTK] Processing {} visualization request of {} {}".format(req_name, model_name,
         " for {}".format(var_name) if var_name else ''))
 
     # Ensure that a view direction is set

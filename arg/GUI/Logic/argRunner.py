@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                           arg/GUI/Logic/argRunner.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,29 +34,18 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
-############################################################################
-DEBUG_ARG_GUI           = True
-app                     = "ARG-GUI"
-
-########################################################################
-# Import python packages
+import os
 import re
 
-# Import GUI packages
-from PySide2.QtCore             import QCoreApplication, \
-                                       QFileInfo, \
-                                       QDir, \
-                                       QObject, \
-                                       QProcess, \
-                                       Qt, \
-                                       Signal
+from PySide2.QtCore import QCoreApplication, QFileInfo, QDir, QObject, QProcess, Qt, Signal
 
-# Import ARG-GUI modules
-from arg.GUI.Logic.argSettingsController      import *
+from arg.GUI.Logic.argSettingsController import argSettingsController
 
-########################################################################
+app = "ARG-GUI"
+
+
 class argRunner(QObject):
     """A runner class
     """
@@ -67,15 +56,15 @@ class argRunner(QObject):
     argRunStarted = Signal()
     argRunFinished = Signal()
 
-    ####################################################################
-    def __init__(self, parent=None):
+    def __init__(self):
 
-        super(argRunner, self).__init__(parent)
+        super().__init__()
 
         self.argPythonExe = ""
         self.argPythonSitePackage = ""
         self.argScript = ""
         self.argLatexProcessorPath = ""
+        self.argExecutionOption = None
 
         self.parameterFile = ""
         self.settingsController = None
@@ -87,13 +76,11 @@ class argRunner(QObject):
         self.process.readyReadStandardError.connect(self.onErrorDetected, Qt.DirectConnection)
         self.process.readyReadStandardOutput.connect(self.onOutputDetected, Qt.DirectConnection)
 
-    ####################################################################
     def setSettingsController(self, settingsController: argSettingsController):
         self.settingsController = settingsController
         # Set ARG execution default option
         self.argExecutionOption = settingsController.eOption()
 
-    ####################################################################
     def initializeEnv(self):
         """Initialize environment to be applied on ARG process started by Runner
         """
@@ -102,24 +89,19 @@ class argRunner(QObject):
         env = QProcess.systemEnvironment()
 
         # Set PYTHONPATH
-        env = self.initializeEnvVar(env,
-            "PYTHONPATH",
-            [self.argPythonExe, self.argPythonSitePackage])
+        env = self.initializeEnvVar(env, "PYTHONPATH", [self.argPythonExe, self.argPythonSitePackage])
 
         # Set PATH
-        env = self.initializeEnvVar(env,
-            "PATH",
-            [os.path.dirname(self.argPythonExe), self.argPythonExe,
-             os.path.dirname(self.argLatexProcessorPath), self.argLatexProcessorPath,
-             os.environ["PATH"] if "PATH" in os.environ else ""])
+        env = self.initializeEnvVar(env, "PATH",
+                                    [os.path.dirname(self.argPythonExe), self.argPythonExe,
+                                     os.path.dirname(self.argLatexProcessorPath), self.argLatexProcessorPath,
+                                     os.environ["PATH"] if "PATH" in os.environ else ""])
 
         # Update environment of process to be used to run ARG
         self.process.setEnvironment(env)
-        if DEBUG_ARG_GUI:
-            print("[DEBUG_ARG_GUI] Completed ARG process environment:\n{}".format(env))
 
-    ####################################################################
-    def initializeEnvVar(self, env, envVarName, pathsList):
+    @staticmethod
+    def initializeEnvVar(env, envVarName, pathsList):
         """Initialize environment variable with provided list of paths
         """
 
@@ -131,7 +113,6 @@ class argRunner(QObject):
 
         # TBD
         regexSub = r"{}={}".format(envVarName, os.pathsep.join(pathsList))
-        # regexSub = r"{}=\1{}".format(envVarName, os.pathsep.join(pathsList))
         env = [regex.sub(regexSub.replace('\\', '/'), var.replace('\\', '/')) for var in env]
 
         # Loop over system environment to look for possibly existing value
@@ -142,15 +123,8 @@ class argRunner(QObject):
         if not isPathFound:
             env.append("{}={}".format(envVarName, pathsStr))
 
-        # Print debug information when requested
-        if DEBUG_ARG_GUI:
-            print("[DEBUG_ARG_GUI] Building \'{}\' environment variable".format(envVarName))
-            print("\tpathsStr: {}".format(pathsStr))
-            print("\tregex: {}".format(regex))
-            print("\tregexSub: {}".format(regexSub))
         return env
 
-    ####################################################################
     def updateEnv(self):
         """Initialize Runner attributes, including parsed setting values
         """
@@ -166,7 +140,6 @@ class argRunner(QObject):
         # Initialize ARG process environement
         self.initializeEnv()
 
-    ########################################################################
     def start(self):
 
         # Update ARG process environement
@@ -179,7 +152,7 @@ class argRunner(QObject):
         self.parameterFile = settings.getCurrentParameterFileRun()
 
         # Initiate ARG process if current file defined
-        if (self.parameterFile):
+        if self.parameterFile:
 
             # Set working directory
             parameterFileDir = QFileInfo(self.parameterFile).canonicalPath()
@@ -211,7 +184,6 @@ class argRunner(QObject):
 
         return 1
 
-    ########################################################################
     def clean(self, outputFolder):
         settings = QCoreApplication.instance().settingsController
 
@@ -228,33 +200,30 @@ class argRunner(QObject):
                     outputFolderFullPath = os.path.join(parameterFileDir, outputFolder)
                 outputFolderFullPathAsDir = QDir(outputFolderFullPath)
                 if outputFolderFullPathAsDir.removeRecursively():
-                    self.logStandardDetected.emit("[{}] 'Clean' action - the following output folder has been cleaned: {}"
-                                                  .format(app, outputFolderFullPath))
+                    self.logStandardDetected.emit(
+                        "[{}] 'Clean' action - the following output folder has been cleaned: {}"
+                            .format(app, outputFolderFullPath))
                 else:
-                    self.logErrorDetected.emit("** ERROR: 'Clean' action - the following output folder cannot be cleaned: {}"
-                                               .format(outputFolderFullPath))
+                    self.logErrorDetected.emit(
+                        "** ERROR: 'Clean' action - the following output folder cannot be cleaned: {}"
+                            .format(outputFolderFullPath))
             else:
-                self.logErrorDetected.emit("** ERROR: 'Clean' action - the following output folder cannot be cleaned: {}"
-                                           .format(outputFolder))
+                self.logErrorDetected.emit(
+                    "** ERROR: 'Clean' action - the following output folder cannot be cleaned: {}"
+                        .format(outputFolder))
 
-    ########################################################################
     def setEOption(self):
         """ Switch runner to E execution mode
         """
         self.argExecutionOption = self.settingsController.eOption()
 
-    ########################################################################
     def setGOption(self):
         """ Switch runner to G execution mode
         """
         self.argExecutionOption = self.settingsController.gOption()
 
-    ########################################################################
     def onErrorDetected(self):
         self.logErrorDetected.emit(str(self.process.readAllStandardError(), 'utf-8'))
 
-    ########################################################################
     def onOutputDetected(self):
         self.logStandardDetected.emit(str(self.process.readAllStandardOutput(), 'utf-8'))
-
-########################################################################
