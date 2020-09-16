@@ -225,8 +225,7 @@ class ArgUserSettingsReader(TestCase):
         # Log total content in case of difference
         self.maxDiff = None
 
-        reader = argUserSettingsReader(self.adminLvl,
-                                       self.usrLvl)
+        reader = argUserSettingsReader(self.adminLvl, self.usrLvl)
         for key in self.keyValues:
             value = self.keyValues[key]
             reader.setSetting(key, value)
@@ -242,8 +241,7 @@ class ArgUserSettingsReader(TestCase):
         # Log total content in case of difference
         self.maxDiff = None
 
-        reader = argUserSettingsReader(self.adminLvl,
-                                       self.usrLvl)
+        reader = argUserSettingsReader(self.adminLvl, self.usrLvl)
         reader.read()
         self.assertEqual(reader.getPythonExecutable(),
                          self.expectedUsr.get("python_executable"))
@@ -255,8 +253,7 @@ class ArgUserSettingsReader(TestCase):
         # Log total content in case of difference
         self.maxDiff = None
 
-        reader = argUserSettingsReader(self.adminLvl,
-                                       self.usrLvl)
+        reader = argUserSettingsReader(self.adminLvl, self.usrLvl)
         reader.read()
         self.assertEqual(reader.getPythonSitePackage(),
                          self.expectedUsr.get("python_site_package"))
@@ -268,8 +265,7 @@ class ArgUserSettingsReader(TestCase):
         # Log total content in case of difference
         self.maxDiff = None
 
-        reader = argUserSettingsReader(self.adminLvl,
-                                       self.usrLvl)
+        reader = argUserSettingsReader(self.adminLvl, self.usrLvl)
         reader.read()
         self.assertEqual(reader.getArgScript(),
                          self.expectedUsr.get("arg_script"))
@@ -281,8 +277,7 @@ class ArgUserSettingsReader(TestCase):
         # Log total content in case of difference
         self.maxDiff = None
 
-        reader = argUserSettingsReader(self.adminLvl,
-                                       self.usrLvl)
+        reader = argUserSettingsReader(self.adminLvl, self.usrLvl)
         reader.read()
         self.assertEqual(reader.getLatexProcessor(),
                          self.expectedUsr.get("latex_processor"))

@@ -49,7 +49,7 @@ class argOpenUserSettingsAction(QAction):
     """
 
     def __init__(self, parent=None):
-        super(argOpenUserSettingsAction, self).__init__(parent)
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/settings.png")))
         self.setText("ARG settings...")
@@ -57,6 +57,7 @@ class argOpenUserSettingsAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'Open user settings' action detected.".format(app))
         QApplication.instance().openUserSettings()

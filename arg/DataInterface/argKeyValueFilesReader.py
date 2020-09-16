@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #               arg/DataInterface/argKeyValueFilesReader.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import csv
 import os
@@ -117,7 +117,8 @@ class argKeyValueFilesReader(argDataInterfaceBase):
             self.Dictionaries.append(
                 self.parse_key_value_file(args[0], delim, reverse))
 
-    def parse_key_value_file(self, full_name, delim='=', reverse=False):
+    @staticmethod
+    def parse_key_value_file(full_name, delim='=', reverse=False):
         """Parse file with provided name and given delimiter
         """
 
@@ -129,8 +130,8 @@ class argKeyValueFilesReader(argDataInterfaceBase):
             with open(full_name, "r") as f:
                 # Instantiate CSV reader and iterate over rows
                 reader = csv.reader(f,
-                                    delimiter = delim,
-                                    skipinitialspace = True)
+                                    delimiter=delim,
+                                    skipinitialspace=True)
                 for r in reader:
                     # Ignore non-conforming rows
                     if len(r) != 2:
@@ -165,16 +166,7 @@ class argKeyValueFilesReader(argDataInterfaceBase):
         # Iterate over all readers and dictionaries
         for r, d in zip(self.Readers, self.Dictionaries):
             # Initialize meta-information for this reader
-            r_meta = {}
-
-            # Keep track of file name
-            r_meta["file name"] = r
-
-            # Retrieve number of keys
-            r_meta["number of keys"] = len(d)
-
-            # Compute number of unique values
-            r_meta["number of unique values"] = len(set(d.values()))
+            r_meta = {"file name": r, "number of keys": len(d), "number of unique values": len(set(d.values()))}
 
             # Append local meta-information to global list
             meta.append(r_meta)

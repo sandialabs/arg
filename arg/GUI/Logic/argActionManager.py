@@ -58,8 +58,8 @@ class argActionManager(QObject):
     """An action manager class to cover all available actions
     """
 
-    def __init__(self, parent=None):
-        super(argActionManager, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # All available actions
         self.quitAct = argQuitAction(self)

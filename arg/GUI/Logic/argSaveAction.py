@@ -48,8 +48,8 @@ class argSaveAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argSaveAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/save.png")))
         self.setText("Save")
@@ -57,7 +57,8 @@ class argSaveAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         """Routine when 'Save' action is triggered
         """
 
@@ -70,7 +71,7 @@ class argSaveAction(QAction):
         currentFileOpened = settings.getCurrentParameterFile()
 
         # When no current file is defined
-        if (currentFileOpened == ''):
+        if currentFileOpened == '':
             # fileToSave = QFileDialog.getSaveFileName(None,"Save Parameters File", "", "yaml file (*.yml *.yaml)")
 
             # Open FileDialog to get file information
@@ -96,5 +97,5 @@ class argSaveAction(QAction):
 
         # Log saved values
         print("[{}] Saving current parameters values to: {}".format(app, fileToSave))
-        if (fileToSave):
+        if fileToSave:
             QApplication.instance().saveRequested(fileToSave)

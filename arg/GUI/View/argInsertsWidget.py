@@ -49,7 +49,7 @@ class argInsertsWidget(QWidget):
     """
 
     def __init__(self, parent=None):
-        super(argInsertsWidget, self).__init__(parent)
+        super().__init__()
 
         # Retrieve settings controller
         settings = QApplication.instance().settingsController
@@ -97,7 +97,7 @@ class argInsertsWidget(QWidget):
 
         insertsData = data.get(settings.insertionKey())
 
-        if (insertsData):
+        if insertsData:
             insertsDataCount = len(insertsData)
             typeComboBox = [settings.insertionTypeTextKey(), settings.insertionTypeImageKey()]
 
@@ -110,18 +110,18 @@ class argInsertsWidget(QWidget):
                 self.insertTableWidget.setItem(i, 0, QTableWidgetItem(
                     "{}".format(insert[settings.locationParameterFileKey()])))
                 self.insertTableWidget.setCellWidget(i, 1, insertComboBox)
-                if (settings.imageParameterFileKey() in insert):
+                if settings.imageParameterFileKey() in insert:
                     self.insertTableWidget.setItem(i, 1, QTableWidgetItem(settings.imageParameterFileKey()))
                     textValue = insert[settings.imageParameterFileKey()]
-                    if (len(textValue) == 1):
+                    if len(textValue) == 1:
                         self.insertTableWidget.setItem(i, 2, QTableWidgetItem(textValue[0]))
                         insertComboBox.setCurrentText(settings.imageParameterFileKey())
                     else:
                         print("[{}] Current insertion value contains more than one element. Ignoring. ".format(app))
-                if (settings.textParameterFileKey() in insert):
+                if settings.textParameterFileKey() in insert:
                     self.insertTableWidget.setItem(i, 1, QTableWidgetItem(settings.textParameterFileKey()))
                     textValue = insert[settings.textParameterFileKey()]
-                    if (len(textValue) == 1):
+                    if len(textValue) == 1:
                         self.insertTableWidget.setItem(i, 2, QTableWidgetItem(textValue[0]))
                         insertComboBox.setCurrentText(settings.textParameterFileKey())
                     else:
@@ -143,8 +143,7 @@ class argInsertsWidget(QWidget):
         paramInserts = []
 
         for i in range(0, self.insertTableWidget.rowCount()):
-            currentInsert = {}
-            currentInsert[settings.insertionLocationKey()] = self.insertTableWidget.item(i, 0).text()
+            currentInsert = {settings.insertionLocationKey(): self.insertTableWidget.item(i, 0).text()}
             comboboxWidget = self.insertTableWidget.cellWidget(i, 1)
             currentInsert[comboboxWidget.currentText()] = [self.insertTableWidget.item(i, 2).text()]
             if len(currentInsert) > 0:
@@ -209,7 +208,7 @@ class argInsertsWidget(QWidget):
     @Slot()
     def onInsertTableWidgetCellChanged(self, row, col):
         typeWidget = self.insertTableWidget.cellWidget(row, 1)
-        if typeWidget == None:
+        if typeWidget is None:
             return
 
         if col == 2:
@@ -235,7 +234,7 @@ class argInsertsWidget(QWidget):
                 cellItem.setBackgroundColor(QColor(255, 255, 255))
 
     @Slot()
-    def onInsertComboBoxCurrenIndexChanged(self, text):
+    def onInsertComboBoxCurrenIndexChanged(self):
         for row in range(self.insertTableWidget.rowCount()):
             if self.insertTableWidget.cellWidget(row, 1) == self.sender():
                 self.onInsertTableWidgetCellChanged(row, 2)

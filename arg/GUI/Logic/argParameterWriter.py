@@ -47,8 +47,11 @@ class argParameterWriter(QObject):
     """A writer class to write parameters file
     """
 
-    def __init__(self, data={}, err="", parent=None):
-        super(argParameterWriter, self).__init__(parent)
+    def __init__(self, data=None):
+        super().__init__()
+
+        if data is None:
+            data = dict()
 
         self.ParameterData = argParameterData(data)
         self.SettingController = argSettingsController()
@@ -197,13 +200,12 @@ class argParameterWriter(QObject):
                 self.SettingController.insertionKey())
 
         # Dump all retrieved data dicts into specified file
-        fileLoad = None
         with open(filePath, 'w') as file:
-            if (len(reportInformationToWrite.keys()) > 0):
-                fileLoad = yaml.dump(reportInformationToWrite, file)
-            if (len(generalOptionsToWrite.keys()) > 0):
-                fileLoad = yaml.dump(generalOptionsToWrite, file)
-            if (len(dataToWrite.keys()) > 0):
-                fileLoad = yaml.dump(dataToWrite, file)
-            if (len(insertsToWrite.keys()) > 0):
-                fileLoad = yaml.dump(insertsToWrite, file)
+            if len(reportInformationToWrite.keys()) > 0:
+                yaml.dump(reportInformationToWrite, file)
+            if len(generalOptionsToWrite.keys()) > 0:
+                yaml.dump(generalOptionsToWrite, file)
+            if len(dataToWrite.keys()) > 0:
+                yaml.dump(dataToWrite, file)
+            if len(insertsToWrite.keys()) > 0:
+                yaml.dump(insertsToWrite, file)

@@ -39,7 +39,7 @@
 import abc
 
 
-class argDataInterfaceBase(object):
+class argDataInterfaceBase:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

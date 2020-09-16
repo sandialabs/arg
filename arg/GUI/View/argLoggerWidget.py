@@ -45,8 +45,8 @@ class argLoggerWidget(QWidget):
     """A widget class to cover 'Logger' area
     """
 
-    def __init__(self, parent=None):
-        super(argLoggerWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Instantiate logger layout
         self.loggerVLayout = QVBoxLayout()

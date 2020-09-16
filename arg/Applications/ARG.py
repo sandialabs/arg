@@ -67,7 +67,7 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
     Types = yaml.safe_load(t_file)
 
 
-class Runner(object):
+class Runner:
     """A class to describe ARG runner parameters
     """
 
@@ -83,7 +83,8 @@ class Runner(object):
         self.LatexProcessor = None
         self.TexFile = None
 
-    def usage(self):
+    @staticmethod
+    def usage():
         """Provide online help.
         """
 
@@ -259,7 +260,6 @@ def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
             print("[{}] LaTeX to PDF processor: {}".format(
                 app,
                 latex_proc.strip()))
-            has_latexmk = True
 
         # Look for predefined list of possible processors otherwise
         else:
@@ -269,7 +269,6 @@ def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
                 print("[{}] LaTeX to PDF processor: {}".format(
                     app,
                     return_latex.strip()))
-                has_latexmk = True
             else:
                 # If no latexmk was found, then look for full pdflatex path
                 return_latex = distutils.spawn.find_executable("pdflatex")

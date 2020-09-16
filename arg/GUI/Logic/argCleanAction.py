@@ -48,8 +48,8 @@ class argCleanAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argCleanAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/clean.png")))
         self.setText("Clean")
@@ -57,6 +57,7 @@ class argCleanAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'Clean' action detected.".format(app))
         QApplication.instance().cleanRequested()

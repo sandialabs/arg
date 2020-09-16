@@ -49,7 +49,7 @@ from arg.Common.argInformationObject import argInformationObject
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 
 
-class argBackendBase(object):
+class argBackendBase:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -92,7 +92,8 @@ class argBackendBase(object):
         return argMultiFontStringHelper.Types.get(
             "BackendTypes", {}).get(self.Type, {}).get("captions", '')
 
-    def get_timestamp(self):
+    @staticmethod
+    def get_timestamp():
         """Convenience method to get timestamp under unified format
         """
 
@@ -134,77 +135,55 @@ class argBackendBase(object):
         """Generate backend-end specific artifact for multi-font string
         """
 
-        pass
-
     @abc.abstractmethod
     def generate_matrix_string(self, matrix):
         """Generate back-end specific string from matrix entries
         """
-
-        pass
 
     @abc.abstractmethod
     def add_paragraph(self, item):
         """Add paragraph to the report
         """
 
-        pass
-
     @abc.abstractmethod
     def add_list(self, item, number_items=False):
         """Add itemization or enumeration to the report
         """
-
-        pass
 
     @abc.abstractmethod
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
 
-        pass
-
     @abc.abstractmethod
     def add_section(self, item, numbered=True):
         """Add section to the report
         """
-
-        pass
 
     @abc.abstractmethod
     def add_chapter(self, item, numbered=True):
         """Add chapter to the report
         """
 
-        pass
-
     @abc.abstractmethod
     def add_page_break(self):
         """Add page break to the report
         """
-
-        pass
 
     @abc.abstractmethod
     def add_table(self, header, body, do_verbatim, position):
         """Add table to the report
         """
 
-        pass
-
     @abc.abstractmethod
     def add_figure(self, arguments):
         """Add figure to the report
         """
 
-        pass
-
     @abc.abstractmethod
     def recursively_build_report(self, structure_tree):
         """Recursively navigate tree sructure to build report
         """
-
-        pass
 
     @abc.abstractmethod
     def assemble(self, report_map, version=None, latex_proc=None):
@@ -484,7 +463,6 @@ class argBackendBase(object):
             return None, None
 
         # Determine path and file names
-        figure_file_path = os.path.dirname(figure_file)
         figure_file_name = os.path.basename(figure_file)
 
         # Ensure that image file is present in output directory

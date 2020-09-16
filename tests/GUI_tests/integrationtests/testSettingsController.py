@@ -92,8 +92,7 @@ def main():
     controller.scriptDirectoryConfigFilePath = adminLvl
     controller.userHomeConfigFilePath = usrLvl
     controller.userSettingsReader = \
-        argUserSettingsReader(controller.scriptDirectoryConfigFilePath,
-                              controller.userHomeConfigFilePath)
+        argUserSettingsReader(controller.scriptDirectoryConfigFilePath, controller.userHomeConfigFilePath)
 
     # Set config file path to output, initialize controller and save settings as initialized
     controller.userHomeConfigFilePath = os.path.join(workingDir, "userSettingsController.yml")

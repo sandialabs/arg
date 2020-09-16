@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                     arg/GUI/Logic/argUserSettingsReader.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import os
 
@@ -57,8 +57,8 @@ class argUserSettingsReader(QObject):
     """A reader class to read ARG settings file
     """
 
-    def __init__(self, adminLvlPath, usrLvlPath, data={}, err='', parent=None):
-        super(argUserSettingsReader, self).__init__(parent)
+    def __init__(self, adminLvlPath, usrLvlPath):
+        super().__init__()
 
         self.adminLvlPath = adminLvlPath
         self.usrLvlPath = usrLvlPath
@@ -98,7 +98,8 @@ class argUserSettingsReader(QObject):
         missings = self.checkAllSettings()
         return [False, missings]
 
-    def readSettingsFile(self, lvl):
+    @staticmethod
+    def readSettingsFile(lvl):
         """Read settings file at given level
         """
 

@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                    arg/GUI/View/argDataWidget.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 
 import os
@@ -51,8 +51,8 @@ class argDataWidget(QWidget):
     """A widget class to cover 'Data' tab
     """
 
-    def __init__(self, parent=None):
-        super(argDataWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Retrieve settings controller
         settings = QApplication.instance().settingsController
@@ -189,7 +189,8 @@ class argDataWidget(QWidget):
         self.geometryRootLineEdit.editingFinished.connect(self.onGeometryRootLineEditEditingFinished)
         self.inputDeckLineEdit.editingFinished.connect(self.onInputDeckEditEditingFinished)
 
-    def fillTableWidget(self, bijectiveMappingsKey, tableWidget, data):
+    @staticmethod
+    def fillTableWidget(bijectiveMappingsKey, tableWidget, data):
         """ Fill table widget with mapping
         """
 
@@ -243,21 +244,21 @@ class argDataWidget(QWidget):
         self.cleanParameters()
 
         # Data folder
-        if (data.get(settings.dataFolderKey())):
+        if data.get(settings.dataFolderKey()):
             self.dataFolderLineEdit.setText(data.get(settings.dataFolderKey()))
 
         # CAD Parameters
-        if (data.get(settings.geometryRootKey())):
+        if data.get(settings.geometryRootKey()):
             self.geometryRootLineEdit.setText(data.get(settings.geometryRootKey()))
-        if (data.get(settings.reportedCadMetaDataKey())):
+        if data.get(settings.reportedCadMetaDataKey()):
             cadMetaDataValue = data.get(settings.reportedCadMetaDataKey())
             cadMetaDataValueAsString = settings.keySeparatorDefault().join(cadMetaDataValue)
             self.geometryReportedCADMetadaLineEdit.setText(cadMetaDataValueAsString)
 
-        if (data.get(settings.inputDeckKey())):
+        if data.get(settings.inputDeckKey()):
             self.inputDeckLineEdit.setText(data.get(settings.inputDeckKey()))
 
-        if (data.get(settings.ignoredBlocksKey())):
+        if data.get(settings.ignoredBlocksKey()):
             ignoredBlocksValue = data.get(settings.ignoredBlocksKey())
             ignoredBlocksAsString = settings.keySeparatorDefault().join(ignoredBlocksValue)
             self.ignoredBlocksLineEdit.setText(ignoredBlocksAsString)
@@ -266,7 +267,8 @@ class argDataWidget(QWidget):
         self.fillTableWidget(settings.cadToFemKey(), self.CADToFEMTableWidget, data)
         self.fillTableWidget(settings.femToCadKey(), self.FEMToCADTableWidget, data)
 
-    def constructParametersFromTabWidget(self, tabWidget, subParameter):
+    @staticmethod
+    def constructParametersFromTabWidget(tabWidget, subParameter):
         """Complete provided tabWidget with subParameter content
         """
 
@@ -312,22 +314,21 @@ class argDataWidget(QWidget):
         settings = QApplication.instance().settingsController
 
         # Initialize parameters dict
-        parameters = {}
+        parameters = {
+            settings.dataFolderKey(): self.dataFolderLineEdit.text() if self.dataFolderLineEdit.text()
+            else settings.dataFolderDefault(),
+            settings.geometryRootKey(): self.geometryRootLineEdit.text()}
 
         # Data folder
-        parameters[settings.dataFolderKey()] = \
-            self.dataFolderLineEdit.text() if self.dataFolderLineEdit.text() \
-                else settings.dataFolderDefault()
 
         # CAD Parameters
-        parameters[settings.geometryRootKey()] = self.geometryRootLineEdit.text()
         cadMetaDataList = self.convertStringAsList(self.geometryReportedCADMetadaLineEdit.text())
-        if (len(cadMetaDataList) > 0):
+        if len(cadMetaDataList) > 0:
             parameters[settings.reportedCadMetaDataKey()] = cadMetaDataList
 
         parameters[settings.inputDeckKey()] = self.inputDeckLineEdit.text()
         ignoredBlocksList = self.convertStringAsList(self.ignoredBlocksLineEdit.text())
-        if (len(ignoredBlocksList) > 0):
+        if len(ignoredBlocksList) > 0:
             parameters[settings.ignoredBlocksKey()] = ignoredBlocksList
 
         # Mappings
@@ -364,7 +365,8 @@ class argDataWidget(QWidget):
         cleanParametersTabwidget(self.FEMToCADTableWidget)
         cleanParametersTabwidget(self.CADToFEMTableWidget)
 
-    def convertStringAsList(self, text):
+    @staticmethod
+    def convertStringAsList(text):
         """Convert a string provided as a list. The string is splitted using
         the defaut key separator provied by the settings controller.
         """
@@ -373,7 +375,7 @@ class argDataWidget(QWidget):
         settings = QApplication.instance().settingsController
 
         collection = []
-        if (len(text) > 0):
+        if len(text) > 0:
             collection = text.split(settings.keySeparatorDefault())
 
         return collection
@@ -416,7 +418,8 @@ class argDataWidget(QWidget):
         """
         self.onRemoveTableWidgetSelectedItems(self.FEMToCADTableWidget)
 
-    def onFillLineEdit(self, lineEdit, fileMode):
+    @staticmethod
+    def onFillLineEdit(lineEdit, fileMode):
         openFileDialog = QFileDialog()
         openFileDialog.setAcceptMode(QFileDialog.AcceptOpen)
         openFileDialog.setFileMode(fileMode)
@@ -426,7 +429,8 @@ class argDataWidget(QWidget):
             if len(fileNames) == 1:
                 lineEdit.setText(fileNames[0])
 
-    def onRemoveTableWidgetSelectedItems(self, tabWidget):
+    @staticmethod
+    def onRemoveTableWidgetSelectedItems(tabWidget):
         """Remove selected row from table
         """
 

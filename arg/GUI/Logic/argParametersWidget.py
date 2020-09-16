@@ -48,8 +48,8 @@ class argParametersWidget(QTabWidget):
     """A widget class to cover all tabs
     """
 
-    def __init__(self, parent=None):
-        super(argParametersWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Instantiate each available tab
         self.reportInformationWidget = argReportInformationWidget()
