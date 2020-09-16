@@ -1,19 +1,12 @@
-venv/
-static/
-templates/
+# Byte-compiled / optimized / DLL files
+__pycache__
+*.py[cod]
+*$py.class
 
-*.pyc
-__pycache__/
-
+# Flask
 instance/
 
-.pytest_cache/
-.coverage
-htmlcov/
-
-dist/
-build/
-*.egg-info/
-
-static/*
-templates/*
+# static html folders
+# hosting files built from the angular (front-end) project
+static/
+templates/index.html
