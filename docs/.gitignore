@@ -1,0 +1,10 @@
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+
+# Jekyll (static site generator)
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata

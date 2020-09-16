@@ -1,5 +1,9 @@
+# Byte-compiled / optimized / DLL files
 __pycache__
+*.py[cod]
+*$py.class
 
+# Arg test output
 build_tests/build_tests-cases.txt
 build_tests-[a-z]*-Report-Latex/
 build_tests-[a-z]*-Report-Word/
@@ -10,7 +14,6 @@ GUI_tests/output
 GUI_tests/GUI_unittests
 GUI_tests/GUI_integrationtests
 
-.pytest_cache
-
-!.gitignore
 !expected/*
+
+.pytest_cache
