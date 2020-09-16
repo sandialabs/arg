@@ -207,8 +207,13 @@ export class ToolbarComponent implements OnInit {
   save(): void {
     let params = this.localStorageService.getJson(LocalStorageService.ARG_PARAMETERS_KEY);
     // check if any params exists
+    // Last processing on param
+
     if (params) {
-      
+      if (typeof(params.IgnoredBlockKeys) == 'string' ) {
+        params.IgnoredBlockKeys = params.IgnoredBlockKeys.split(';');
+      }
+
       // Publish on logger
       this.eventService.publish('logger', {level: 'INFO', message: 'Requesting save...'});
 

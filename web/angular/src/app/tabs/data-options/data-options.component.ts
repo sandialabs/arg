@@ -46,21 +46,39 @@ import { Subscription } from 'rxjs';
 import { EventService } from './../../services/event.service';
 import { LocalStorageService } from './../../services/local-storage.service';
 
+
 @Component({
   selector: 'app-data-options',
   templateUrl: './data-options.component.html',
   styleUrls: ['./data-options.component.scss']
 })
+
 export class DataOptionsComponent implements OnInit {
   /**
    * @variables
    */
+
+  public TABLESMAPPING = {
+      CADToFEM: "CADToFEM",
+      FEMToCAD: "FEMToCAD"
+  }
+
   private defaultFormValues = {
     DataDirectory: '',
     GeometryRoot: '',
     ReportedCadMetaData: '',
     DeckRoot: '',
     IgnoredBlockKeys: '',
+    Mappings: {
+        FEM_to_CAD: {
+            elements: {},
+            factors: {}
+        },
+        CAD_to_FEM: {
+            elements: {},
+            factors: {}
+        }
+    },
     CADtoFEM: [{}],
     FEMtoCAD: [{}]
   }
@@ -70,6 +88,7 @@ export class DataOptionsComponent implements OnInit {
     ReportedCadMetaData: new FormControl(this.defaultFormValues.ReportedCadMetaData),
     DeckRoot: new FormControl(this.defaultFormValues.DeckRoot),
     IgnoredBlockKeys: new FormControl(this.defaultFormValues.IgnoredBlockKeys),
+    Mappings: new FormControl(Object.assign({}, this.defaultFormValues.Mappings)),
     CADtoFEM: new FormControl(this.defaultFormValues.CADtoFEM),
     FEMtoCAD: new FormControl(this.defaultFormValues.FEMtoCAD)
   });
@@ -101,18 +120,32 @@ export class DataOptionsComponent implements OnInit {
 
           // Prepare new data
           Object.keys(data).forEach((key) => {
+            
             if (this.form.contains(key)) {
               if (typeof data[key] == 'number') {
                 data[key] = data[key].toString();
               }
               if (typeof data[key] == 'object') {
-                data[key] = data[key].join(';');
+                if (key != 'Mappings') {
+                    data[key] = data[key].join(';');
+                }
               }
               
               if (formData[key] !== data[key]){
-                formData[key] = data[key];
+                if (key == 'Mappings') {
+                  formData[key].FEM_to_CAD = Object.assign(
+                    { elements: {}, factors: {}}, 
+                    data[key].FEM_to_CAD ? data[key].FEM_to_CAD : {}
+                  );
+                  formData[key].CAD_to_FEM = Object.assign(
+                    { elements: {}, factors: {}}, 
+                    data[key].CAD_to_FEM ? data[key].CAD_to_FEM : {}
+                  );
+                }
+                else {
+                  formData[key] = data[key];
+                }
               }
-
             }
 
           });
@@ -138,13 +171,118 @@ export class DataOptionsComponent implements OnInit {
     });
   }
 
-  addCadToPem(): void {
+  /**
+   * Returns a new key for an array using a prefix and a number suffix
+   * This method will recursively increment the suffix until it finds a non-existing key
+   * @param arr The array to identify a new key for.
+   * @param prefix a string prefix
+   * @param numberSuffix the number suffix to verify
+   */
+  createUniqueKey(arr: any, prefix: string, numberSuffix: number): string {
+     
+    if (arr == null){
+      console.error("Invalid array : " + arr);
+      return null;
+    }
+    else {
+
+      if (arr.elements[prefix + numberSuffix] !== undefined)
+      {
+        return this.createUniqueKey(arr, prefix, numberSuffix + 1);
+      }
+      else return prefix + numberSuffix;
+    }
   }
 
-  addPemToCad(): void {
+  /**
+   * 
+   * @param table Adds an element to a table (Mappings.FEM_to_CAD or Mappings.CAD_to_FEM)
+   */
+  addElt(table: string): void {
+
+    let formData: any = this.form.value;
+
+    let arr = null;
+    if (table == this.TABLESMAPPING.CADToFEM ) {
+      arr = formData.Mappings.CAD_to_FEM;
+    }
+    else if (table ==  this.TABLESMAPPING.FEMToCAD ) {
+      arr = formData.Mappings.FEM_to_CAD;
+    }
+
+    if (arr !== null){
+      var nbElements = Object.keys(arr.elements).length;
+      var newKey = this.createUniqueKey(arr, "elt", nbElements);
+      arr.elements[newKey] =[];
+      arr.factors[newKey] ='';
+
+      // Set form data
+      this.form.setValue(formData);
+    }
+    else console.error("addElt : Invalid table id " + table);
   }
 
-  ngOnDestroy() { 
-	  this.valueChangesSubscription.unsubscribe()
+  removeElementsAndFactors(table: any, key: string) {
+      delete table.elements[key];
+      delete table.factors[key];
+  }
+
+  removeElt(table: string, key: string): void {
+    let formData: any = this.form.value;
+    if (table == this.TABLESMAPPING.CADToFEM ) {
+        this.removeElementsAndFactors(formData.Mappings.CAD_to_FEM, key);
+    }
+    else if (table ==  this.TABLESMAPPING.FEMToCAD ) {
+        this.removeElementsAndFactors(formData.Mappings.FEM_to_CAD, key);
+    }
+    this.form.setValue(formData);
+  }
+
+   updateCol1ElementsAndFactors(table: any, newKey: string, oldKey: string) {
+       table.elements[newKey] = table.elements[oldKey];
+       table.factors[newKey] = table.factors[oldKey];
+       delete table.elements[oldKey];
+       delete table.factors[oldKey];
+   }
+   updateCol1(table: string, oldKey: string, event: any) {
+       let formData: any = this.form.value;
+       const newKey = event.target.textContent;
+       if (oldKey != newKey) {
+           if (table == this.TABLESMAPPING.CADToFEM ) {
+               this.updateCol1ElementsAndFactors(formData.Mappings.CAD_to_FEM, newKey, oldKey);
+           }
+           else if (table ==  this.TABLESMAPPING.FEMToCAD ) {
+               this.updateCol1ElementsAndFactors(formData.Mappings.FEM_to_CAD, newKey, oldKey);
+           }
+           this.form.setValue(formData);
+       }
+   }
+
+  updateCol2(table: string, key: string, event: any) {
+      let formData: any = this.form.value;
+      const col2 = event.target.textContent;
+      if (table == this.TABLESMAPPING.CADToFEM ) {
+          formData.Mappings.CAD_to_FEM.elements[key] = col2.split(';');
+      }
+      else if (table ==  this.TABLESMAPPING.FEMToCAD ) {
+          formData.Mappings.FEM_to_CAD.elements[key] = col2.split(';');
+      }
+      this.form.setValue(formData);
+  }
+
+  updateCol3(table: string, key: string, event: any) {
+      let formData: any = this.form.value;
+      const newFactor = event.target.textContent;
+      if (table == this.TABLESMAPPING.CADToFEM ) {
+          formData.Mappings.CAD_to_FEM.factors[key] = newFactor
+      }
+      else if (table ==  this.TABLESMAPPING.FEMToCAD ) {
+          formData.Mappings.FEM_to_CAD.factors[key] = newFactor
+      }
+      this.form.setValue(formData);
+   }
+
+  ngOnDestroy() {
+      this.valueChangesSubscription.unsubscribe()
   }
 }
