@@ -160,6 +160,7 @@ public class ARGWebGUIView {
 			this.flaskServerAdminKey = generateKey(rnd, 10);
 			env.put("FLASK_SERVER_ADMIN_KEY", this.flaskServerAdminKey);
 
+			processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 			processBuilder.redirectErrorStream(true);
 
 			// Starts the process
