@@ -75,8 +75,18 @@ Python Static Scan:
     paths:
       - pylint/
 
-# Custom variable for Java projects
+# Custom spotbugs sast for Java projects
 spotbugs-sast:
+  stage: test
+  extends: []
+  needs: []
+  image: maven:3.5.4-jdk-8
+  script:
+    - cd rcp/src/io.arg.webgui/
+    - echo "Verifying arg rcp plugin"
+    - mvn clean verify -DskipTests
   artifacts:
     reports:
-      sast: gl-sast-report.json
+      sast: rcp/src/io.arg.webgui/bundles/io.arg.webgui.plugin/target/spotbugsXml.xml
+
+    

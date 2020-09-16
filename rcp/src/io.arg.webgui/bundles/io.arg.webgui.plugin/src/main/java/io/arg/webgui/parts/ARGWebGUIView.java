@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Random;
@@ -20,7 +21,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.chromium.Browser;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
 
 /**
  * The ARG web GUI view
@@ -50,7 +50,7 @@ public class ARGWebGUIView {
 	// TODO store in config file
 	private String flaskNgAppPathUrl = "http://127.0.0.1";
 	private String flaskShutdownRoute = "/api/v1/server/shutdown";
-	
+
 	/**
 	 * The system process to launch the flask server
 	 */
@@ -65,23 +65,23 @@ public class ARGWebGUIView {
 	private String flaskServerAdminKey;
 
 	private static String generateKey(Random random, int length) {
-        
+
 		String strAllowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sbRandomString = new StringBuilder(10);
-        
-        for(int i = 0 ; i < length; i++){
-            
-            //get random integer between 0 and string length
-            int randomInt = random.nextInt(strAllowedCharacters.length());
-            
-            //get char from randomInt index from string and append in StringBuilder
-            sbRandomString.append( strAllowedCharacters.charAt(randomInt) );
-        }
-        
-        return sbRandomString.toString();
-        
-    }
-	
+		StringBuilder sbRandomString = new StringBuilder(10);
+
+		for (int i = 0; i < length; i++) {
+
+			// get random integer between 0 and string length
+			int randomInt = random.nextInt(strAllowedCharacters.length());
+
+			// get char from randomInt index from string and append in StringBuilder
+			sbRandomString.append(strAllowedCharacters.charAt(randomInt));
+		}
+
+		return sbRandomString.toString();
+
+	}
+
 	/**
 	 * This method is automatically called when launching the plugin view.
 	 * 
@@ -147,7 +147,8 @@ public class ARGWebGUIView {
 			// TODO store in config file
 			env.put("FLASK_DEBUG", "0");
 			// TODO store in config file
-			// TODO change the server environment to production (in fact needed if server is not local)
+			// TODO change the server environment to production (in fact needed if server is
+			// not local)
 			env.put("FLASK_ENV", "development");
 
 			// TODO: need to check the availability of the port before setting it. Multiple
@@ -158,7 +159,7 @@ public class ARGWebGUIView {
 			Random rnd = new Random();
 			this.flaskServerAdminKey = generateKey(rnd, 10);
 			env.put("FLASK_SERVER_ADMIN_KEY", this.flaskServerAdminKey);
-			
+
 			processBuilder.redirectErrorStream(true);
 
 			// Starts the process
@@ -172,23 +173,25 @@ public class ARGWebGUIView {
 
 	/**
 	 * Sends to the flask server a stop request to shutdown gracefully
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	public String requestFlaskServerStop() throws Exception {
-      StringBuilder result = new StringBuilder();
-      URL url = new URL(this.flaskNgAppPathUrl + ":" + this.port + this.flaskShutdownRoute + "?key=" + this.flaskServerAdminKey);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-      String line;
-      while ((line = rd.readLine()) != null) {
-         result.append(line);
-      }
-      rd.close();
-      return result.toString();
-   }
-	
+		StringBuilder result = new StringBuilder();
+		URL url = new URL(this.flaskNgAppPathUrl + ":" + this.port + this.flaskShutdownRoute + "?key="
+				+ this.flaskServerAdminKey);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), Charset.defaultCharset()));
+		String line;
+		while ((line = rd.readLine()) != null) {
+			result.append(line);
+		}
+		rd.close();
+		return result.toString();
+	}
+
 	/**
 	 * Stops the client and the server
 	 */
@@ -197,17 +200,14 @@ public class ARGWebGUIView {
 		if (apiProcess != null && apiProcess.isAlive()) {
 			// TODO replace with logger (log4j)
 			System.out.println("Stopping ARG Api");
-			
-			
-			try
-			{
-				System.out.println(this.requestFlaskServerStop());			
+
+			try {
+				System.out.println(this.requestFlaskServerStop());
 				apiProcess.wait(10000);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
 			}
-			catch(Exception e) {
-				System.err.println(e.getMessage());			
-			}
-			
+
 			apiProcess.destroy();
 			apiProcess = null;
 		}
