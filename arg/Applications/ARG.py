@@ -42,7 +42,6 @@ import os
 import shutil
 import sys
 import time
-
 import yaml
 
 from arg import __version__
@@ -72,6 +71,8 @@ class Runner:
     """
 
     def __init__(self, version=None):
+        """Class constructor
+        """
 
         # Default values of variables that must exist
         self.Explore = False
@@ -85,7 +86,7 @@ class Runner:
 
     @staticmethod
     def usage():
-        """Provide online help.
+        """Provide online help
         """
 
         print("Usage:")
