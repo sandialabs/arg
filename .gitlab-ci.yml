@@ -12,8 +12,10 @@ include:
   - template: Secret-Detection.gitlab-ci.yml
   - local: "/.gitlab/templates/build-tests-GA-EA.yml"
   - local: "/.gitlab/templates/gui-tests.yml"
+  - local: "/.gitlab/templates/rcp-tests.yml"
   - local: "/.gitlab/templates/distributions-tests.yml"
   - local: "/.gitlab/templates/package.yml"
+  - local: "/.gitlab/templates/package-rcp.yml"
   - local: "/.gitlab/templates/deploy.yml"
   - local: "/.gitlab/templates/docs.yml"
   - local: "/.gitlab/templates/git-bot.yml"

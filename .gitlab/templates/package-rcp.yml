@@ -1,0 +1,51 @@
+###########################
+#### Package RCP stage ####
+###########################
+
+
+#Build angular client
+build-angular-flask-server:
+  stage: check-package
+  needs: []
+  image: trion/ng-cli
+  script:
+    - echo "Install Angular dependencies"
+    - cd web/angular
+    - npm install
+    - echo "Build Angular client"
+    - ng build --prod --base-href /static/
+    - echo "Copy Angular Files to Flask server"
+    - cd ../../web/api
+    - mkdir static
+    - mkdir templates
+    - mv ../angular/dist/ARG-GUI-angular/index.html templates/index.html
+    - cp -R ../angular/dist/ARG-GUI-angular/* static/
+  artifacts:
+    expire_in: 3 days
+    paths:
+      - web/api
+  rules:
+    - changes:
+      - rcp/**
+      - web/**
+
+
+#Build rcp plugin
+build-rcp-plugin:
+  stage: package
+  image: maven:3.5.4-jdk-8
+  needs: [build-angular-flask-server]
+  script:
+    - mkdir target
+    - cd rcp/src/io.arg.webgui
+    - echo "Building arg plugin"
+    - mvn clean install -DskipTests
+    - cp -R releng/io.arg.webgui.update/target/site/. ../../../target/
+  artifacts:
+    expire_in: 3 days
+    paths:
+      - target
+  rules:
+    - changes:
+      - rcp/**
+      - web/**
