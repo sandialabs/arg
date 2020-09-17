@@ -46,8 +46,8 @@ class argCentralWidget(QSplitter):
     """A widget class to cover central area layout
     """
 
-    def __init__(self, parent=None):
-        super(argCentralWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Instantiate 'Parameters' and 'Logger' widgets
         self.parameterWidget = argParametersWidget()

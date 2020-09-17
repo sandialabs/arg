@@ -60,7 +60,7 @@ class argReportInformationWidget(QWidget):
         self.argExecutionOption = settings.eOption()
 
         # Backend
-        self.backendGroupBox = QGroupBox(self)
+        self.backendGroupBox = QGroupBox()
         self.backendLabel = QLabel(settings.backendTypeValue(settings.label))
         self.backendLatexRadioButton = QRadioButton(settings.backendTypeKeyLatex())
         self.backendWordRadioButton = QRadioButton(settings.backendTypeKeyWord())

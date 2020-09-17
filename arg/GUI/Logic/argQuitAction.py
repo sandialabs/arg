@@ -48,7 +48,7 @@ class argQuitAction(QAction):
     """An action class
     """
 
-    def __init__(selfe):
+    def __init__(self):
         super().__init__()
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/quit.png")))

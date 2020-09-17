@@ -6,3 +6,7 @@
 
 # Binary directory
 bin/
+
+# Cache
+__pycache__/
+web/__pycache__/
