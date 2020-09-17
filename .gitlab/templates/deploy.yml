@@ -15,11 +15,11 @@ Upload pyARG-dep in Gitlab.com:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG-dep"
     PACKAGING_PATH: "package-pyARG-dep"
   before_script:
-    - echo "========== Getting Uploading dependencies ==========="
+    - echo "========== [pyARG-dep deployment] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install twine
   script:
-    - echo "==================== Upload pyARG ==================="
+    - echo "==================== [pyARG-dep deployment] Upload pyARG ==================="
     - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
@@ -37,11 +37,11 @@ Upload pyARG in Gitlab.com:
   variables:
     PACKAGING_PATH: "package"
   before_script:
-    - echo "========== Getting Uploading dependencies ==========="
+    - echo "========== [pyARG deployment] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install twine
   script:
-    - echo "==================== Upload pyARG ==================="
+    - echo "==================== [pyARG deployment] Upload pyARG ==================="
     - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
     # Try to install pyARG from gitlab packages
     #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.1
@@ -64,11 +64,11 @@ Upload pyARG-dep in pypi.org:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG-dep"
     PACKAGING_PATH: "package-pyARG-dep"
   before_script:
-    - echo "========== Getting Uploading dependencies ==========="
+    - echo "========== [pyARG-dep deployment] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install --upgrade twine
   script:
-    - echo "========= Upload pyARG-dep on pypi.org/legacy ==========="
+    - echo "========= [pyARG-dep deployment] Upload pyARG-dep on pypi.org/legacy ==========="
     - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/* --skip-existing
     - pip install pyARG-dep
     - pip uninstall pyARG-dep -y
@@ -90,11 +90,11 @@ Upload pyARG in pypi.org:
   variables:
     PACKAGING_PATH: "package"
   before_script:
-    - echo "========== Getting Uploading dependencies ==========="
+    - echo "========== [pyARG deployment] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install --upgrade twine
   script:
-    - echo "========= Upload pyARG on pypi.org/legacy ==========="
+    - echo "========= [pyARG deployment] Upload pyARG on pypi.org/legacy ==========="
     - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/* --skip-existing
     - pip install pyARG
     - python -c "import arg"

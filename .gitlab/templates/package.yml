@@ -8,7 +8,7 @@ Check pyARG-dep:
   stage: check-package
   needs: []
   script:
-    - echo "==================== Checking Version ===================="
+    - echo "==================== [pypi Package] Check pyARG-dep version ===================="
     - export VERSION_CHECK=$(python .gitlab/ci/version_checker.py pyARG-dep)
     - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG-dep -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
   rules:
@@ -27,12 +27,12 @@ Package pyARG-dep:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG-dep"
     PACKAGING_PATH: "package-pyARG-dep"
   before_script:
-    - echo "========== Getting Packaging dependencies ==========="
+    - echo "========== [pypi Package] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install wheel
     - pip install twine
   script:
-    - echo "==================== Build pyARG ===================="
+    - echo "==================== [pypi Package] Build pyARG-dep ===================="
     - mkdir $PACKAGING_PATH/
     - cp $DEPLOYMENT_PYPI_SRC/* $PACKAGING_PATH/
     - cp requirements.txt $PACKAGING_PATH/
@@ -58,7 +58,7 @@ Check pyARG:
   stage: check-package
   needs: []
   script:
-    - echo "==================== Checking Version ===================="
+    - echo "==================== [pypi Package] Check pyARG version ===================="
     - export VERSION_CHECK=$(python .gitlab/ci/version_checker.py pyARG)
     - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
   rules:
@@ -74,12 +74,12 @@ Package pyARG:
     DEPLOYMENT_PYPI_SRC: ".gitlab/deployment/pypi/pyARG"
     PACKAGING_PATH: "package"
   before_script:
-    - echo "========== Getting Packaging dependencies ==========="
+    - echo "========== [pypi Package] Get pypi dependencies ==========="
     - pip install --upgrade pip
     - pip install wheel
     - pip install twine
   script:
-    - echo "==================== Build pyARG ===================="
+    - echo "==================== [pypi Package] Build pyARG ===================="
     - mkdir $PACKAGING_PATH/
     - cp $DEPLOYMENT_PYPI_SRC/* $PACKAGING_PATH/
     - cp LICENSE $PACKAGING_PATH/

@@ -8,7 +8,6 @@ include:
   - template: Code-Quality.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
   - template: Secret-Detection.gitlab-ci.yml
   - local: "/.gitlab/templates/build-tests-GA-EA.yml"
   - local: "/.gitlab/templates/gui-tests.yml"
@@ -42,7 +41,7 @@ stages:
   - check-package
   - package
   - deploy
-  - doc
+  - documentation
   - git-bot
 
 # Workaround for Gitlab issue generating a detached pipeline for "rules" "if" "manual" jobs
@@ -77,8 +76,8 @@ Python Static Scan:
     paths:
       - pylint/
 
-# Custom spotbugs sast for Java projects
-spotbugs-sast:
+# Custom SpotBugs-SAST routine for Java projects
+Custom SpotBugs-SAST test:
   stage: test
   extends: []
   needs: []

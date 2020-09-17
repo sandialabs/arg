@@ -4,17 +4,17 @@
 
 
 #Build angular client
-build-angular-flask-server:
+Build Angular app / Deploy to Flask server:
   stage: check-package
   needs: []
   image: trion/ng-cli
   script:
-    - echo "Install Angular dependencies"
+    - echo "==================== [pypi Package] Install Angular dependencies ===================="
     - cd web/angular
     - npm install
-    - echo "Build Angular client"
+    - echo "==================== [pypi Package] Build Angular client ===================="
     - ng build --prod --base-href /static/
-    - echo "Copy Angular Files to Flask server"
+    - echo "==================== [pypi Package] Deploy to Flask server ===================="
     - cd ../../web/api
     - mkdir static
     - mkdir templates
@@ -29,16 +29,15 @@ build-angular-flask-server:
       - rcp/**
       - web/**
 
-
-#Build rcp plugin
-build-rcp-plugin:
+# Build RCP plug-in
+Build RCP plug-in:
   stage: package
   image: maven:3.5.4-jdk-8
-  needs: [build-angular-flask-server]
+  needs: ["Build Angular app / Deploy to Flask server"]
   script:
     - mkdir target
     - cd rcp/src/io.arg.webgui
-    - echo "Building arg plugin"
+    - echo "==================== [RCP Package] Build RCP ARG Web-Gui plug-in ===================="
     - mvn clean install -DskipTests
     - cp -R releng/io.arg.webgui.update/target/site/. ../../../target/
   artifacts:
