@@ -62,17 +62,17 @@ class argActionManager(QObject):
         super().__init__()
 
         # All available actions
-        self.quitAct = argQuitAction(self)
-        self.openAct = argOpenAction(self)
-        self.saveAct = argSaveAction(self)
-        self.saveAsAct = argSaveAsAction(self)
-        self.saveBeforeRunAct = argSaveBeforeRunAction(self)
-        self.runAct = argRunAction(self)
-        self.cleanAct = argCleanAction(self)
-        self.reloadAct = argReloadAction(self)
-        self.helpAct = argHelpAction(self)
-        self.openUserSettingsAct = argOpenUserSettingsAction(self)
-        self.aboutAct = argAboutAction(self)
+        self.quitAct = argQuitAction()
+        self.openAct = argOpenAction()
+        self.saveAct = argSaveAction()
+        self.saveAsAct = argSaveAsAction()
+        self.saveBeforeRunAct = argSaveBeforeRunAction()
+        self.runAct = argRunAction()
+        self.cleanAct = argCleanAction()
+        self.reloadAct = argReloadAction()
+        self.helpAct = argHelpAction()
+        self.openUserSettingsAct = argOpenUserSettingsAction()
+        self.aboutAct = argAboutAction()
         self.maxNumberOfActions = 10
         self.openRecentActs = []
 

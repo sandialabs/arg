@@ -54,11 +54,11 @@ class argApplication(QApplication):
     """An application class
     """
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
 
         # Create controllers, runner and action manager
-        self.settingsController = argSettingsController(self)
+        self.settingsController = argSettingsController()
 
         # Retrieve list of missing settings from settings controller initialization
         missingSettings = self.settingsController.initialize()
@@ -66,11 +66,11 @@ class argApplication(QApplication):
         # Show missing settings if there are any
         if missingSettings:
             self.showConfigMissingSettings(missingSettings, True)
-        self.parameterController = argParameterController(self)
+        self.parameterController = argParameterController()
         self.parameterController.setSettingsController(self.settingsController)
-        self.runner = argRunner(self)
+        self.runner = argRunner()
         self.runner.setSettingsController(self.settingsController)
-        self.actionManager = argActionManager(self)
+        self.actionManager = argActionManager()
 
         # Pointer on mainWindow
         self.mainWindow = None

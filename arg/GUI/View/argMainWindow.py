@@ -102,7 +102,7 @@ class argMainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         # Main widgets
-        centralWidget = argCentralWidget(self)
+        centralWidget = argCentralWidget()
         self.setCentralWidget(centralWidget)
 
         # Toolbar connections
