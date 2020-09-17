@@ -25,26 +25,29 @@ Bot release job:
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "Clone arg git repository"
+    - echo "==================== [Release routine] Tag master branch ===================="
+    - echo "---------- [ARG Bot] Clone arg repository ----------"
     - git clone git@gitlab.com:AutomaticReportGenerator/arg.git $ARG_REPO_TMP_FOLDER
     - cd $ARG_REPO_TMP_FOLDER
-    - echo "Checkout branch master"
+    - echo "---------- [ARG Bot] Checkout master branch ----------"
     - git checkout master
-    - echo "Finding version to set a tag"
+    - echo "---------- [ARG Bot] Find current version to tag ----------"
     - GIT_TAG=$(awk '/__version__ = "/,/"/ { print }' arg/__version__.py | rev | cut -d" " -f1 | rev | tr -d '"')
     - echo "Found a tag => $GIT_TAG"
+    - echo "---------- [ARG Bot] Check pyARG version ----------"
     - echo "Checking pyARG version"
     - export PYARG=$(awk '/version="/,/",/ { print }' .gitlab/deployment/pypi/pyARG/setup.py | rev | cut -d'"' -f2 | rev)
     - echo "Found pyARG version => $PYARG"
     - if [ "$GIT_TAG" = "$PYARG" ]; then echo "----- VERSIONS ARE THE SAME -----"; else echo "----- __version__.py and setup.py ARE NOT THE SAME -----" && exit 1; fi
-    - echo "Setting a tag $GIT_TAG"
+    - echo "---------- [ARG Bot] Create $GIT_TAG tag ----------"
     - git tag $GIT_TAG
-    - echo "Checkout branch develop"
+      - echo "==================== [Release routine] Spawn new develop branch ===================="
+    - echo "---------- [ARG Bot] Checkout develop branch ----------"
     - git checkout develop
-    - echo "Hard reseting develop to master"
+    - echo "---------- [ARG Bot] Hard-reset develop to master ----------"
     - git reset --hard master
     - git push origin develop
-    - echo "Changing version on develop branch back to develop"
+    - echo "---------- [ARG Bot] Reset version on develop branch ----------"
     - sed -i 's/__version__ = "'$GIT_TAG'"/__version__ = "develop"/g' arg/__version__.py
     - git add .
     - git commit -m "spawn new develop branch from $GIT_TAG"

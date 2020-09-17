@@ -5,12 +5,12 @@
 # Publish the documentation to Gitlab Pages:
 #  - automatically if it is a protected branch (develop or master)
 #  - manually otherwise
-pages:
+Build Pages online documentation:
   image: ruby:2.7
-  stage: doc
+  stage: documentation
   needs: []
   before_script:
-    - echo "==================== Install ARG dependencies ===================="
+    - echo "==================== [Documentation] Install ARG dependencies ===================="
     - apt-get update -y
     - apt-get install -y python3 python3-pip git
     - pip3 install --upgrade pip
@@ -22,6 +22,7 @@ pages:
     - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/m.css/documentation:$(pwd)/m.css/documentation/../plugins:$PYTHONPATH
     - git clone https://github.com/mosra/m.css.git
   script:
+    - echo "==================== [Documentation] Build documentation ===================="
     - cp LICENSE docs/_includes/
     - cp README.md docs/_includes/
     - cd docs

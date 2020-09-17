@@ -25,7 +25,7 @@
     - echo "==================== [${BUILD_TEST_NAME}] Build reports ===================="
     - cd ${BUILD_TEST_PATH}
     - python -c "import test; import os; caseName = os.environ.get('BUILD_TEST_NAME') if 'BUILD_TEST_NAME' in os.environ else ''; caseRunType = os.environ.get('BUILD_TEST_RUNTYPE') if 'BUILD_TEST_RUNTYPE' in os.environ else ''; print(caseName);print(caseRunType); test.build_all(test.machine, caseName, caseRunType, test.reportTypes, test.backendTypes)"
-    - echo "==================== [${BUILD_TEST_NAME}] Checking for errors ===================="
+    - echo "==================== [${BUILD_TEST_NAME}] Check for errors ===================="
     - if [ -s $ERR_PDF_FILE ]; then echo "---------- Errors when building PDF REPORT ----------" && exit 1; else echo "---------- No errors when building PDF REPORT ----------"; fi
     - if [ -s $ERR_DOCX_FILE ]; then echo "---------- Errors when building DOCX REPORT ----------" && exit 1; else echo "---------- No errors when building DOCX REPORT ----------"; fi
     - cd ..
@@ -112,7 +112,7 @@ Build 'tables' case:
   image: nganalytics/nga:compare-builds
   stage: compare-individual-test-pdf
   script:
-    - echo "==================== [${COMPARE_TEST_NAME}] Comparing results ===================="
+    - echo "==================== [${COMPARE_TEST_NAME}] Compare results ===================="
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
@@ -267,7 +267,7 @@ Compare pdf 'tables' case:
   image: nganalytics/nga:compare-builds
   stage: compare-individual-test-word
   script:
-    - echo "==================== [${COMPARE_TEST_NAME}] Comparing results ===================="
+    - echo "==================== [${COMPARE_TEST_NAME}] Compare results ===================="
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"

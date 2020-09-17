@@ -6,7 +6,7 @@
   image: nganalytics/nga:gui-test
   stage: gui-test
   needs: []
-  before_script: # Loading python virtualenv and workarounding vtk no X server bug
+  before_script: # Load python virtualenv and workaround vtk no X server bug
     - echo "==================== [${GUI_TEST_NAME}] Activate virtualenv ===================="
     - virtualenv venv
     - source venv/bin/activate
@@ -27,6 +27,7 @@ GUI integration tests:
     - .gui_test
     - .with_python_cache
   script:
+    - echo "==================== [${GUI_TEST_NAME}] Run GUI tests ===================="
     - python -m tests.GUI_tests.integrationtests.integration
   artifacts:
     expire_in: 1 week
@@ -42,6 +43,7 @@ GUI unit tests:
     - .gui_test
     - .with_python_cache
   script:
+    - echo "==================== [${GUI_TEST_NAME}] Run GUI tests ===================="
     - pip install coverage
     - coverage run --source arg/GUI -m unittest discover -s "tests/GUI_tests" -p "test_*.py"
     - coverage report -m
