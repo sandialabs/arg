@@ -71,7 +71,7 @@ class Application(QObject):
         super(Application, self).__init__(parent=None)
 
         # Create controllers, runner and action manager
-        self.settingsController = argSettingsController(self)
+        self.settingsController = argSettingsController()
         # Retrieve list of missing settings from settings controller initialization
         missingSettings = self.settingsController.initialize()
 
@@ -79,9 +79,9 @@ class Application(QObject):
         if missingSettings:
             self.showConfigMissingSettings(missingSettings, True)
 
-        self.parameterController = argParameterController(self)
+        self.parameterController = argParameterController()
         self.parameterController.setSettingsController(self.settingsController)
-        self.runner = argRunner(self)
+        self.runner = argRunner()
         self.runner.setSettingsController(self.settingsController)
         self.logs = []
 
