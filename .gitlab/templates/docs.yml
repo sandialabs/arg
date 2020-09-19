@@ -43,6 +43,10 @@ Build Pages online documentation:
       - public
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - docs/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
+      changes:
+      - docs/**/*
   allow_failure: true

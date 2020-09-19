@@ -21,6 +21,8 @@ RCP plug-in tests:
       junit: rcp/src/io.arg.webgui/tests/io.arg.webgui.plugin.tests/target/surefire-reports/TEST-*.xml
       cobertura: rcp/src/io.arg.webgui/tests/io.arg.webgui.plugin.tests/target/coverage-site/jacoco.xml
   rules:
-    - changes:
-      - rcp/**
-      - web/**
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      changes:
+      - rcp/**/*
+      - web/**/*

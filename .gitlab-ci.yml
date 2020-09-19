@@ -33,13 +33,13 @@ variables:
 # Stages definition
 stages:
   - test
-  - gui-test
   - build-individual-test
   - compare-individual-test-pdf
   - compare-individual-test-word
   - test-distributions
   - check-package
   - package
+  - gui-test
   - deploy
   - documentation
   - git-bot
