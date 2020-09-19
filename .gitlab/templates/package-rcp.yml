@@ -25,9 +25,11 @@ Build Angular app / Deploy to Flask server:
     paths:
       - web/api
   rules:
-    - changes:
-      - rcp/**
-      - web/**
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      changes:
+      - rcp/**/*
+      - web/**/*
 
 # Build RCP plug-in
 Build RCP plug-in:
@@ -45,6 +47,8 @@ Build RCP plug-in:
     paths:
       - target
   rules:
-    - changes:
-      - rcp/**
-      - web/**
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      changes:
+      - rcp/**/*
+      - web/**/*

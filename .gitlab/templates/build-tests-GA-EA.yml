@@ -38,6 +38,18 @@
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
+  rules:
+    - changes:
+      - arg/Aggregation/*
+      - arg/Applications/*
+      - arg/Backend/*
+      - arg/Common/*
+      - arg/DataInterface/*
+      - arg/Generation/*
+      - arg/Tools/*
+      - arg/__init__.py
+      - arg/__version__.py
+      - tests/build_tests/**/*
 
 # 'can' case build variables
 Build 'can' case:
@@ -138,6 +150,18 @@ Build 'tables' case:
         sh .gitlab/ci/compare_pdf.sh ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf
       fi
   allow_failure: true
+  rules:
+    - changes:
+      - arg/Aggregation/*
+      - arg/Applications/*
+      - arg/Backend/*
+      - arg/Common/*
+      - arg/DataInterface/*
+      - arg/Generation/*
+      - arg/Tools/*
+      - arg/__init__.py
+      - arg/__version__.py
+      - tests/build_tests/**/*
 
 # 'can' case comparison variables
 Compare pdf 'can' case:
@@ -290,7 +314,19 @@ Compare pdf 'tables' case:
         sh .gitlab/ci/compare_pdf.sh ${COMPARE_TEST_GENERATED_PATH_WORD}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf
       fi
   allow_failure: true
-
+  rules:
+    - changes:
+      - arg/Aggregation/*
+      - arg/Applications/*
+      - arg/Backend/*
+      - arg/Common/*
+      - arg/DataInterface/*
+      - arg/Generation/*
+      - arg/Tools/*
+      - arg/__init__.py
+      - arg/__version__.py
+      - tests/build_tests/**/*
+      
 # 'can' case comparison variables
 Compare word 'can' case:
   needs: ["Build 'can' case"]

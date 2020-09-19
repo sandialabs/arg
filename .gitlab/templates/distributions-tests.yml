@@ -12,9 +12,33 @@ Build on macOS 10.14.6:
   needs: []
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - python --version
@@ -61,9 +85,33 @@ Build on Ubuntu latest Docker image:
   needs: []
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -111,9 +159,33 @@ Build on Debian latest Docker image:
   needs: []
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -161,9 +233,33 @@ Build on fedora latest Docker image:
   needs: []
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -212,9 +308,33 @@ Build on CentOS latest Docker image:
   needs: []
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
+      changes:
+        - arg/Aggregation/*
+        - arg/Applications/*
+        - arg/Backend/*
+        - arg/Common/*
+        - arg/DataInterface/*
+        - arg/Generation/*
+        - arg/Tools/*
+        - arg/__init__.py
+        - arg/__version__.py
+        - tests/build_tests/**/*
+        - requirements.txt
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
