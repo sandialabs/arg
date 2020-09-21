@@ -13,7 +13,7 @@ Use 64-bit versions of applications if your system supports them.
 
 ### Update your system
 
-# ARG dependancies:
+# ARG dependencies:
 
 ## 1. Python 3
 
@@ -46,38 +46,19 @@ Use 64-bit versions of applications if your system supports them.
 - Download [ImageMagick](https://imagemagick.org/script/download.php#windows)
   - for 64-bit system: Win64 static at 16 bits-per-pixel component
   - for 32-bit system: Win32 static at 16 bits-per-pixel component
-  
-## 4. Git
-- Download [git](https://git-scm.com/download/win)
-  - for 64-bit system: 64-bit Git for Windows Setup
-  - for 32-bit system: 32-bit Git for Windows Setup
 
-## 5. Perl
+## 4. Perl
 - Download [Perl](http://strawberryperl.com/)
   - for 64-bit system: strawberry-perl-x.xx.x.x-64bit.msi
   - for 32-bit system: strawberry-perl-x.xx.x.x-32bit.msi
 
-## 6. Restart your system
-
-## 7. Open command prompt
-
-- In order to install Python dependencies put following commands line by line:  
+## 5. ARG
+- In order to install ARG and its Python dependencies, put following commands line by line:  
 ```
-git clone https://gitlab.com/AutomaticReportGenerator/arg.git
-cd arg
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install pyARG
 ```
 
-- Add the path to your ARG clone in environment variable PYTHONPATH so it is set as follows:  
-    `C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38;
-    C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Scripts;
-    C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Lib\site-packages;
-    <YOUR_ARG_CLONE_PATH>`
+## Post installation checks
 
-## 8. Post installation checks
-
-To make sure everything was installed correctly, some tests can be built:
-- Go to `arg/tests/build_tests` and run `python test.py`. 
-- Any errors during tests will be reported to console.
-- After a successful build, the results (pdf and docx reports) can be found here: `arg/tests/build_tests` in each case directory. 
+To make sure everything was installed correctly, type `python -c "import arg; print(arg.__version__)"`. It should return **the** latest released version number. 
