@@ -5,7 +5,7 @@
 # Publish the documentation to Gitlab Pages:
 #  - automatically if it is a protected branch (develop or master)
 #  - manually otherwise
-Build Pages online documentation:
+pages:
   image: ruby:2.7
   stage: documentation
   needs: []

@@ -27,19 +27,19 @@ sudo yum update -y
 
 -   Debian/Ubuntu:
 ```
-sudo apt install -y git python3 python3-pip texlive texlive-latex-extra 
+sudo apt install -y python3 python3-pip texlive texlive-latex-extra 
 sudo apt install -y dvipng texlive-science imagemagick
 ```
 -   Fedora:  
 ```
-sudo dnf install -y dnf-plugins-core git texlive texlive-collection-latexextra 
+sudo dnf install -y dnf-plugins-core texlive texlive-collection-latexextra 
 sudo dnf install -y dvipng latexmk texlive-stmaryrd ImageMagick
 ```
 -   Centos/RHEL:  
 ```
 sudo yum install -y yum-utils wget epel-release gcc openssl-devel bzip2-devel 
 sudo yum -y groupinstall "Development Tools"
-sudo yum install -y libffi-devel git wget latexmk texlive texlive-lastpage
+sudo yum install -y libffi-devel wget latexmk texlive texlive-lastpage
 sudo yum install -y texlive-stmaryrd texlive-pdftex texlive-latex-bin
 sudo yum install -y texlive-texconfig* texlive-latex* texlive-metafont*
 sudo yum install -y texlive-cmap* texlive-ec texlive-fncychap* texlive-pdftex-def
@@ -57,7 +57,7 @@ rm texlive-spverbatim-svn15878.v1.0-18.el7.noarch.rpm
 
 - ARG requires Python3 version 3.7 or higher
 
-- check your Python3 current version Debian/Fedora/Centos/RHEL:
+- Check your Python3 current version Debian/Fedora/Centos/RHEL:
   - `python -V`
   - `python3 -V`
 
@@ -95,69 +95,29 @@ rm texlive-spverbatim-svn15878.v1.0-18.el7.noarch.rpm
   - if Python was built from source:
       ```
       python3.8 -m pip install --upgrade pip
-      pip3.8 install virtualenv
-      cd ~/
-      git clone https://gitlab.com/AutomaticReportGenerator/arg.git
-      cd arg/
-      virtualenv venv
-      source venv/bin/activate
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      export PYTHONPATH=~/arg/venv/lib/python3.8/site-packages:~/arg:${PYTHONPATH}
       ```
 
   - if Python version 3.7 or higher is installed:
       ```
       sudo python3 -m pip install --upgrade pip
-      sudo pip3 install virtualenv
-      cd ~/
-      git clone https://gitlab.com/AutomaticReportGenerator/arg.git
-      cd arg/
-      virtualenv venv
-      source venv/bin/activate
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      ```
-
-    - if Python 3.7 is installed then change `<x>` to `7`, if 3.8, then change `<x>` to `8`
-      ```
-      export PYTHONPATH=~/arg/venv/lib/python3.<x>/site-packages:~/arg:${PYTHONPATH}
       ```
 
   - if the only Python installed is Python3 version 3.7 or higher and previous step does not work:
       ```
       sudo python -m pip install --upgrade pip
-      sudo pip install virtualenv
-      cd ~/
-      git clone https://gitlab.com/AutomaticReportGenerator/arg.git
-      cd arg/
-      virtualenv venv
-      source venv/bin/activate
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      ```
-    - if Python 3.7 is installed then change `<x>` to `7`, if 3.8, then change `<x>` to `8`
-      ```
-      export PYTHONPATH=~/arg/venv/lib/python3.<x>/site-packages:~/arg:${PYTHONPATH}
       ```
 
-## 3. Post installation checks
+## 3. ARG 
 
-To make sure everything was installed correctly, some tests can be built:
-- if Virtualenv is activated and PYTHONPATH is exported:
-    ```
-    cd ~/arg/tests/build_tests
-    python test.py
-    ```
+In order to install ARG and its Python dependencies, put following commands line by line:
+```
+python -m pip install --upgrade pip
+pip install pyARG
+```
 
-- if not, then activate Virtualenv and export PYTHONPATH, change `<x>` as before
-    ```
-    cd ~/arg
-    source venv/bin/activate
-    export PYTHONPATH=~/arg/venv/lib/python3.<x>/site-packages:~/arg:${PYTHONPATH}
-    cd ~/arg/tests/build_tests
-    python test.py
-    ```
-  
-Any errors during tests will be reported to console.
-After successful built results (pdf and docx reports) can be found here: `~/arg/tests/build_tests` in each case directory
+## Post installation checks
+
+To make sure everything was installed correctly, type `python -c "import arg; print(arg.__version__)"`. It should return **the** latest released version number. 
