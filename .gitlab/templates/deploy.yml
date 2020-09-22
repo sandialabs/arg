@@ -22,6 +22,8 @@ Upload pyARG-dep in Gitlab.com:
     - echo "==================== [pyARG-dep deployment] Upload pyARG ==================="
     - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - .gitlab/deployment/pypi/pyARG-dep/*
@@ -48,6 +50,8 @@ Upload pyARG in Gitlab.com:
     #- python -c "import arg"
     #- pip uninstall pyARG -y
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: $CI_COMMIT_TAG
 
 
@@ -69,10 +73,14 @@ Upload pyARG-dep in pypi.org:
     - pip install --upgrade twine
   script:
     - echo "========= [pyARG-dep deployment] Upload pyARG-dep on pypi.org/legacy ==========="
-    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/* --skip-existing
+    - ls -al
+    - ls -al $PACKAGING_PATH/dist/*
+    - twine upload --repository-url https://upload.pypi.org/legacy/ --username $TWINE_USERNAME --password $TWINE_PASSWORD $PACKAGING_PATH/dist/* --skip-existing --verbose
     - pip install pyARG-dep
     - pip uninstall pyARG-dep -y
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - .gitlab/deployment/pypi/pyARG-dep/*
@@ -100,6 +108,8 @@ Upload pyARG in pypi.org:
     - python -c "import arg"
     - pip uninstall pyARG -y
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: $CI_COMMIT_TAG
       when: manual
       allow_failure: true

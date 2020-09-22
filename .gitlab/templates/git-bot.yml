@@ -9,6 +9,7 @@ Bot release job:
   variables:
     ARG_REPO_TMP_FOLDER: "arg_repo"
   rules:
+#   Run git-bot stage for real releases only
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"'
       allow_failure: true
   needs: []

@@ -39,6 +39,8 @@
     paths:
       - tests/${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - changes:
       - arg/Aggregation/*
       - arg/Applications/*
@@ -151,6 +153,8 @@ Build 'tables' case:
       fi
   allow_failure: true
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - changes:
       - arg/Aggregation/*
       - arg/Applications/*
@@ -315,6 +319,8 @@ Compare pdf 'tables' case:
       fi
   allow_failure: true
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - changes:
       - arg/Aggregation/*
       - arg/Applications/*

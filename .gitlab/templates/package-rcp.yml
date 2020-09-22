@@ -25,6 +25,8 @@ Build Angular app / Deploy to Flask server:
     paths:
       - web/api
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       changes:
@@ -47,6 +49,8 @@ Build RCP plug-in:
     paths:
       - target
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       changes:

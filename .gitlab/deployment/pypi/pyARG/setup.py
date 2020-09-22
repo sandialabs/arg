@@ -1,4 +1,5 @@
 import setuptools
+import setupnovernormalize
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
@@ -9,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyARG",
-    version="1.0.3",
+    version="1.0.4-RC00",
     author="NexGen Analytics",
     author_email="info@ng-analytics.com",
     description="This is the official PyPi repository for ARG project.",

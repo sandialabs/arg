@@ -42,6 +42,8 @@ pages:
     paths:
       - public
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - docs/**/*

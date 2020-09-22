@@ -35,6 +35,8 @@ GUI integration tests:
     paths:
       - tests/GUI_tests/integrationtests/GUI_integrationtests/
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/GUI/Logic/*
@@ -84,6 +86,8 @@ GUI unit tests:
       - coverage_html/
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/GUI/Logic/*
@@ -133,6 +137,8 @@ GUI flask tests:
       - coverage_html/
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - web/api/**/*
@@ -184,6 +190,8 @@ Qt GUI tests:
     - echo "==================== [${GUI_TEST_NAME} GUI View] Run GUI tests ===================="
     - echo "TODO"
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/GUI/View/*
@@ -222,6 +230,8 @@ plug-in GUI tests:
     - echo "==================== [${GUI_TEST_NAME} GUI View] Run GUI tests ===================="
     - echo "TODO"
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - web/angular/**/*
