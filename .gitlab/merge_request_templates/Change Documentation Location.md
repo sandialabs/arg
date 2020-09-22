@@ -6,8 +6,6 @@ Briefly describe what this MR is about
 
 Mention the issue(s) this MR closes or is related to
 
-Closes
-
 ## Moving docs to a new location?
 
 - [ ] Make sure the old link is not removed and has its contents replaced with
