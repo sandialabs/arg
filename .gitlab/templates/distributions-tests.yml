@@ -11,6 +11,8 @@ Build on macOS 10.14.6:
     OS: "macOS"
   needs: []
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/Aggregation/*
@@ -84,6 +86,8 @@ Build on Ubuntu latest Docker image:
     OS: "Ubuntu"
   needs: []
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/Aggregation/*
@@ -158,6 +162,8 @@ Build on Debian latest Docker image:
     OS: "Debian"
   needs: []
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/Aggregation/*
@@ -232,6 +238,8 @@ Build on fedora latest Docker image:
     OS: "fedora"
   needs: []
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/Aggregation/*
@@ -307,6 +315,8 @@ Build on CentOS latest Docker image:
     OS: "CentOS"
   needs: []
   rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - arg/Aggregation/*
