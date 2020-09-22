@@ -55,3 +55,15 @@ It may be installed as follows:
 ```
 sudo port install ImageMagick
 ```
+
+## 4. ARG 
+
+In order to install ARG and its Python dependencies, put following commands line by line:
+```
+python -m pip install --upgrade pip
+pip install pyARG
+```
+
+## Post installation checks
+
+To make sure everything was installed correctly, type `python -c "import arg; print(arg.__version__)"`. It should return **the** latest released version number. 

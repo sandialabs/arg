@@ -39,7 +39,7 @@
 import importlib
 
 
-class argBackend(object):
+class argBackend:
 
     @staticmethod
     def factory(parameters):

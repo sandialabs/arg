@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Applications/Explorator.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import os
 import sys
@@ -43,7 +43,6 @@ import time
 import yaml
 
 from arg import __version__
-from arg.Applications import ARG
 from arg.Common.argReportParameters import argReportParameters
 
 ARG_VERSION = __version__
@@ -259,13 +258,7 @@ def execute(app, parameters):
     """
 
     # Initialize storage for automatically determined values
-    mutables = {}
-
-    # Save ARG version in mutables
-    mutables["version"] = parameters.Version
-
-    # Retrieve supported parameters file extensions
-    supported_parametersfile_extensions = parameters.Types.get("ParametersFileTypes")
+    mutables = {"version": parameters.Version}
 
     # Parse parameters file
     print("[{}] Parsing parameters file".format(app))
@@ -290,7 +283,7 @@ def execute(app, parameters):
             case.MeshType,
             case.MeshName))
         case.DiscoveredData[case.MeshType] = " mesh in {}".format(
-            backend.generate_text(case.MeshName.replace('\\', '/'), "typewriter"))
+            backend.generate_text(case.MeshName.replace('\\', '/')))
 
     # Save computed mutables
     parameters.save_generated_mutables(mutables)
@@ -299,7 +292,7 @@ def execute(app, parameters):
     generate_structure_file(parameters, case)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 def get_and_comment_property_value(meta_info, info_key):
@@ -342,7 +335,7 @@ def find_solution_partition(case, sol_stem, sol_method, backend):
                 solution.Type,
                 f))
             case.DiscoveredData.setdefault("{} solution".format(solution.Type), []).append(
-                " in {}".format(backend.generate_text(solution.Name.replace('\\', '/'), "typewriter")))
+                " in {}".format(backend.generate_text(solution.Name.replace('\\', '/'))))
 
             # Store corresponding solution and break out
             case.Solutions.append(solution)
@@ -388,7 +381,7 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
             yaml_file.write("{}    figure_file: {}\n".format(indent, img))
             img = img.replace(os.path.sep, '/').format(indent)
             yaml_file.write(
-                "{}    caption_string: 'File {}'\n".format(indent, backend.generate_text(img, "typewriter")))
+                "{}    caption_string: 'File {}'\n".format(indent, backend.generate_text(img)))
             yaml_file.write("{}    label: 'f:{}'\n".format(indent, img))
 
     # Ignore unknown fragment types
@@ -622,7 +615,7 @@ def insert_solution_chapter(yaml_file, case, solution, verbosity_levels, verbosi
     yaml_file.write("  title: %s Solution\n" % solution.Method.title())
     yaml_file.write("  latex: 'This chapter describes the {} solution found in the following directory: {}.'\n".format(
         backend.generate_text(solution.Method),
-        backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+        backend.generate_text(case.RealDataDir.replace('\\', '/'))))
     yaml_file.write("  sections:\n")
     for frag_k, frag_v in fragments.get(sect_index, {}).items():
         insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
@@ -632,7 +625,7 @@ def insert_solution_chapter(yaml_file, case, solution, verbosity_levels, verbosi
     yaml_file.write("  - n: section\n")
     yaml_file.write("    title: Meta-Data\n")
     yaml_file.write("    latex: 'This section lists the meta-information properties found in {}.'\n".format(
-        backend.generate_text(name, "typewriter")))
+        backend.generate_text(name)))
     yaml_file.write("    sections:\n")
     for frag_k, frag_v in fragments.get(sect_index, {}).items():
         insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
@@ -651,14 +644,14 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
     yaml_file.write("  title: Stand-Alone Artifacts\n")
     yaml_file.write(
         "  latex: 'This chapter integrates all standalone images and text fragments found in the following directory: {}.'\n".format(
-            backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+            backend.generate_text(case.RealDataDir.replace('\\', '/'))))
     yaml_file.write("  sections:\n")
     if case.Images:
         yaml_file.write("  - n: section\n")
         yaml_file.write("    title: PNG Images\n")
         yaml_file.write(
             "    latex: 'This section shows all stand-alone PNG images found in the following directory: {}.'\n".format(
-                backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+                backend.generate_text(case.RealDataDir.replace('\\', '/'))))
         yaml_file.write("    sections:\n")
         for img in sorted(case.Images):
             print("[{}] Including image {}".format(
@@ -670,14 +663,14 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
             yaml_file.write("        figure_file: %s\n" % img)
             img = img.replace(os.path.sep, '/')
             yaml_file.write("        caption_string: 'File {}'\n".format(
-                backend.generate_text(img, "typewriter")))
+                backend.generate_text(img)))
             yaml_file.write("        label: 'f:%s'\n" % img)
     if case.TextFiles:
         yaml_file.write("  - n: section\n")
         yaml_file.write("    title: Text Fragments\n")
         yaml_file.write(
             "    latex: 'This section shows all stand-alone text fragments found in the following directory: {}.'\n".format(
-                backend.generate_text(case.RealDataDir.replace('\\', '/'), "typewriter")))
+                backend.generate_text(case.RealDataDir.replace('\\', '/'))))
         yaml_file.write("    sections:\n")
         for txt in sorted(case.TextFiles):
             print("[{}] Including text fragment {}".format(

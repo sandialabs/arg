@@ -52,7 +52,7 @@ class argReportWordBackend(argWordBackend):
     def __init__(self, parameters):
 
         # Call superclass init
-        super(argReportWordBackend, self).__init__(parameters)
+        super().__init__(parameters)
 
     def create_document_preamble(self, version=None):
         """Create document and its preamble given an Assembler version

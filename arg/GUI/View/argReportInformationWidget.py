@@ -47,8 +47,8 @@ class argReportInformationWidget(QWidget):
     """A widget class to cover 'Report Information' tab
     """
 
-    def __init__(self, parent=None):
-        super(argReportInformationWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Retrieve settings controller
         settings = QApplication.instance().settingsController
@@ -60,7 +60,7 @@ class argReportInformationWidget(QWidget):
         self.argExecutionOption = settings.eOption()
 
         # Backend
-        self.backendGroupBox = QGroupBox(self)
+        self.backendGroupBox = QGroupBox()
         self.backendLabel = QLabel(settings.backendTypeValue(settings.label))
         self.backendLatexRadioButton = QRadioButton(settings.backendTypeKeyLatex())
         self.backendWordRadioButton = QRadioButton(settings.backendTypeKeyWord())
@@ -225,60 +225,60 @@ class argReportInformationWidget(QWidget):
 
         # Report type
         value = data.get(settings.reportTypeKey())
-        if (value == None or value == settings.reportTypeKeyReport()):
+        if value is None or value == settings.reportTypeKeyReport():
             self.displayClassification(False)
         else:
             self.displayClassification(True)
 
         # Backend
         value = data.get(settings.backendTypeKey())
-        if (value):
-            if (value == settings.backendTypeKeyLatex()):
+        if value:
+            if value == settings.backendTypeKeyLatex():
                 self.backendLatexRadioButton.setChecked(True)
-            elif (value == settings.backendTypeKeyWord()):
+            elif value == settings.backendTypeKeyWord():
                 self.backendWordRadioButton.setChecked(True)
 
         # Report type
         value = data.get(settings.reportTypeKey())
-        if (value == settings.reportTypeKeyReport()):
+        if value == settings.reportTypeKeyReport():
             self.reportTypeReportRadioButton.setChecked(True)
 
         # Classification
         value = data.get(settings.classificationKey())
-        if (value == settings.classificationKeyGeneric()):
+        if value == settings.classificationKeyGeneric():
             self.classificationTypeGenericRadioButton.setChecked(True)
 
         # File Name
-        if (data.get(settings.fileNameKey())):
+        if data.get(settings.fileNameKey()):
             self.fileNameLineEdit.setText(data.get(settings.fileNameKey()))
 
         # Mutables File
-        if (data.get(settings.mutablesFileKey())):
+        if data.get(settings.mutablesFileKey()):
             self.mutableLineEdit.setText(data.get(settings.mutablesFileKey()))
 
         # Structure File
-        if (data.get(settings.structureFileKey())):
+        if data.get(settings.structureFileKey()):
             self.structureFileLineEdit.setText(data.get(settings.structureFileKey()))
 
         # Structure End File
-        if (data.get(settings.structureEndFileKey())):
+        if data.get(settings.structureEndFileKey()):
             self.structureEndFileLineEdit.setText(data.get(settings.structureEndFileKey()))
 
         # Artifact File
-        if (data.get(settings.artifactFileKey())):
+        if data.get(settings.artifactFileKey()):
             self.artifactFileLineEdit.setText(data.get(settings.artifactFileKey()))
 
         # Output Folder
-        if (data.get(settings.outputFolderKey())):
+        if data.get(settings.outputFolderKey()):
             self.outputFolderLineEdit.setText(data.get(settings.outputFolderKey()))
 
         # Verbosity
         value = data.get(settings.verbosityKey())
-        if (value == settings.verbosityKeyTerseAsInt()):
+        if value == settings.verbosityKeyTerseAsInt():
             self.verbosityTerseRadioButton.setChecked(True)
-        elif (value == settings.verbosityKeyDefaultAsInt()):
+        elif value == settings.verbosityKeyDefaultAsInt():
             self.verbosityDefaultRadioButton.setChecked(True)
-        elif (value == settings.verbosityKeyVerboseAsInt()):
+        elif value == settings.verbosityKeyVerboseAsInt():
             self.verbosityVerboseRadioButton.setChecked(True)
 
     def constructParameters(self):
@@ -292,17 +292,17 @@ class argReportInformationWidget(QWidget):
         parameters = {}
 
         # Backend
-        if (self.backendLatexRadioButton.isChecked()):
+        if self.backendLatexRadioButton.isChecked():
             parameters[settings.backendTypeKey()] = settings.backendTypeKeyLatex()
-        elif (self.backendWordRadioButton.isChecked()):
+        elif self.backendWordRadioButton.isChecked():
             parameters[settings.backendTypeKey()] = settings.backendTypeKeyWord()
 
         # Report Type
-        if (self.reportTypeReportRadioButton.isChecked()):
+        if self.reportTypeReportRadioButton.isChecked():
             parameters[settings.reportTypeKey()] = settings.reportTypeKeyReport()
 
         # Classification
-        if (self.classificationTypeGenericRadioButton.isChecked()):
+        if self.classificationTypeGenericRadioButton.isChecked():
             parameters[settings.classificationKey()] = settings.classificationKeyGeneric().lower()
 
         # File Name
@@ -324,11 +324,11 @@ class argReportInformationWidget(QWidget):
         parameters[settings.outputFolderKey()] = self.outputFolderLineEdit.text()
 
         # Verbosity
-        if (self.verbosityTerseRadioButton.isChecked()):
+        if self.verbosityTerseRadioButton.isChecked():
             parameters[settings.verbosityKey()] = settings.verbosityKeyTerseAsInt()
-        elif (self.verbosityDefaultRadioButton.isChecked()):
+        elif self.verbosityDefaultRadioButton.isChecked():
             parameters[settings.verbosityKey()] = settings.verbosityKeyDefaultAsInt()
-        elif (self.verbosityVerboseRadioButton.isChecked()):
+        elif self.verbosityVerboseRadioButton.isChecked():
             parameters[settings.verbosityKey()] = settings.verbosityKeyVerboseAsInt()
 
         return parameters
@@ -347,7 +347,8 @@ class argReportInformationWidget(QWidget):
         self.outputFolderLineEdit.setText("")
         self.verbosityDefaultRadioButton.setChecked(True)
 
-    def onFillLineEdit(self, lineEdit, fileMode):
+    @staticmethod
+    def onFillLineEdit(lineEdit, fileMode):
         openFileDialog = QFileDialog()
         openFileDialog.setAcceptMode(QFileDialog.AcceptOpen)
         openFileDialog.setFileMode(fileMode)

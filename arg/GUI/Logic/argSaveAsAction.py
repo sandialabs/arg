@@ -43,8 +43,8 @@ app = "ARG-GUI"
 
 class argSaveAsAction(QAction):
 
-    def __init__(self, parent=None):
-        super(argSaveAsAction, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         # scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         # self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/save.png")))
         self.setText("Save as...")
@@ -52,7 +52,8 @@ class argSaveAsAction(QAction):
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         """Routine when 'Save' action is triggered
         """
 
@@ -83,5 +84,5 @@ class argSaveAsAction(QAction):
 
         # Log file name
         print("[{}] Saving to file \'{}\'".format(app, fileToSave))
-        if (fileToSave):
+        if fileToSave:
             QApplication.instance().saveRequested(fileToSave)

@@ -79,19 +79,9 @@ class argHDF5Reader(argDataInterfaceBase):
         """Retrieve meta-information from data
         """
         # Initialize single reader meta-information
-        r_meta = {}
-
-        # Keep track of file name
-        r_meta["file name"] = os.path.basename(self.Reader.filename)
-
-        # Retrieve number of groups
-        r_meta["number of groups"] = len(self.Groups)
-
-        # Retrieve number of datasets
-        r_meta["number of datasets"] = len(self.Datasets)
-
-        # Retrieve number of root attrbutes
-        r_meta["number of attributes"] = sum([len(x) for x in self.Attributes.values()])
+        r_meta = {"file name": os.path.basename(self.Reader.filename), "number of groups": len(self.Groups),
+                  "number of datasets": len(self.Datasets),
+                  "number of attributes": sum([len(x) for x in self.Attributes.values()])}
 
         # Return global meta-information
         return [r_meta]

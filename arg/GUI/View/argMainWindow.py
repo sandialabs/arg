@@ -45,8 +45,8 @@ class argMainWindow(QMainWindow):
     """A widget class
     """
 
-    def __init__(self, parent=None):
-        super(argMainWindow, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         qapp = QApplication.instance()
 
         # 'File' menu section
@@ -102,7 +102,7 @@ class argMainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         # Main widgets
-        centralWidget = argCentralWidget(self)
+        centralWidget = argCentralWidget()
         self.setCentralWidget(centralWidget)
 
         # Toolbar connections

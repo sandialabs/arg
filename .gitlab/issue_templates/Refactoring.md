@@ -30,4 +30,4 @@ Please select the appropriate label from the following:
     ~"tooling::pipelines"
     ~"tooling::workflow"
 
-/label ~"feature::maintenance"
+/label ~"architecture" ~"style"

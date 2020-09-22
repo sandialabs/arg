@@ -52,7 +52,7 @@ from arg.Tools import Utilities
 app = "argReportParameters"
 
 
-class argReportParameters(object):
+class argReportParameters:
     """A class to get and store ARG report parameters
     """
 
@@ -83,6 +83,7 @@ class argReportParameters(object):
         self.Types = types
         self.TmpFile = None
         self.LatexProcessor = latex_processor
+        self.TexFile = None
 
         # Default static data interface factory
         self.DataFactory = argDataInterface.factory
@@ -160,7 +161,8 @@ class argReportParameters(object):
 
         sys.exit(0)
 
-    def explorator_command_line_usage(self):
+    @staticmethod
+    def explorator_command_line_usage():
         """Provide online help on Explorator with command line arguments
         """
 
@@ -173,7 +175,8 @@ class argReportParameters(object):
         print("\t [-s <structure>]    name of file report structure")
         print("\t [-a <structure>]    name of analyst authored result section structure file")
 
-    def generator_command_line_usage(self):
+    @staticmethod
+    def generator_command_line_usage():
         """Provide online help on Generator with command line arguments
         """
 
@@ -183,7 +186,8 @@ class argReportParameters(object):
         print("\t [-f <file name>]      name of artifact input file")
         print("\t [-o <output dir>]     directory of output artifacts")
 
-    def assembler_command_line_usage(self):
+    @staticmethod
+    def assembler_command_line_usage():
         """Provide online help on Assembler with command line arguments
         """
 
@@ -196,7 +200,8 @@ class argReportParameters(object):
         print("\t [-o <output path>]        path to output files")
         print("\t [-s <structure>]          name of file report structure")
 
-    def parameters_file_usage(self):
+    @staticmethod
+    def parameters_file_usage():
         """Provide online help on ARG with parameters file
         """
 
@@ -337,6 +342,7 @@ class argReportParameters(object):
     def parse_command_line(self, app_name: str):
         """Parse app_name command line and fill report parameters
         """
+
         app_name = app_name.lower()
         allowed_args = {'explorator': 'hc:d:m:o:s:a:', 'generator': 'hb:d:f:o:', 'assembler': 'hl:c:d:m:n:o:s:'}
         args_dict = {'a': self.arg_a, 'b': self.arg_b, 'd': self.arg_d, 'f': self.arg_f, 'h': self.arg_h,
@@ -426,6 +432,8 @@ class argReportParameters(object):
     def parse_parameters_file(self, file=None):
         """Parse variables file and fill report parameters
         """
+
+        # Parse parameters file if it has not been done already
         if self.parsed_params is None:
             # Parse provided file if exists
             if file:
@@ -440,15 +448,13 @@ class argReportParameters(object):
 
             # Bail out early if dictionary is empty
             if not param_dict:
-                print("[{}] No parameters found in {}".format(
-                    self.Application,
+                print("[argReportParameters] No parameters found in {}".format(
                     parameters_file))
                 return False
 
             # or file reading did not succeed
             elif isinstance(param_dict, str):
-                print("[{}] {}".format(
-                    self.Application,
+                print("[argReportParameters] {}".format(
                     param_dict.capitalize()))
                 return False
 
@@ -461,8 +467,7 @@ class argReportParameters(object):
                     class_keys[compound_key.lower()] = [compound_key, values]
 
             # Process retrieved non-empty dictionary
-            print("[{}] Read {} parameter statements in {}".format(
-                self.Application,
+            print("[argReportParameters] Read {} parameter statements in {}".format(
                 len(param_dict),
                 parameters_file))
             for key, value in param_dict.items():
@@ -646,8 +651,7 @@ class argReportParameters(object):
             # Print retrieved key=value pairs when requested
             if self.Verbosity > self.VerbosityLevels.get("default"):
                 for key, value in param_dict.items():
-                    print("[{}] Found {}={} in {}".format(
-                        self.Application,
+                    print("[argReportParameters] Found {}={} in {}".format(
                         key,
                         value,
                         parameters_file))
@@ -780,8 +784,7 @@ class argReportParameters(object):
         if self.GeometryRoot:
             geometry_full_path = os.path.join(self.DataDir, self.GeometryRoot)
             if os.path.isdir(geometry_full_path):
-                print("[{}] Specified geometry root {} was found in {}".format(
-                    self.Application,
+                print("[argReportParameters] Specified geometry root {} was found in {}".format(
                     self.GeometryRoot,
                     self.DataDir))
                 case.GeometryFiles = [os.path.join(self.GeometryRoot, x) for x in os.listdir(geometry_full_path) if
@@ -805,8 +808,7 @@ class argReportParameters(object):
             deck_full_name = os.path.join(self.DataDir, self.DeckRoot)
             if self.DeckRoot in case.DeckFiles:
                 # Specified file takes precedence over detected ones
-                print("[{}] Specified input deck root {} was found in {}".format(
-                    self.Application,
+                print("[argReportParameters] Specified input deck root {} was found in {}".format(
                     self.DeckRoot,
                     self.DataDir))
                 case.DeckFiles = [self.DeckRoot]
@@ -849,8 +851,7 @@ class argReportParameters(object):
         # Prepare output directory
         if not os.path.isdir(self.OutputDir):
             # Try to create output directory if it does not exist yet
-            print("[{}] Creating output directory {}".format(
-                self.Application,
+            print("[argReportParameters] Creating output directory {}".format(
                 self.OutputDir))
             try:
                 os.makedirs(self.OutputDir, 0o750)
@@ -866,13 +867,11 @@ class argReportParameters(object):
         if os.path.exists(self.StructureFile):
             report_map = Utilities.read_yml_file(self.StructureFile)
             if not report_map:
-                print("[{}] *  WARNING: {} Not generating mutables.".format(
-                    self.Application,
+                print("[argReportParameters] *  WARNING: {} Not generating mutables.".format(
                     report_map))
                 return False
             elif isinstance(report_map, str):
-                print("[{}] *  WARNING: {}".format(
-                    self.Application,
+                print("[argReportParameters] *  WARNING: {}".format(
                     report_map))
                 return False
         else:
@@ -883,7 +882,7 @@ class argReportParameters(object):
 
         # Assign default title if neither defined nor automatically created
         if not self.Title:
-            print("[{}] No specified title found".format(self.Application))
+            print("[argReportParameters] No specified title found")
             if "title" in report_map:
                 title_params = report_map["title"]
                 self.get_title([title_params["datatype"],
@@ -918,7 +917,7 @@ class argReportParameters(object):
             mutables["author"] = self.Authors[0]
 
         # Return generated mutables
-        return (mutables)
+        return mutables
 
     def save_generated_mutables(self, mutables_dict):
         """Write mutables dictionary to possibly existing YAML file
@@ -927,8 +926,7 @@ class argReportParameters(object):
         mutables_file = os.path.join(self.OutputDir, self.Mutables)
         # Bail out early if dictionary is empty
         if not mutables_dict:
-            print("[{}] No mutable variables to be saved in {}".format(
-                self.Application,
+            print("[argReportParameters] No mutable variables to be saved in {}".format(
                 mutables_file))
             return
 
@@ -936,8 +934,7 @@ class argReportParameters(object):
         existing_mutables = Utilities.read_yml_file(mutables_file)
         if isinstance(existing_mutables, dict):
             n_existing = len(existing_mutables)
-            print("[{}] Found {} pre-existing mutable variables in {}".format(
-                self.Application,
+            print("[argReportParameters] Found {} pre-existing mutable variables in {}".format(
                 n_existing,
                 mutables_file))
 
@@ -950,33 +947,28 @@ class argReportParameters(object):
                 print("*  WARNING: {} pre-existing mutable variable(s) took precedence over new one(s)".format(
                     n_read + n_existing - len(mutables_dict)))
             else:
-                print("[{}] No pre-existing mutable variables found in {}".format(
-                    self.Application,
+                print("[argReportParameters] No pre-existing mutable variables found in {}".format(
                     mutables_file))
         elif isinstance(existing_mutables, str):
             print("*  WARNING: {}".format(existing_mutables))
         else:
-            print("[{}] No pre-existing mutable variables found in {}".format(
-                self.Application,
+            print("[argReportParameters] No pre-existing mutable variables found in {}".format(
                 mutables_file))
 
         # Save dictionary to mutables file
-        print("[{}] Saving {} mutable variable(s) in {}".format(
-            self.Application,
+        print("[argReportParameters] Saving {} mutable variable(s) in {}".format(
             len(mutables_dict),
             mutables_file))
 
         # Create mutables file is not existing
         if not os.path.isfile(mutables_file):
             with open(mutables_file, 'w') as f:
-                print("[{}] Created mutables file {}".format(
-                    self.Application,
+                print("[argReportParameters] Created mutables file {}".format(
                     mutables_file))
                 # Close provided structure file
                 f.close()
         else:
-            print("[{}] Found mutables file {}".format(
-                self.Application,
+            print("[argReportParameters] Found mutables file {}".format(
                 mutables_file))
 
         # Dump mutables into file
@@ -986,8 +978,7 @@ class argReportParameters(object):
         # Print saved key=value pairs when requested
         if self.Verbosity > self.VerbosityLevels.get("terse"):
             for key, value in mutables_dict.items():
-                print("[{}] Saved {}={} in {}".format(
-                    self.Application,
+                print("[argReportParameters] Saved {}={} in {}".format(
                     key,
                     value,
                     mutables_file))
@@ -999,10 +990,6 @@ class argReportParameters(object):
         # Retrieve meta-information
         data = argDataInterface.factory(arguments[0], os.path.join(self.DataDir, arguments[1]))
         meta_info = data.get_meta_information()
-
-        # Initialize title fields
-        method = None
-        db_name = None
 
         # Iterate over all meta information dictionaries
         for meta_dict in meta_info:
@@ -1040,8 +1027,7 @@ class argReportParameters(object):
 
         # If file was specified check that it was found
         if spec_file in disc_files:
-            print("[{}] Specified {} {} was found".format(
-                self.Application,
+            print("[argReportParameters] Specified {} {} was found".format(
                 spec_type,
                 spec_file))
         else:

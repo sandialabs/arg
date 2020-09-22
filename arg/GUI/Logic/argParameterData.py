@@ -43,5 +43,6 @@ class argParameterData(QObject):
     """A data class to save parsed parameters file
     """
 
-    def __init__(self, dict):
-        self.Dict = dict
+    def __init__(self, dict_):
+        super().__init__()
+        self.Dict = dict_

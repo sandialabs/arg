@@ -39,7 +39,7 @@
 import importlib
 
 
-class argDataInterface(object):
+class argDataInterface:
 
     @staticmethod
     def factory(data_type, database_name, *parameters):

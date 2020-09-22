@@ -69,14 +69,18 @@ class argParameterReader(QObject):
     dataCreated = Signal(dict)
     errorDetected = Signal(str)
 
-    def __init__(self, data={}, err="", parent=None):
-        super(argParameterReader, self).__init__(parent)
+    def __init__(self, data=None, err=""):
+        super().__init__()
+
+        if data is None:
+            data = dict()
 
         self.ParameterData = argParameterData(data)
         self.ErrorString = err
         self.SettingController = argSettingsController()
 
-    def verbosity_to_int(self, value):
+    @staticmethod
+    def verbosity_to_int(value):
         """Convert verbosity key into integer value in allowable range
         """
 
@@ -112,10 +116,6 @@ class argParameterReader(QObject):
             else:
                 # String key is defined, returned corresponding integer
                 return int_value
-
-        # Defensive coding: this point should never be reached
-        print("** ERROR: logical error in verbosity_to_int()")
-        sys.exit(1)
 
     def read(self, filePath):
         """Read specified file and populate provided data

@@ -48,20 +48,20 @@ class argUserSettingsWriter(QObject):
     """A writer class to read ARG settings file
     """
 
-    def __init__(self, data={}, err='', parent=None):
-        super(argUserSettingsWriter, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
-    def write(self, filePath, data):
+    @staticmethod
+    def write(filePath, data):
         """Write specified file and populate provided data
         """
 
         # Create parent folder if does not exist
         if not os.path.exists(os.path.dirname(filePath)):
-            dir = QDir()
-            dir.mkpath(os.path.dirname(filePath))
+            dir_ = QDir()
+            dir_.mkpath(os.path.dirname(filePath))
 
         # Retrieve dictionary of parameters from file
-        fileLoad = None
         with open(filePath, 'w') as f:
             yaml.dump(data, f)
             return True

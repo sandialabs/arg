@@ -301,7 +301,7 @@ class argVTKExodusReader(argDataInterfaceBase):
             # Iterate over non-empty leaves of multiblock dataset
             it = reader.GetOutput().NewIterator()
             it.InitTraversal()
-            while (not it.IsDoneWithTraversal()):
+            while not it.IsDoneWithTraversal():
                 # Get data depending on attribute type
                 data = None
                 if self.AttributeBinding == "point":

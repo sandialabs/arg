@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Applications/Assembler.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import os
 import sys
@@ -43,10 +43,8 @@ import time
 import yaml
 
 from arg import __version__
-from arg.Applications import ARG
 from arg.Common.argReportParameters import argReportParameters
 from arg.Tools import Utilities
-
 
 ARG_VERSION = __version__
 
@@ -125,7 +123,7 @@ def execute(app, parameters):
         parameters.LatexProcessor)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 if __name__ == '__main__':

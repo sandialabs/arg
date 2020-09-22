@@ -44,6 +44,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 // Services
 import { EventService } from './../../services/event.service';
 import { LocalStorageService } from './../../services/local-storage.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-inserts',
@@ -54,12 +55,18 @@ export class InsertsComponent implements OnInit {
   /**
    * @variables
    */
+   public INSERTTYPES = [
+      "string",
+      "image"
+   ]
+
   private defaultFormValues = {
-    Inserts: [{}],
+    Insert: [],
   }
   public form = new FormGroup({
-    Inserts: new FormControl(this.defaultFormValues.Inserts)
+    Insert: new FormControl(this.defaultFormValues.Insert)
   });
+  valueChangesSubscription: Subscription;
 
   /**
    * @constructor
@@ -79,11 +86,12 @@ export class InsertsComponent implements OnInit {
     this.eventService.subscribe('inserts-tab-refresh',
       (data: any) => {
         if ("object" == typeof data) {
-          // Reset form
           this.form.reset();
-
-          // Get defaults
           let formData: any = this.defaultFormValues;
+
+          // If insert key not present empty Insert array
+          if (data['Insert'] === undefined)
+            formData['Insert'] = [];
 
           // Prepare new data
           Object.keys(data).forEach((key) => {
@@ -94,7 +102,6 @@ export class InsertsComponent implements OnInit {
               formData[key] = data[key];
             }
           });
-
           // Set form data
           this.form.setValue(formData);
         }
@@ -103,5 +110,79 @@ export class InsertsComponent implements OnInit {
 
     // Refresh the first time
     this.eventService.publish('inserts-tab-refresh', this.localStorageService.getJson(LocalStorageService.ARG_PARAMETERS_KEY));
+
+    // form value change listener
+    this.valueChangesSubscription = this.form.valueChanges.subscribe(val => {
+      // Get current storage configuration
+      var currentConfig = this.localStorageService.getJson(LocalStorageService.ARG_PARAMETERS_KEY);
+      var state = JSON.stringify(currentConfig);
+      var configUpdate = Object.assign(currentConfig, val);
+      if (state != JSON.stringify(configUpdate)){
+        this.localStorageService.setJson(LocalStorageService.ARG_PARAMETERS_KEY, configUpdate);
+      }
+    });
+
+}
+
+  updateLocation(index: 'number', insert: object, event: any): void {
+    let formData: any = this.form.value;
+    const newLocation = event.target.textContent;
+    if (newLocation != ""  && (newLocation != insert["location"] )) {
+      formData["Insert"][index].location = newLocation;
+    }
+
+    // Set form data
+    this.form.setValue(formData);
+  }
+
+  updateTextOrImage(index: 'number', insert: object, event: any): void {
+    let formData: any = this.form.value;
+    const newText = event.target.textContent;
+    console.log("newText: "+newText +" " + event)
+    var type = insert["string"] ? this.INSERTTYPES[0] : this.INSERTTYPES[1];
+    if (newText != ""  && (newText != insert[type] )) {
+       formData["Insert"][index][type]= [newText];
+    }
+
+    // Set form data
+    event.target.textContent = newText;
+    this.form.setValue(formData);
+   }
+
+  updateTypes(index: 'number', insert: object, event: any): void {
+    let formData: any = this.form.value;
+    const newType = event.target.value;
+    var oldType = insert["string"] ? this.INSERTTYPES[0] : this.INSERTTYPES[1];
+
+    if (newType != ""  && (newType != oldType )) {
+      formData["Insert"][index][newType] = formData["Insert"][index][oldType];
+      delete formData["Insert"][index][oldType];
+      var test=0;
+    }
+    // Set form data
+    this.form.setValue(formData);
+   }
+
+   addInsert(): void {
+     let formData: any = this.form.value;
+     var nextNumberNameRequested = formData["Insert"].length;
+     formData["Insert"][nextNumberNameRequested] = {};
+     formData["Insert"][nextNumberNameRequested].location = "1";
+     formData["Insert"][nextNumberNameRequested][this.INSERTTYPES[0]] = ["My insertion"];
+     // Set form data
+     this.form.setValue(formData);
+   }
+
+   removeInsert(index: 'number'): void {
+     let formData: any = this.form.value;
+     var nextNumberNameRequested = formData["Insert"].length;
+     formData["Insert"].splice(index, 1);
+     // Set form data
+     this.form.setValue(formData);
+   }
+
+  getInsertType(insert: object): string {
+    var result =  insert[this.INSERTTYPES[0]] ? this.INSERTTYPES[0] : this.INSERTTYPES[1];
+    return result;
   }
 }

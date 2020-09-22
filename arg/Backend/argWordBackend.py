@@ -145,12 +145,13 @@ class argWordBackend(argBackendBase):
     def __init__(self, parameters=None):
 
         # Call superclass init
-        super(argWordBackend, self).__init__(parameters)
+        super().__init__(parameters)
 
         # Define backend type
         self.Type = "Word"
 
-    def generate_text(self, text, type="default"):
+    @staticmethod
+    def generate_text(text):
         """Add page break to the report
         """
 
@@ -204,7 +205,8 @@ class argWordBackend(argBackendBase):
         # Return plain text string
         return ','.join(["[{}]".format(','.join([f"{x}" for x in v])) for v in matrix])
 
-    def create_list(self, paragraph, list_type):
+    @staticmethod
+    def create_list(paragraph, list_type):
         """Create list
         """
 
@@ -717,11 +719,7 @@ class argWordBackend(argBackendBase):
         """
 
         # Call super method first
-        super(argWordBackend, self).assemble(report_map, version)
-
-        # Create report with preamble
-        print("[{}] Creating Word report".format(app))
-        self.create_document_preamble(version)
+        super().assemble(report_map, version)
 
         # Create report with preamble
         print("[{}] Creating Word report".format(app))
@@ -781,7 +779,8 @@ class argWordBackend(argBackendBase):
         self.add_index("Table")
         self.Report.add_page_break()
 
-    def update_tocs(self, docx_file):
+    @staticmethod
+    def update_tocs(docx_file):
         """Update table of contents, list of figures, list of tables
         """
 
@@ -920,7 +919,8 @@ class argWordBackend(argBackendBase):
         r_element.append(fldChar4)
         p_element = paragraph._p
 
-    def iter_heading(self, paragraphs):
+    @staticmethod
+    def iter_heading(paragraphs):
         """Iterate on headings to number them, a fix suggested by
            https://github.com/python-openxml/python-docx/issues/590
         """

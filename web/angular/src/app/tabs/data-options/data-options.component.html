@@ -86,32 +86,40 @@ HEADER
   <div class="form-group">
     <div class="row">
       <div class="col">
-        <label>CAD to FEM</label>
-        <table class="table table-bordered">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th>CAD Parts</th>
-              <th>FEM Blocks</th>
-              <th>Factors</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4" class="text-right">
-                <button type="button" class="btn btn-success" (click)="addCadToPem()"><i class="fa fa-plus"></i>&nbsp;Add</button>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+        <div id="table" class="table-editable">
+          <figure>
+            <figcaption>
+              <label>CAD to FEM</label>
+            </figcaption>
+            <table class="table table-bordered">
+              <thead class="bg-primary text-white">
+                <tr>
+                  <th scope="col">CAD Parts</th>
+                  <th scope="col">FEM Blocks</th>
+                  <th scope="col">Factors</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cadToElt of this.form.value.Mappings.CAD_to_FEM.elements | keyvalue">
+                  <td class=text-nowrap contenteditable="true" (blur)="updateCol1(this.TABLESMAPPING.CADToFEM, cadToElt.key, $event)" [innerHTML]="cadToElt.key"></td>
+                  <td contenteditable="true" (blur)="updateCol2(this.TABLESMAPPING.CADToFEM, cadToElt.key, $event)" [innerHTML]="cadToElt.value.join(';')"></td>
+                  <td contenteditable="true" (blur)="updateCol3(this.TABLESMAPPING.CADToFEM, cadToElt.key, $event)" [innerHTML]="this.form.value.Mappings.CAD_to_FEM.factors[cadToElt.key]"></td>
+                  <td>
+                    <button type="button" class="btn btn-success" (click)="removeElt(this.TABLESMAPPING.CADToFEM, cadToElt.key)"><em class="fa fa-minus"></em>&nbsp;</button>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="text-right">
+                  <button type="button" class="btn btn-success" (click)="addElt(this.TABLESMAPPING.CADToFEM)"><em class="fa fa-plus"></em>&nbsp;Add</button>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </figure>
+        </div>
       </div>
     </div>
   </div>
@@ -119,32 +127,39 @@ HEADER
   <div class="form-group">
     <div class="row">
       <div class="col">
-        <label>FEM to CAD</label>
-        <table class="table table-bordered">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th>FEM Blocks</th>
-              <th>CAD Parts</th>
-              <th>Factors</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4" class="text-right">
-                <button type="button" class="btn btn-success"><i class="fa fa-plus" (click)="addPemToCad()"></i>&nbsp;Add</button>
+        <figure>
+          <figcaption>
+            <label>FEM to CAD</label>
+          </figcaption>
+          <table class="table table-bordered">
+            <caption></caption>
+            <thead class="bg-primary text-white">
+              <tr>
+                <th scope="col">FEM Blocks</th>
+                <th scope="col">CAD Parts</th>
+                <th scope="col">Factors</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let femToCadElt of this.form.value.Mappings.FEM_to_CAD.elements | keyvalue">
+              <td class=text-nowrap contenteditable="true" (blur)="updateCol1(this.TABLESMAPPING.FEMToCAD, femToCadElt.key, $event)">{{ femToCadElt.key }} </td>
+              <td contenteditable="true" (blur)="updateCol2(this.TABLESMAPPING.FEMToCAD, femToCadElt.key, $event)">{{ femToCadElt.value.join(';') }} </td>
+              <td contenteditable="true" (blur)="updateCol3(this.TABLESMAPPING.FEMToCAD, femToCadElt.key, $event)">{{ this.form.value.Mappings.FEM_to_CAD.factors[femToCadElt.key] }} </td>
+              <td>
+                <button type="button" class="btn btn-success" (click)="removeElt(this.TABLESMAPPING.FEMToCAD, femToCadElt.key)"><em class="fa fa-minus"></em>&nbsp;</button>
               </td>
             </tr>
-          </tfoot>
-        </table>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-right">
+                  <button type="button" class="btn btn-success"  (click)="addElt(this.TABLESMAPPING.FEMToCAD)"><em class="fa fa-plus"></em>&nbsp;Add</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </figure>
       </div>
     </div>
   </div>

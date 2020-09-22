@@ -13,34 +13,29 @@ Use 64-bit versions of applications if your system supports them.
 
 ### Update your system
 
-# ARG dependancies:
+# ARG dependencies:
 
 ## 1. Python 3
 
 - ARG requires Python3 version 3.7 or higher
 
-- Download Python https://www.python.org/downloads/windows/
+- Download [Python](https://www.python.org/downloads/windows/)
   - for 64-bit system: Windows x86-64 executable installer
   - for 32-bit system: Windows x86 executable installer
 
-- During installation check box Add Python 3.X to PATH and at the end click disable path length.
+- During installation, check 'Add Python 3.X to PATH' box and at the end, click on 'Disable path length limit'.
 
-- Make sure python is in environment variables - PATH.
+- Make sure python is in environment variable PATH.
 
 - Add PYTHONPATH to environment variables:
 
-  - if you installed python 3.8.x to ```C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\```
-  
-  - environment variable PYTHONPATH should be set as follows:
-    - ```C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38;C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Scripts;C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Lib\site-packages```
+  - if you installed python 3.8.x to `C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\`, environment variable PYTHONPATH should be set as follows:  
+    `C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38;
+    C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Scripts;
+    C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\Lib\site-packages`
     
-  - if you installed python 3.7.x to ```C:\Users\<YOUR_USER_NAME>\AppData\Local\Programs\Python\Python38\```
-  
-    - environment variable PYTHONPATH should be set as follows:
-    - ```C:\Program Files\Python37;C:\Program Files\Python37\Scripts;C:\Program Files\Python37\Lib\site-packages```
-
 ## 2. MiKTeX (TeX/LaTeX Windows alternative)
-- Download MiKTeX https://miktex.org/download
+- Download [MiKTeX](https://miktex.org/download)
   - go to All downloads tab
   - choose basic installer according to system architecture
 - For installation instruction https://miktex.org/howto/install-miktex
@@ -48,38 +43,22 @@ Use 64-bit versions of applications if your system supports them.
 - After installation, you will be notified about updates, update MiKTeX
 
 ## 3. ImageMagick
-- Download ImageMagick https://imagemagick.org/script/download.php#windows
+- Download [ImageMagick](https://imagemagick.org/script/download.php#windows)
   - for 64-bit system: Win64 static at 16 bits-per-pixel component
   - for 32-bit system: Win32 static at 16 bits-per-pixel component
-  
-## 4. Git
-- Download git https://git-scm.com/download/win
-  - for 64-bit system: 64-bit Git for Windows Setup
-  - for 32-bit system: 32-bit Git for Windows Setup
 
-## 5. Perl
-- Download Perl http://strawberryperl.com/
+## 4. Perl
+- Download [Perl](http://strawberryperl.com/)
   - for 64-bit system: strawberry-perl-x.xx.x.x-64bit.msi
   - for 32-bit system: strawberry-perl-x.xx.x.x-32bit.msi
 
-## 6. Restart your system
-
-## 7. Open command prompt
-
-- Go to directiory you want to have ARG in
-
-- In order to install Python dependancies put following commands line by line
+## 5. ARG
+- In order to install ARG and its Python dependencies, put following commands line by line:  
 ```
-git clone https://gitlab.com/AutomaticReportGenerator/arg.git
-cd arg
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install pyARG
 ```
 
-## 8. Post installation checks
+## Post installation checks
 
-To make sure everything was installed correctly, some tests can be built:
-Go to `arg/tests/build_tests` and run `python test.py`
-  
-Any errors during tests will be reported to console.
-After a successful build, the results (pdf and docx reports) can be found here: `arg/tests/build_tests` in each case directory
+To make sure everything was installed correctly, type `python -c "import arg; print(arg.__version__)"`. It should return **the** latest released version number. 

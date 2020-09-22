@@ -52,7 +52,7 @@ class argReportLaTeXBackend(argLaTeXBackend):
 
     def __init__(self, parameters):
         # Call superclass init
-        super(argReportLaTeXBackend, self).__init__(parameters)
+        super().__init__(parameters)
 
     def create_LaTeX_output(self):
         """Create a LaTeX output file

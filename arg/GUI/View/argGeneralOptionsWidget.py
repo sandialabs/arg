@@ -47,8 +47,8 @@ class argGeneralOptionsWidget(QWidget):
     """A widget class ro cover 'General Options' tab
     """
 
-    def __init__(self, parent=None):
-        super(argGeneralOptionsWidget, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
 
         # Retrieve settings controller
         settings = QApplication.instance().settingsController
@@ -207,67 +207,67 @@ class argGeneralOptionsWidget(QWidget):
         self.cleanParameters()
 
         # Title
-        if (data.get(settings.titleKey())):
+        if data.get(settings.titleKey()):
             self.titleLineEdit.setText(data.get(settings.titleKey()))
 
         # Number
-        if (data.get(settings.numberKey())):
+        if data.get(settings.numberKey()):
             self.numberLineEdit.setText(data.get(settings.numberKey()))
 
         # Issue
-        if (data.get(settings.issueKey())):
+        if data.get(settings.issueKey()):
             self.issueLineEdit.setText(data.get(settings.issueKey()))
 
         # Version
-        if (data.get(settings.versionsKey())):
+        if data.get(settings.versionsKey()):
             self.versionsLineEdit.setText(str(data.get(settings.versionsKey())))
 
         # Author
-        if (data.get(settings.authorsKey())):
+        if data.get(settings.authorsKey()):
             self.authorsLineEdit.setText(data.get(settings.authorsKey()))
 
         # Organization
-        if (data.get(settings.organizationsKey())):
+        if data.get(settings.organizationsKey()):
             self.organizationsLineEdit.setText(data.get(settings.organizationsKey()))
 
         # Location
-        if (data.get(settings.locationKey())):
+        if data.get(settings.locationKey()):
             self.locationLineEdit.setText(data.get(settings.locationKey()))
 
         # Year
-        if (data.get(settings.yearKey())):
+        if data.get(settings.yearKey()):
             self.yearLineEdit.setText(data.get(settings.yearKey()))
 
         # Month
-        if (data.get(settings.monthKey())):
+        if data.get(settings.monthKey()):
             self.monthLineEdit.setText(data.get(settings.monthKey()))
 
         # Abstract
-        if (data.get(settings.abstractFileKey())):
+        if data.get(settings.abstractFileKey()):
             self.abstractFileLineEdit.setText(data.get(settings.abstractFileKey()))
 
         # Preface
-        if (data.get(settings.prefaceKey())):
+        if data.get(settings.prefaceKey()):
             self.prefaceLineEdit.setText(data.get(settings.prefaceKey()))
 
         # Thanks
-        if (data.get(settings.thanksKey())):
+        if data.get(settings.thanksKey()):
             self.thanksLineEdit.setText(data.get(settings.thanksKey()))
 
         # Executive Summary
-        if (data.get(settings.executiveSummaryKey())):
+        if data.get(settings.executiveSummaryKey()):
             self.executiveSummaryLineEdit.setText(data.get(settings.executiveSummaryKey()))
 
         # Nomenclature
-        if (data.get(settings.nomenclatureKey())):
+        if data.get(settings.nomenclatureKey()):
             self.nomenclatureLineEdit.setText(data.get(settings.nomenclatureKey()))
 
         # Final
-        if (data.get(settings.finalKey())):
+        if data.get(settings.finalKey()):
             self.finalCheckBox.setChecked(data.get(settings.finalKey()))
 
         # Key Separator
-        if (data.get(settings.keySeparatorKey())):
+        if data.get(settings.keySeparatorKey()):
             self.keySeperatorLineEdit.setText(data.get(settings.keySeparatorKey()))
 
     def constructParameters(self):
@@ -278,25 +278,20 @@ class argGeneralOptionsWidget(QWidget):
         settings = QApplication.instance().settingsController
 
         # Initialize parameters dict
-        parameters = {}
-
-        parameters[settings.titleKey()] = self.titleLineEdit.text()
-        parameters[settings.numberKey()] = self.numberLineEdit.text()
-        parameters[settings.issueKey()] = self.issueLineEdit.text()
-        parameters[settings.versionsKey()] = self.versionsLineEdit.text()
-        parameters[settings.authorsKey()] = self.authorsLineEdit.text()
-        parameters[settings.organizationsKey()] = self.organizationsLineEdit.text()
-        parameters[settings.locationKey()] = self.locationLineEdit.text()
-        parameters[settings.yearKey()] = self.yearLineEdit.text()
-        parameters[settings.monthKey()] = self.monthLineEdit.text()
-        parameters[settings.abstractFileKey()] = self.abstractFileLineEdit.text()
-        parameters[settings.prefaceKey()] = self.prefaceLineEdit.text()
-        parameters[settings.abstractFileKey()] = self.abstractFileLineEdit.text()
-        parameters[settings.thanksKey()] = self.thanksLineEdit.text()
-        parameters[settings.executiveSummaryKey()] = self.executiveSummaryLineEdit.text()
-        parameters[settings.nomenclatureKey()] = self.nomenclatureLineEdit.text()
-        parameters[settings.finalKey()] = self.finalCheckBox.isChecked()
-        parameters[settings.keySeparatorKey()] = self.keySeperatorLineEdit.text()
+        parameters = {settings.titleKey(): self.titleLineEdit.text(), settings.numberKey(): self.numberLineEdit.text(),
+                      settings.issueKey(): self.issueLineEdit.text(),
+                      settings.versionsKey(): self.versionsLineEdit.text(),
+                      settings.authorsKey(): self.authorsLineEdit.text(),
+                      settings.organizationsKey(): self.organizationsLineEdit.text(),
+                      settings.locationKey(): self.locationLineEdit.text(),
+                      settings.yearKey(): self.yearLineEdit.text(), settings.monthKey(): self.monthLineEdit.text(),
+                      settings.abstractFileKey(): self.abstractFileLineEdit.text(),
+                      settings.prefaceKey(): self.prefaceLineEdit.text(),
+                      settings.thanksKey(): self.thanksLineEdit.text(),
+                      settings.executiveSummaryKey(): self.executiveSummaryLineEdit.text(),
+                      settings.nomenclatureKey(): self.nomenclatureLineEdit.text(),
+                      settings.finalKey(): self.finalCheckBox.isChecked(),
+                      settings.keySeparatorKey(): self.keySeperatorLineEdit.text()}
 
         return parameters
 
@@ -321,7 +316,8 @@ class argGeneralOptionsWidget(QWidget):
         self.finalCheckBox.setChecked(False)
         self.keySeperatorLineEdit.setText("")
 
-    def onFillLineEdit(self, lineEdit, fileMode):
+    @staticmethod
+    def onFillLineEdit(lineEdit, fileMode):
         openFileDialog = QFileDialog()
         openFileDialog.setAcceptMode(QFileDialog.AcceptOpen)
         openFileDialog.setFileMode(fileMode)

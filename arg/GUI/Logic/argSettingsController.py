@@ -49,8 +49,8 @@ class argSettingsController(QObject):
     """A controller class to handle settings
     """
 
-    def __init__(self, parent=None):
-        super(argSettingsController, self).__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.label = 0
         self.mandatory = 1
         self.commentary = 2
@@ -68,16 +68,16 @@ class argSettingsController(QObject):
         self.argScriptPath = None
         self.argLatexProcessorPath = None
 
-    def initialize(self):
-
-        # Initialize user settings from config file
-        missingSettings = self.initializeUserSettings()
-
         # Current file opened
         self.currentParameterFile = ""
 
         # Current file run
         self.currentParameterFileRun = ""
+
+    def initialize(self):
+
+        # Initialize user settings from config file
+        missingSettings = self.initializeUserSettings()
 
         # Report information
         self.settings[self.backendTypeKey()] = ["Backend", True]
@@ -166,16 +166,20 @@ class argSettingsController(QObject):
         else:
             print("*  WARNING: Current set of settings could not be saved:\n\t{}".format(data))
 
-    def getCompanyName(self):
+    @staticmethod
+    def getCompanyName():
         return "ARG"
 
-    def getToolName(self):
+    @staticmethod
+    def getToolName():
         return "ARG-GUI"
 
-    def getRecentMenuSettings(self):
+    @staticmethod
+    def getRecentMenuSettings():
         return "Recent Menu"
 
-    def getSaveBeforeRunSettings(self):
+    @staticmethod
+    def getSaveBeforeRunSettings():
         return "SaveBeforeRunEnabled"
 
     def getConfigArgPythonExePath(self):
@@ -187,16 +191,20 @@ class argSettingsController(QObject):
     def getArgPythonExePath(self):
         return self.argPythonExePath
 
-    def getArgPythonExePathLabel(self):
+    @staticmethod
+    def getArgPythonExePathLabel():
         return "Python executable"
 
-    def getArgPythonExePathKey(self):
+    @staticmethod
+    def getArgPythonExePathKey():
         return "argPythonExePath"
 
-    def getArgPythonExePathUserSettingsKey(self):
+    @staticmethod
+    def getArgPythonExePathUserSettingsKey():
         return "python_executable"
 
-    def getArgPythonExePathToolTip(self):
+    @staticmethod
+    def getArgPythonExePathToolTip():
         return "Fill the line edit with the complete path of the Python executable to be used to run ARG."
 
     def setArgPythonExePath(self, pythonExePath):
@@ -211,16 +219,20 @@ class argSettingsController(QObject):
     def getArgPythonSitePackagePath(self):
         return self.argPythonSitePackagePath
 
-    def getArgPythonSitePackagePathLabel(self):
+    @staticmethod
+    def getArgPythonSitePackagePathLabel():
         return "Python site-packages folder"
 
-    def getArgPythonSitePackagePathKey(self):
+    @staticmethod
+    def getArgPythonSitePackagePathKey():
         return "argPythonSitePackagePath"
 
-    def getArgPythonSitePackagePathUserSettingsKey(self):
+    @staticmethod
+    def getArgPythonSitePackagePathUserSettingsKey():
         return "python_site_package"
 
-    def getArgPythonSitePackagePathToolTip(self):
+    @staticmethod
+    def getArgPythonSitePackagePathToolTip():
         return "Fill the line edit with the complete path to the site-packages directory required by Python. <br><br>" \
                "(e.g: '<code>.../Python.framework/Versions/3.7/lib/python3.7/site-packages</code>')"
 
@@ -233,16 +245,20 @@ class argSettingsController(QObject):
     def readConfigArgScriptPath(self):
         return self.userSettingsReader.readArgScript(self.userSettingsReader.usrLvlPath)
 
-    def getArgScriptPathLabel(self):
+    @staticmethod
+    def getArgScriptPathLabel():
         return "ARG.py script"
 
-    def getArgScriptPathKey(self):
+    @staticmethod
+    def getArgScriptPathKey():
         return "argScriptPath"
 
-    def getArgScriptPathUserSettingsKey(self):
+    @staticmethod
+    def getArgScriptPathUserSettingsKey():
         return "arg_script"
 
-    def getArgScriptPathToolTip(self):
+    @staticmethod
+    def getArgScriptPathToolTip():
         return "Fill the line edit with the complete path to '<code>ARG.py</code>' script."
 
     def getArgScriptPath(self):
@@ -260,19 +276,23 @@ class argSettingsController(QObject):
     def getArgLatexProcessorPath(self):
         return self.argLatexProcessorPath
 
-    def getArgLatexProcessorPathLabel(self):
+    @staticmethod
+    def getArgLatexProcessorPathLabel():
         return "Latexmk processor"
 
-    def getArgLatexProcessorPathKey(self):
+    @staticmethod
+    def getArgLatexProcessorPathKey():
         return "argLatexProcessorPath"
 
-    def getArgLatexProcessorPathUserSettingsKey(self):
+    @staticmethod
+    def getArgLatexProcessorPathUserSettingsKey():
         return "latex_processor"
 
-    def getArgLatexProcessorPathToolTip(self):
-        return "Fill the line edit with the complete path to Latexmk processor executable.<br><br>\
-                (e.g: '<code>.../bin/latexmk</code>')<br><br><br>\
-                <i><u>Note</u>: The <code>Latexmk</code> processor is not part of ARG, the ability to call it from ARG is provided as a convenience.</i>"
+    @staticmethod
+    def getArgLatexProcessorPathToolTip():
+        return "Fill the line edit with the complete path to Latexmk processor executable.<br><br>" \
+               "(e.g: '<code>.../bin/latexmk</code>')<br><br><br><i><u>Note</u>: The <code>Latexmk</code> processor " \
+               "is not part of ARG, the ability to call it from ARG is provided as a convenience.</i>"
 
     def setArgLatexProcessorPath(self, latexProcessorPath):
         self.argLatexProcessorPath = latexProcessorPath
@@ -291,7 +311,7 @@ class argSettingsController(QObject):
 
     def settingsValue(self, keyFunction, keyValue):
         app = 'ARG-GUI'
-        if keyValue == None:
+        if keyValue is None:
             return self.settings.get(keyFunction())
         elif keyValue < 3:
             return self.settings.get(keyFunction())[keyValue]
@@ -300,458 +320,570 @@ class argSettingsController(QObject):
             return ""
 
     # ARG execution option
-    def eOption(self):
+    @staticmethod
+    def eOption():
         return "-e"
 
-    def gOption(self):
+    @staticmethod
+    def gOption():
         return "-g"
 
     # Report information
-    def backendTypeKey(self):
+    @staticmethod
+    def backendTypeKey():
         return "BackendType"
 
-    def backendTypeParameterFileKey(self):
+    @staticmethod
+    def backendTypeParameterFileKey():
         return "backend_type"
 
     def backendTypeValue(self, keyValue=None):
         return self.settingsValue(self.backendTypeKey, keyValue)
 
-    def backendTypeKeyWord(self):
+    @staticmethod
+    def backendTypeKeyWord():
         return "Word"
 
-    def backendTypeKeyLatex(self):
+    @staticmethod
+    def backendTypeKeyLatex():
         return "LaTeX"
 
-    def reportTypeKeyReport(self):
+    @staticmethod
+    def reportTypeKeyReport():
         return "Report"
 
-    def reportTypeKey(self):
+    @staticmethod
+    def reportTypeKey():
         return "ReportType"
 
-    def reportTypeParameterFileKey(self):
+    @staticmethod
+    def reportTypeParameterFileKey():
         return "report_type"
 
     def reportTypeValue(self, keyValue=None):
         return self.settingsValue(self.reportTypeKey, keyValue)
 
-    def classificationKey(self):
+    @staticmethod
+    def classificationKey():
         return "Classification"
 
-    def classificationParameterFileKey(self):
+    @staticmethod
+    def classificationParameterFileKey():
         return "classification"
 
-    def classificationKeyGeneric(self):
+    @staticmethod
+    def classificationKeyGeneric():
         return "Generic"
 
     def classificationValue(self, keyValue=None):
         return self.settingsValue(self.classificationKey, keyValue)
 
-    def fileNameKey(self):
+    @staticmethod
+    def fileNameKey():
         return "File Name"
 
-    def fileNameParameterFileKey(self):
+    @staticmethod
+    def fileNameParameterFileKey():
         return "file_name"
 
     def fileNameValue(self, keyValue=None):
         return self.settingsValue(self.fileNameKey, keyValue)
 
-    def mutablesFileKey(self):
+    @staticmethod
+    def mutablesFileKey():
         return "Mutables"
 
-    def mutablesFileParameterFileKey(self):
+    @staticmethod
+    def mutablesFileParameterFileKey():
         return "mutables"
 
     def mutablesFileValue(self, keyValue=None):
         return self.settingsValue(self.mutablesFileKey, keyValue)
 
-    def structureFileKey(self):
+    @staticmethod
+    def structureFileKey():
         return "StructureFile"
 
-    def structureFileParameterFileKey(self):
+    @staticmethod
+    def structureFileParameterFileKey():
         return "structure"
 
     def structureFileValue(self, keyValue=None):
         return self.settingsValue(self.structureFileKey, keyValue)
 
-    def structureEndFileKey(self):
+    @staticmethod
+    def structureEndFileKey():
         return "StructureEnd"
 
-    def structureEndFileParameterFileKey(self):
+    @staticmethod
+    def structureEndFileParameterFileKey():
         return "structure_end"
 
     def structureEndFileValue(self, keyValue=None):
         return self.settingsValue(self.structureEndFileKey, keyValue)
 
-    def artifactFileKey(self):
+    @staticmethod
+    def artifactFileKey():
         return "ArtifactFile"
 
-    def artifactFileParameterFileKey(self):
+    @staticmethod
+    def artifactFileParameterFileKey():
         return "artifact"
 
     def artifactFileValue(self, keyValue=None):
         return self.settingsValue(self.artifactFileKey, keyValue)
 
-    def outputFolderKey(self):
+    @staticmethod
+    def outputFolderKey():
         return "OutputDir"
 
-    def outputFolderParameterFileKey(self):
+    @staticmethod
+    def outputFolderParameterFileKey():
         return "output"
 
     def outputFolderValue(self, keyValue=None):
         return self.settingsValue(self.outputFolderKey, keyValue)
 
-    def verbosityKey(self):
+    @staticmethod
+    def verbosityKey():
         return "Verbosity"
 
-    def verbosityParameterFileKey(self):
+    @staticmethod
+    def verbosityParameterFileKey():
         return "verbosity"
 
-    def verbosityKeyTerse(self):
+    @staticmethod
+    def verbosityKeyTerse():
         return "Terse"
 
-    def verbosityKeyTerseAsInt(self):
+    @staticmethod
+    def verbosityKeyTerseAsInt():
         return -1
 
-    def verbosityKeyDefault(self):
+    @staticmethod
+    def verbosityKeyDefault():
         return "Default"
 
-    def verbosityKeyDefaultAsInt(self):
+    @staticmethod
+    def verbosityKeyDefaultAsInt():
         return 0
 
-    def verbosityKeyVerbose(self):
+    @staticmethod
+    def verbosityKeyVerbose():
         return "Verbose"
 
-    def verbosityKeyVerboseAsInt(self):
+    @staticmethod
+    def verbosityKeyVerboseAsInt():
         return 1
 
     def verbosityValue(self, keyValue=None):
         return self.settingsValue(self.verbosityKey, keyValue)
 
     # General Options
-    def titleKey(self):
+    @staticmethod
+    def titleKey():
         return "Title"
 
     def titleValue(self, keyValue=None):
         return self.settingsValue(self.titleKey, keyValue)
 
-    def titleParameterFileKey(self):
+    @staticmethod
+    def titleParameterFileKey():
         return "title"
 
-    def numberKey(self):
+    @staticmethod
+    def numberKey():
         return "Number"
 
     def numberValue(self, keyValue=None):
         return self.settingsValue(self.numberKey, keyValue)
 
-    def numberParameterFileKey(self):
+    @staticmethod
+    def numberParameterFileKey():
         return "number"
 
-    def issueKey(self):
+    @staticmethod
+    def issueKey():
         return "Issue"
 
     def issueValue(self, keyValue=None):
         return self.settingsValue(self.issueKey, keyValue)
 
-    def issueParameterFileKey(self):
+    @staticmethod
+    def issueParameterFileKey():
         return "issue"
 
-    def versionsKey(self):
+    @staticmethod
+    def versionsKey():
         return "Versions"
 
     def versionsValue(self, keyValue=None):
         return self.settingsValue(self.versionsKey, keyValue)
 
-    def versionParameterFileKey(self):
+    @staticmethod
+    def versionParameterFileKey():
         return "version"
 
-    def authorsKey(self):
+    @staticmethod
+    def authorsKey():
         return "Authors"
 
     def authorsValue(self, keyValue=None):
         return self.settingsValue(self.authorsKey, keyValue)
 
-    def authorParameterFileKey(self):
+    @staticmethod
+    def authorParameterFileKey():
         return "author"
 
-    def organizationsKey(self):
+    @staticmethod
+    def organizationsKey():
         return "Organizations"
 
     def organizationsValue(self, keyValue=None):
         return self.settingsValue(self.organizationsKey, keyValue)
 
-    def organizationParameterFileKey(self):
+    @staticmethod
+    def organizationParameterFileKey():
         return "organization"
 
-    def locationKey(self):
+    @staticmethod
+    def locationKey():
         return "Location"
 
     def locationValue(self, keyValue=None):
         return self.settingsValue(self.locationKey, keyValue)
 
-    def locationParameterFileKey(self):
+    @staticmethod
+    def locationParameterFileKey():
         return "location"
 
-    def yearKey(self):
+    @staticmethod
+    def yearKey():
         return "Year"
 
     def yearValue(self, keyValue=None):
         return self.settingsValue(self.yearKey, keyValue)
 
-    def yearParameterFileKey(self):
+    @staticmethod
+    def yearParameterFileKey():
         return "year"
 
-    def monthKey(self):
+    @staticmethod
+    def monthKey():
         return "Month"
 
     def monthValue(self, keyValue=None):
         return self.settingsValue(self.monthKey, keyValue)
 
-    def monthParameterFileKey(self):
+    @staticmethod
+    def monthParameterFileKey():
         return "month"
 
-    def abstractFileKey(self):
+    @staticmethod
+    def abstractFileKey():
         return "AbstractFile"
 
     def abstractFileValue(self, keyValue=None):
         return self.settingsValue(self.abstractFileKey, keyValue)
 
-    def abstractFileParameterFileKey(self):
+    @staticmethod
+    def abstractFileParameterFileKey():
         return "abstract"
 
-    def prefaceKey(self):
+    @staticmethod
+    def prefaceKey():
         return "Preface"
 
     def prefaceValue(self, keyValue=None):
         return self.settingsValue(self.prefaceKey, keyValue)
 
-    def prefaceParameterFileKey(self):
+    @staticmethod
+    def prefaceParameterFileKey():
         return "preface"
 
-    def thanksKey(self):
+    @staticmethod
+    def thanksKey():
         return "Thanks"
 
     def thanksValue(self, keyValue=None):
         return self.settingsValue(self.thanksKey, keyValue)
 
-    def thanksParameterFileKey(self):
+    @staticmethod
+    def thanksParameterFileKey():
         return "thanks"
 
-    def executiveSummaryKey(self):
+    @staticmethod
+    def executiveSummaryKey():
         return "ExecutiveSummary"
 
     def executiveSummaryValue(self, keyValue=None):
         return self.settingsValue(self.executiveSummaryKey, keyValue)
 
-    def executiveSummaryParameterFileKey(self):
+    @staticmethod
+    def executiveSummaryParameterFileKey():
         return "executive_summary"
 
-    def nomenclatureKey(self):
+    @staticmethod
+    def nomenclatureKey():
         return "Nomenclature"
 
     def nomenclatureValue(self, keyValue=None):
         return self.settingsValue(self.nomenclatureKey, keyValue)
 
-    def nomenclatureParameterFileKey(self):
+    @staticmethod
+    def nomenclatureParameterFileKey():
         return "nomenclature"
 
-    def finalKey(self):
+    @staticmethod
+    def finalKey():
         return "Final"
 
     def finalValue(self, keyValue=None):
         return self.settingsValue(self.finalKey, keyValue)
 
-    def finalParameterFileKey(self):
+    @staticmethod
+    def finalParameterFileKey():
         return "final"
 
-    def keySeparatorKey(self):
+    @staticmethod
+    def keySeparatorKey():
         return "KeySeparator"
 
-    def keySeparatorDefault(self):
+    @staticmethod
+    def keySeparatorDefault():
         return ";"
 
     def keySeparatorValue(self, keyValue=None):
         return self.settingsValue(self.keySeparatorKey, keyValue)
 
-    def keySeparatorParameterFileKey(self):
+    @staticmethod
+    def keySeparatorParameterFileKey():
         return "key_separator"
 
     # Data
-    def dataFolderKey(self):
+    @staticmethod
+    def dataFolderKey():
         return "DataDirectory"
 
-    def dataFolderParameterFileKey(self):
+    @staticmethod
+    def dataFolderParameterFileKey():
         return "data"
 
-    def dataFolderDefault(self):
+    @staticmethod
+    def dataFolderDefault():
         return '.'
 
     def dataFolderValue(self, keyValue=None):
         return self.settingsValue(self.dataFolderKey, keyValue)
 
-    def solutionCasesKey(self):
+    @staticmethod
+    def solutionCasesKey():
         return "SolutionCases"
 
-    def solutionCasesParameterFileKey(self):
+    @staticmethod
+    def solutionCasesParameterFileKey():
         return "solution_cases"
 
     def solutionCasesValue(self, keyValue=None):
         return self.settingsValue(self.solutionCasesKey, keyValue)
 
-    def solutionCasesLabelsList(self):
+    @staticmethod
+    def solutionCasesLabelsList():
         return ["Type", "Ignored Blocks", "Mode minimum value", "Mode maximum value"]
 
-    def solutionCasesAddKey(self):
+    @staticmethod
+    def solutionCasesAddKey():
         return "Add solution case"
 
-    def solutionCasesRemoveKey(self):
+    @staticmethod
+    def solutionCasesRemoveKey():
         return "Remove solution case"
 
-    def solutionCasesTypeKey(self):
+    @staticmethod
+    def solutionCasesTypeKey():
         return "type"
 
-    def solutionCasesTypeValues(self):
+    @staticmethod
+    def solutionCasesTypeValues():
         return ["eigen"]
 
-    def solutionCasesIgnoredBlocksKey(self):
+    @staticmethod
+    def solutionCasesIgnoredBlocksKey():
         return "ignored_blocks"
 
-    def solutionCasesModeKey(self):
+    @staticmethod
+    def solutionCasesModeKey():
         return "modes"
 
-    def cadParametersSectionKey(self):
+    @staticmethod
+    def cadParametersSectionKey():
         return "CAD Parameters"
 
-    def geometryRootKey(self):
+    @staticmethod
+    def geometryRootKey():
         return "GeometryRoot"
 
-    def geometryRootParameterFileKey(self):
+    @staticmethod
+    def geometryRootParameterFileKey():
         return "geometry_root"
 
     def geometryRootValue(self, keyValue=None):
         return self.settingsValue(self.geometryRootKey, keyValue)
 
-    def reportedCadMetaDataKey(self):
+    @staticmethod
+    def reportedCadMetaDataKey():
         return "ReportedCadMetaData"
 
-    def reportedCadMetaDataParameterFileKey(self):
+    @staticmethod
+    def reportedCadMetaDataParameterFileKey():
         return "reported_cad_metadata"
 
     def reportedCadMetaDataValue(self, keyValue=None):
         return self.settingsValue(self.reportedCadMetaDataKey, keyValue)
 
-    def femParametersSectionKey(self):
+    @staticmethod
+    def femParametersSectionKey():
         return "FEM Parameters"
 
-    def inputDeckKey(self):
+    @staticmethod
+    def inputDeckKey():
         return "DeckRoot"
 
-    def inputDeckParameterFileKey(self):
+    @staticmethod
+    def inputDeckParameterFileKey():
         return "input_deck"
 
     def inputDeckValue(self, keyValue=None):
         return self.settingsValue(self.inputDeckKey, keyValue)
 
-    def logFileKey(self):
+    @staticmethod
+    def logFileKey():
         return "LogFile"
 
-    def logFileParameterFileKey(self):
+    @staticmethod
+    def logFileParameterFileKey():
         return "log_file"
 
     def logFileValue(self, keyValue=None):
         return self.settingsValue(self.logFileKey, keyValue)
 
-    def ignoredBlocksKey(self):
+    @staticmethod
+    def ignoredBlocksKey():
         return "IgnoredBlockKeys"
 
-    def ignoredBlocksParameterFileKey(self):
+    @staticmethod
+    def ignoredBlocksParameterFileKey():
         return "ignored_blocks"
 
     def ignoredBlocksValue(self, keyValue=None):
         return self.settingsValue(self.ignoredBlocksKey, keyValue)
 
-    def mappingsSectionKey(self):
+    @staticmethod
+    def mappingsSectionKey():
         return "Mappings"
 
-    def bijectiveMappingsKey(self):
+    @staticmethod
+    def bijectiveMappingsKey():
         return "Mappings"
 
     def bijectiveMappingsValue(self, keyValue=None):
         return self.settingsValue(self.bijectiveMappingsKey, keyValue)
 
-    def bijectiveMappingsParameterFileKey(self):
+    @staticmethod
+    def bijectiveMappingsParameterFileKey():
         return "mappings"
 
-    def cadToFemKey(self):
+    @staticmethod
+    def cadToFemKey():
         return "CAD_to_FEM"
 
     def cadToFemValue(self, keyValue=None):
         return self.settingsValue(self.cadToFemKey, keyValue)
 
-    def cadToFemAddKey(self):
+    @staticmethod
+    def cadToFemAddKey():
         return "Add CAD to FEM"
 
-    def cadToFemRemoveKey(self):
+    @staticmethod
+    def cadToFemRemoveKey():
         return "Remove CAD to FEM"
 
-    def cadToFemHeaderLabelsList(self):
+    @staticmethod
+    def cadToFemHeaderLabelsList():
         return ["CAD parts", "FEM blocks ", "Factors"]
 
-    def femToCadKey(self):
+    @staticmethod
+    def femToCadKey():
         return "FEM_to_CAD"
 
     def femToCadValue(self, keyValue=None):
         return self.settingsValue(self.femToCadKey, keyValue)
 
-    def femToCadAddKey(self):
+    @staticmethod
+    def femToCadAddKey():
         return "Add FEM to CAD"
 
-    def femToCadRemoveKey(self):
+    @staticmethod
+    def femToCadRemoveKey():
         return "Remove FEM to CAD"
 
-    def femToCadHeaderLabelsList(self):
+    @staticmethod
+    def femToCadHeaderLabelsList():
         return ["FEM blocks ", "CAD parts", "Factors"]
 
-    def elementsKey(self):
+    @staticmethod
+    def elementsKey():
         return "elements"
 
-    def factorsKey(self):
+    @staticmethod
+    def factorsKey():
         return "factors"
 
     # Inserts
-    def insertionKey(self):
+    @staticmethod
+    def insertionKey():
         return "Insert"
 
-    def insertionParameterFileKey(self):
+    @staticmethod
+    def insertionParameterFileKey():
         return "insert_in"
 
     def insertionValue(self, keyValue=None):
         return self.settingsValue(self.insertionKey(), keyValue)
 
-    def insertionLocationKey(self):
+    @staticmethod
+    def insertionLocationKey():
         return "location"
 
-    def insertionTypeTextKey(self):
+    @staticmethod
+    def insertionTypeTextKey():
         return "string"
 
-    def insertionTypeImageKey(self):
+    @staticmethod
+    def insertionTypeImageKey():
         return "image"
 
-    def insertionAddKey(self):
+    @staticmethod
+    def insertionAddKey():
         return "Add insert"
 
-    def insertionRemoveKey(self):
+    @staticmethod
+    def insertionRemoveKey():
         return "Remove insert"
 
-    def insertHeaderLabelsList(self):
+    @staticmethod
+    def insertHeaderLabelsList():
         return ["Location", "Type", "Text / Image Path"]
 
-    def textParameterFileKey(self):
+    @staticmethod
+    def textParameterFileKey():
         return "string"
 
     def textValue(self, keyValue=None):
         return self.settingsValue(self.textKey, keyValue)
 
-    def imageParameterFileKey(self):
+    @staticmethod
+    def imageParameterFileKey():
         return "image"
 
     def imageValue(self, keyValue=None):

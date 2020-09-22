@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                     arg/Aggregation/argAggregate.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,14 +34,14 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import math as mt
 import os
 import re
-import vtk
 
 import matplotlib
+import vtk
 import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
 import yaml
 
@@ -284,9 +284,7 @@ def show_all_blocks(backend, fig_params, data, file_names, verbose):
 
     do_histograms = True
     # All histogram plots have identical sizes and aspects
-    histo_plot_params = {}
-    histo_plot_params["type"] = "histogram"
-    histo_plot_params["xyratio"] = 3.5
+    histo_plot_params = {"type": "histogram", "xyratio": 3.5}
 
     # Retrieve mandatory figure parameters
     try:
@@ -752,8 +750,7 @@ def show_enumerated_fields(backend, fig_params, data, file_name):
             # Get handle on input data in VTK form
             vtk_data = d.get_VTK_reader_output_data(i)
             if not vtk_data:
-                print("*  WARNING: could not read VTK data from input model".format(
-                    file_name))
+                print("* {} WARNING: could not read VTK data from input model".format(file_name))
                 return
 
             # Generate clipped mesh surface view
@@ -770,8 +767,7 @@ def arg_aggregate(backend, request_params):
 
     # Switch between different aggregation types
     request_name = request_params["name"]
-    print("[argAggregate] Processing {} request".format(
-        request_name))
+    print("[argAggregate] Processing {} request".format(request_name))
 
     # Operation show_all_blocks: one 4-view figure and one table per mesh block
     if request_name.startswith("show_all_blocks"):

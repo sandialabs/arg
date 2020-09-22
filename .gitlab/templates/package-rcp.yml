@@ -1,0 +1,58 @@
+###########################
+#### Package RCP stage ####
+###########################
+
+
+#Build angular client
+Build Angular app / Deploy to Flask server:
+  stage: check-package
+  needs: []
+  image: trion/ng-cli
+  script:
+    - echo "==================== [pypi Package] Install Angular dependencies ===================="
+    - cd web/angular
+    - npm install
+    - echo "==================== [pypi Package] Build Angular client ===================="
+    - ng build --prod --base-href /static/
+    - echo "==================== [pypi Package] Deploy to Flask server ===================="
+    - cd ../../web/api
+    - mkdir static
+    - mkdir templates
+    - mv ../angular/dist/ARG-GUI-angular/index.html templates/index.html
+    - cp -R ../angular/dist/ARG-GUI-angular/* static/
+  artifacts:
+    expire_in: 3 days
+    paths:
+      - web/api
+  rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      changes:
+      - rcp/**/*
+      - web/**/*
+
+# Build RCP plug-in
+Build RCP plug-in:
+  stage: package
+  image: maven:3.5.4-jdk-8
+  needs: ["Build Angular app / Deploy to Flask server"]
+  script:
+    - mkdir target
+    - cd rcp/src/io.arg.webgui
+    - echo "==================== [RCP Package] Build RCP ARG Web-Gui plug-in ===================="
+    - mvn clean install -DskipTests
+    - cp -R releng/io.arg.webgui.update/target/site/. ../../../target/
+  artifacts:
+    expire_in: 3 days
+    paths:
+      - target
+  rules:
+#   Always run when pushing a release candidate
+    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+      changes:
+      - rcp/**/*
+      - web/**/*

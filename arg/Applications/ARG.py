@@ -42,7 +42,6 @@ import os
 import shutil
 import sys
 import time
-
 import yaml
 
 from arg import __version__
@@ -67,11 +66,13 @@ with open(os.path.join(common_dir, "../Common/argTypes.yml"),
     Types = yaml.safe_load(t_file)
 
 
-class Runner(object):
+class Runner:
     """A class to describe ARG runner parameters
     """
 
     def __init__(self, version=None):
+        """Class constructor
+        """
 
         # Default values of variables that must exist
         self.Explore = False
@@ -81,17 +82,23 @@ class Runner(object):
         self.Parameters = None
         self.Version = version
         self.LatexProcessor = None
+        self.TexFile = None
 
-    def usage(self):
-        """Provide online help.
+    @staticmethod
+    def usage():
+        """Provide online help
         """
 
         print("Usage:")
         print("\t [-h]                      Help: print this message and exit")
         print("\t [-e]                      run Explorator then Assembler")
         print("\t [-g]                      run Generator then Assembler")
+        print("\t [-E]                      run Explorator")
+        print("\t [-G]                      run Generator")
+        print("\t [-A]                      run Assembler")
         print("\t [-p <parameters file>]    name of parameters file")
         print("\t [-l <LaTeX processor>]    name of LaTeX processor")
+        print("\t [-t]                      generate just .tex file")
         sys.exit(0)
 
     def parse_line(self, app, default_parameters_filename, types=None):
@@ -103,7 +110,7 @@ class Runner(object):
 
         # Try to hash command line with respect to allowable flags
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "egEGAp:l:")
+            opts, args = getopt.getopt(sys.argv[1:], "egEGAp:l:t")
         except getopt.GetoptError:
             self.usage()
             sys.exit(1)
@@ -134,6 +141,8 @@ class Runner(object):
                 self.ParametersFile = a
             elif o == "-l":
                 self.LatexProcessor = a
+            elif o == "-t":
+                self.TexFile = True
 
         # Inform user if missing argument
         if not self.ParametersFile:
@@ -147,6 +156,7 @@ class Runner(object):
                                               self.Version,
                                               types,
                                               self.LatexProcessor)
+        self.Parameters.TexFile = self.TexFile
 
         # Populate attributes based on parameters file content
         return (self.Parameters.check_parameters_file()
@@ -251,7 +261,6 @@ def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
             print("[{}] LaTeX to PDF processor: {}".format(
                 app,
                 latex_proc.strip()))
-            has_latexmk = True
 
         # Look for predefined list of possible processors otherwise
         else:
@@ -261,7 +270,6 @@ def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
                 print("[{}] LaTeX to PDF processor: {}".format(
                     app,
                     return_latex.strip()))
-                has_latexmk = True
             else:
                 # If no latexmk was found, then look for full pdflatex path
                 return_latex = distutils.spawn.find_executable("pdflatex")

@@ -36,8 +36,6 @@
 #
 #HEADER
 
-import os
-
 from PySide2.QtWidgets import QAction, QApplication
 
 app = "ARG-GUI"
@@ -47,14 +45,14 @@ class argAboutAction(QAction):
     """An action class
     """
 
-    def __init__(self, parent=None):
-        super(argAboutAction, self).__init__(parent)
-        scriptDirectory = os.path.dirname(os.path.realpath(__file__))
+    def __init__(self):
+        super().__init__()
         self.setText("About...")
         self.setToolTip("Information about ARG-GUI")
 
         self.triggered.connect(self.onTriggered)
 
-    def onTriggered(self):
+    @staticmethod
+    def onTriggered():
         print("[{}] 'About' action detected.".format(app))
         QApplication.instance().aboutRequested()

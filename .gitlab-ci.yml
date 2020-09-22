@@ -8,12 +8,13 @@ include:
   - template: Code-Quality.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
   - template: Secret-Detection.gitlab-ci.yml
   - local: "/.gitlab/templates/build-tests-GA-EA.yml"
   - local: "/.gitlab/templates/gui-tests.yml"
+  - local: "/.gitlab/templates/rcp-tests.yml"
   - local: "/.gitlab/templates/distributions-tests.yml"
   - local: "/.gitlab/templates/package.yml"
+  - local: "/.gitlab/templates/package-rcp.yml"
   - local: "/.gitlab/templates/deploy.yml"
   - local: "/.gitlab/templates/docs.yml"
   - local: "/.gitlab/templates/git-bot.yml"
@@ -27,18 +28,20 @@ variables:
   ERR_PDF_FILE: "${BUILD_TEST_NAME}/build_tests-${BUILD_TEST_NAME}-Report-LaTeX/ARG.err"
   ERR_DOCX_FILE: "${BUILD_TEST_NAME}/build_tests-${BUILD_TEST_NAME}-Report-Word/ARG.err"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+# SECURE_LOG_LEVEL: "debug"
 
 # Stages definition
 stages:
   - test
-  - gui-test
   - build-individual-test
   - compare-individual-test-pdf
   - compare-individual-test-word
   - test-distributions
+  - check-package
   - package
+  - gui-test
   - deploy
-  - doc
+  - documentation
   - git-bot
 
 # Workaround for Gitlab issue generating a detached pipeline for "rules" "if" "manual" jobs
@@ -54,7 +57,7 @@ workflow:
 
 Python Static Scan:
   extends: .with_python_cache
-  image: python:3.8.5-slim-buster
+  image: python:slim-buster
   stage: test
   before_script:
     - pip install virtualenv
@@ -72,3 +75,19 @@ Python Static Scan:
     expose_as: "PyLint Report"
     paths:
       - pylint/
+
+# Custom SpotBugs-SAST routine for Java projects
+Custom SpotBugs-SAST test:
+  stage: test
+  extends: []
+  needs: []
+  image: maven:3.5.4-jdk-8
+  script:
+    - cd rcp/src/io.arg.webgui/
+    - echo "Verifying arg rcp plugin"
+    - mvn clean verify -DskipTests
+  artifacts:
+    reports:
+      sast: rcp/src/io.arg.webgui/bundles/io.arg.webgui.plugin/target/spotbugsXml.xml
+
+    

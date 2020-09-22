@@ -333,7 +333,8 @@ class argLaTeXBackend(argBackendBase):
                     # Print resulting line into destination file
                     f_out.write(l)
 
-    def generate_text(self, text, type="default"):
+    @staticmethod
+    def generate_text(text):
         """Add page break to the report
         """
 
@@ -361,13 +362,13 @@ class argLaTeXBackend(argBackendBase):
                     if c in string:
                         string = string.replace(c, "\\" + c)
 
-                if (font_bits & 1 == 1):
+                if font_bits & 1 == 1:
                     string = italic(string)
-                if (font_bits & 2 == 2):
+                if font_bits & 2 == 2:
                     string = bold(string)
-                if (font_bits & 4 == 4):
+                if font_bits & 4 == 4:
                     string = r"\texttt{{{}}}".format(string)
-                if (font_bits & 8 == 8):
+                if font_bits & 8 == 8:
                     string = r"$\mathcal{{{}}}$".format(string)
                 if color and colors.get(color):
                     sep = ','
@@ -796,23 +797,27 @@ class argLaTeXBackend(argBackendBase):
         # Append backend-specific postamble
         self.append_document_postamble()
 
-        # Generate PDF report
-        print("[argLaTeXBackend] Generating PDF report")
-
-        # Check specified LaTeX processor usability
-        has_latex = self.check_latex_processor(latex_proc)
-        if has_latex:
-            self.Report.generate_pdf(clean_tex=False,
-                                     compiler=latex_proc,
-                                     compiler_args=["-pdf", "-f"],
-                                     silent=True)
-        # Use whatever pylatex finds if failed
+        if self.Parameters.TexFile is not None and self.Parameters.TexFile:
+            self.Report.generate_tex()
         else:
-            self.Report.generate_pdf(clean_tex=False,
-                                     compiler_args=["-pdf", "-f"],
-                                     silent=True)
+            # Generate PDF report
+            print("[argLaTeXBackend] Generating PDF report")
 
-    def check_latex_processor(self, latex_proc):
+            # Check specified LaTeX processor usability
+            has_latex = self.check_latex_processor(latex_proc)
+            if has_latex:
+                self.Report.generate_pdf(clean_tex=False,
+                                         compiler=latex_proc,
+                                         compiler_args=["-pdf", "-f"],
+                                         silent=True)
+            # Use whatever pylatex finds if failed
+            else:
+                self.Report.generate_pdf(clean_tex=False,
+                                         compiler_args=["-pdf", "-f"],
+                                         silent=True)
+
+    @staticmethod
+    def check_latex_processor(latex_proc):
         """Check specified LaTeX processor usability
         """
 
