@@ -151,7 +151,7 @@ class argWordBackend(argBackendBase):
         self.Type = "Word"
 
     @staticmethod
-    def generate_text(text):
+    def generate_text(text, type="default"):
         """Add page break to the report
         """
 
