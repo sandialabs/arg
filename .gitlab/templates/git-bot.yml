@@ -42,8 +42,9 @@ Bot release job:
     - if [ "$GIT_TAG" = "$PYARG" ]; then echo "----- VERSIONS ARE THE SAME -----"; else echo "----- __version__.py and setup.py ARE NOT THE SAME -----" && exit 1; fi
     - echo "---------- [ARG Bot] Create $GIT_TAG tag ----------"
     - git tag $GIT_TAG
-    - git push
+    - git push --tags
     - echo "==================== [Release routine] Spawn new develop branch ===================="
+    - git pull
     - echo "---------- [ARG Bot] Checkout develop branch ----------"
     - git checkout develop
     - echo "---------- [ARG Bot] Hard-reset develop to master ----------"
