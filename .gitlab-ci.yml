@@ -11,10 +11,9 @@ include:
   - template: Secret-Detection.gitlab-ci.yml
   - local: "/.gitlab/templates/build-tests-GA-EA.yml"
   - local: "/.gitlab/templates/gui-tests.yml"
-  - local: "/.gitlab/templates/rcp-tests.yml"
   - local: "/.gitlab/templates/distributions-tests.yml"
   - local: "/.gitlab/templates/package.yml"
-  - local: "/.gitlab/templates/package-rcp.yml"
+  - local: "/.gitlab/templates/package-web.yml"
   - local: "/.gitlab/templates/deploy.yml"
   - local: "/.gitlab/templates/docs.yml"
   - local: "/.gitlab/templates/git-bot.yml"
@@ -75,19 +74,5 @@ Python Static Scan:
     expose_as: "PyLint Report"
     paths:
       - pylint/
-
-# Custom SpotBugs-SAST routine for Java projects
-Custom SpotBugs-SAST test:
-  stage: test
-  extends: []
-  needs: []
-  image: maven:3.5.4-jdk-8
-  script:
-    - cd rcp/src/io.arg.webgui/
-    - echo "Verifying arg rcp plugin"
-    - mvn clean verify -DskipTests
-  artifacts:
-    reports:
-      sast: rcp/src/io.arg.webgui/bundles/io.arg.webgui.plugin/target/spotbugsXml.xml
 
     

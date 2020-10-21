@@ -1,5 +1,5 @@
 ###########################
-#### Package RCP stage ####
+#### Package Web stage ####
 ###########################
 
 
@@ -30,29 +30,4 @@ Build Angular app / Deploy to Flask server:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       changes:
-      - rcp/**/*
-      - web/**/*
-
-# Build RCP plug-in
-Build RCP plug-in:
-  stage: package
-  image: maven:3.5.4-jdk-8
-  needs: ["Build Angular app / Deploy to Flask server"]
-  script:
-    - mkdir target
-    - cd rcp/src/io.arg.webgui
-    - echo "==================== [RCP Package] Build RCP ARG Web-Gui plug-in ===================="
-    - mvn clean install -DskipTests
-    - cp -R releng/io.arg.webgui.update/target/site/. ../../../target/
-  artifacts:
-    expire_in: 3 days
-    paths:
-      - target
-  rules:
-#   Always run when pushing a release candidate
-    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
-    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
-    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
-      changes:
-      - rcp/**/*
       - web/**/*

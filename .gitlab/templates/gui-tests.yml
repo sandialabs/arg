@@ -219,10 +219,10 @@ Qt GUI tests:
         - arg/__version__.py
         - requirements.txt
 
-# plug-in GUI tests on View component
-plug-in GUI tests:
+# Web GUI tests on View component
+Web GUI tests:
   variables:
-    GUI_TEST_NAME: "plug-in"
+    GUI_TEST_NAME: "Web"
   extends:
     - .gui_view_test
     - .with_python_cache
