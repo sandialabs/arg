@@ -56,7 +56,7 @@ workflow:
 
 Python Static Scan:
   extends: .with_python_cache
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: test
   before_script:
     - pip install virtualenv
