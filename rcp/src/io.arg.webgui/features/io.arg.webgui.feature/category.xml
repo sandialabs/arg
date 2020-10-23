@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <bundle id="io.arg.webgui.plugin" version="0.1.0.qualifier">
-      <category name="arg-web-gui"/>
-   </bundle>
-   <category-def name="arg-web-gui" label="ARG User Web Interface"/>
-</site>
