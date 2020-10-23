@@ -6,7 +6,7 @@
 
 #Deploy pyARG-dep in Gitlab.com
 Upload pyARG-dep in Gitlab.com:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG-dep"
@@ -31,7 +31,7 @@ Upload pyARG-dep in Gitlab.com:
 
 #Deploy pyARG in Gitlab.com
 Upload pyARG in Gitlab.com:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG"
@@ -59,7 +59,7 @@ Upload pyARG in Gitlab.com:
 
 #Deploy pyARG-dep in pypi.org
 Upload pyARG-dep in pypi.org:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG-dep"
@@ -90,7 +90,7 @@ Upload pyARG-dep in pypi.org:
 
 #Deploy pyARG in pypi.org
 Upload pyARG in pypi.org:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: deploy
   needs:
     - job: "Package pyARG"

@@ -4,7 +4,7 @@
 
 #Check if package pyARG-dep can be prepared
 Check pyARG-dep package:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: check-package
   needs: []
   script:
@@ -21,7 +21,7 @@ Check pyARG-dep package:
 
 #Package pyARG-dep for pypi
 Package pyARG-dep:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: package
   needs:
     - job: "Check pyARG-dep package"
@@ -59,7 +59,7 @@ Package pyARG-dep:
 
 #Check if package pyARG can be prepared
 Check pyARG package:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: check-package
   needs: []
   script:
@@ -73,7 +73,7 @@ Check pyARG package:
 
 #Package pyARG for pypi
 Package pyARG:
-  image: python:slim-buster
+  image: python:3.7-slim-buster
   stage: package
   needs:
     - job: "Check pyARG package"
