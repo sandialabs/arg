@@ -75,7 +75,7 @@ class argReportParameters:
     # Save default temp file name
     DEFAULT_TMPFILE = "ARG"
 
-    def __init__(self, application, parameters_file=None, version=None, types=None, latex_processor=None):
+    def __init__(self, application, parameters_file=None, version=None, types=None, latex_processor=None, structure_file=None):
 
         # Default application settings
         self.Application = application
@@ -96,7 +96,7 @@ class argReportParameters:
         self.ParametersFile = parameters_file
         self.FileName = None
         self.Mutables = "mutables.yml"
-        self.StructureFile = None
+        self.StructureFile = structure_file
         self.StructureEndFile = None
         self.Abstract = None
         self.Thanks = None
