@@ -1,4 +1,4 @@
-ARG version: 1.0.7-RC1
+ARG version: 1.0.7
 
 # Chapters
 chapters:
