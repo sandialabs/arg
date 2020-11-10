@@ -130,7 +130,7 @@ Build 'tables' case:
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
-        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME}
+        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} -I "${LINE_TO_IGNORE}"
       fi
     - |
       if [ "$COMPARE_TEX_OUTPUT" == "true" ]; then
@@ -192,6 +192,7 @@ Compare pdf 'crush' case:
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_pdf
 
 # 'crush-E' case comparison variables
@@ -206,6 +207,7 @@ Compare pdf 'crush-E' case:
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_pdf
 
 # 'disk' case comparison variables
@@ -299,7 +301,7 @@ Compare pdf 'tables' case:
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
-        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME}
+        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} -I "${LINE_TO_IGNORE}"
       fi
     - |
       if [ "$COMPARE_WORD_OUTPUT" == "true" ]; then
@@ -362,6 +364,7 @@ Compare word 'crush' case:
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
     COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_word
 
 # 'crush-E' case comparison variables
@@ -378,6 +381,7 @@ Compare word 'crush-E' case:
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
     COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_word
 
 # 'disk' case comparison variables
