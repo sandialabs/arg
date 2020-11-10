@@ -411,8 +411,8 @@ class argBackendBase:
             tab_head[0].append(prop_type, "typewriter")
             tab_head += [argMultiFontStringHelper(self)
                          for _ in prop_items]
-            map(lambda x, p: x.append(p, "typewriter"),
-                tab_head[1:], prop_items)
+            for p in prop_items:
+                tab_head.append(p)
             multi_font_string = argMultiFontStringHelper(self)
             multi_font_string.append("Values of ", "default")
             multi_font_string.append(prop_type, "typewriter")

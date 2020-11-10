@@ -362,7 +362,8 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Merge all shards
         merge_map = {}
         it_shards = [s.NewIterator() for s in shards]
-        map(vtkCommonDataModel.vtkCompositeDataIterator.InitTraversal, it_shards)
+        for i in it_shards:
+            vtkCommonDataModel.vtkCompositeDataIterator.InitTraversal(i)
         while not it_shards[0].IsDoneWithTraversal():
             # Merge duplicate points when merging blocks
             append = vtkFiltersCore.vtkAppendFilter()
