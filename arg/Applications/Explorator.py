@@ -44,10 +44,9 @@ import yaml
 
 from arg import __version__
 from arg.Common.argReportParameters import argReportParameters
+from arg.Applications.argExplorator import argExplorator
 
 ARG_VERSION = __version__
-
-app = "Explorator"
 
 # Import ARG modules
 if not __package__:
@@ -74,146 +73,8 @@ class exploratorSolution:
         self.Method = None
 
 
-class exploratorCase:
-    """A class to help discover and describe a case
-    """
 
-    def __init__(self, parameters):
-        # Data directory and files provided by user
-        self.DataDir = parameters.DataDir
-        self.DataPath = os.path.join(parameters.DataDir, '')
-        self.ParametersFile = parameters.ParametersFile
-        self.Mutables = parameters.Mutables
-        self.RealDataDir = os.path.realpath(parameters.DataDir)
-
-        # Other parameters inherited from user specifications
-        self.Mappings = parameters.Mappings
-        self.MetaData = parameters.MetaData
-        self.IgnoredBlockKeys = parameters.IgnoredBlockKeys
-        self.SolutionCases = parameters.SolutionCases
-        self.Fragments = parameters.Fragments
-
-        # Discovered files
-        self.DeckFiles = []
-        self.ExodusIIFiles = []
-        self.ExodusIIPartitions = set()
-        self.LogNames = []
-        self.Images = []
-        self.TextFiles = []
-
-        # Variables determined by analysis
-        self.DiscoveredData = {}
-        self.GeometryFiles = []
-        self.ParametersFiles = []
-        self.DeckType = None
-        self.DeckRoot = None
-        self.MeshType = None
-        self.MeshName = None
-        self.LogFile = None
-        self.Solutions = []
-        self.CaseNames = []
-        self.Methods = []
-
-    def print_debug(self):
-        """ Print debug information
-        """
-
-        res = ''
-
-        # Data directory and files provided by user
-        res = "{}\nDataDir = {}".format(res, self.DataDir)
-        res = "{}\nDataPath = {}".format(res, self.DataPath)
-        res = "{}\nParametersFile = {}".format(res, self.ParametersFile)
-        res = "{}\nMutables = {}".format(res, self.Mutables)
-        res = "{}\nRealDataDir = {}".format(res, self.RealDataDir)
-
-        # Other parameters inherited from user specifications
-        res = "{}\nMappings = {}".format(res, self.Mappings)
-        res = "{}\nMetaData = {}".format(res, self.MetaData)
-        res = "{}\nIgnoredBlockKeys = {}".format(res, self.IgnoredBlockKeys)
-        res = "{}\nSolutionCases = {}".format(res, self.SolutionCases)
-        res = "{}\nFragments = {}".format(res, self.Fragments)
-
-        # Discovered files
-        res = "{}\nDeckFiles = {}".format(res, self.DeckFiles)
-        res = "{}\nExodusIIFiles = {}".format(res, self.ExodusIIFiles)
-        res = "{}\nExodusIIPartitions = {}".format(res, self.ExodusIIPartitions)
-        res = "{}\nLogNames = {}".format(res, self.LogNames)
-        res = "{}\nImages = {}".format(res, self.Images)
-        res = "{}\nTextFiles = {}".format(res, self.TextFiles)
-
-        # Variables determined by analysis
-        res = "{}\nDiscoveredData = {}".format(res, self.DiscoveredData)
-        res = "{}\nGeometryFiles = {}".format(res, self.GeometryFiles)
-        res = "{}\nParametersFiles = {}".format(res, self.ParametersFiles)
-        res = "{}\nDeckType = {}".format(res, self.DeckType)
-        res = "{}\nDeckRoot = {}".format(res, self.DeckRoot)
-        res = "{}\nMeshType = {}".format(res, self.MeshType)
-        res = "{}\nMeshName = {}".format(res, self.MeshName)
-        res = "{}\nLogFile = {}".format(res, self.LogFile)
-        res = "{}\nSolutions = {}".format(res, self.Solutions)
-        res = "{}\nCaseNames = {}".format(res, self.CaseNames)
-        res = "{}\nMethods = {}".format(res, self.Methods)
-
-        print(res)
-
-    def recursively_search_supported_files(self, current_dir, verbosity):
-        """ Recursively retrieve supported files in given directory tree
-        """
-
-        # Iterate over all files in all current directory
-        for file_name in os.listdir(current_dir):
-            dir_or_file = os.path.join(current_dir, file_name)
-
-            # Distinguish between sub-directories and regular files
-            if os.path.isdir(dir_or_file):
-                # Descend into sub-tree
-                self.recursively_search_supported_files(dir_or_file, verbosity)
-
-            elif os.path.isfile(dir_or_file):
-                # Split file name
-                file_split = file_name.split('.')
-                if len(file_split) > 1:
-                    last_extension = file_split[-1].lower()
-                    if len(file_split) > 3:
-                        ante_penult_extension = file_split[-3].lower()
-                    else:
-                        ante_penult_extension = ''
-                else:
-                    last_extension = ''
-                    ante_penult_extension = ''
-
-                # Handle all supported regular file types
-                file_name = dir_or_file.replace(self.DataPath, '', 1)
-                if last_extension in ('i', "in", "inp", "yml", "yaml"):
-                    # Potential input deck file
-                    if file_name not in (self.ParametersFile, self.Mutables):
-                        self.DeckFiles.append(file_name)
-                elif last_extension in ('e', 'g', "ex2", "exo"):
-                    # ExodusII files
-                    self.ExodusIIFiles.append(file_name)
-                elif ante_penult_extension in ('e', 'g', "ex2", "exo"):
-                    # ExodusII partitions
-                    self.ExodusIIPartitions.add(os.path.splitext(file_name)[0])
-                elif last_extension in ("log", "rslt"):
-                    # Log files
-                    self.LogNames.append(file_name)
-                elif verbosity:
-                    if last_extension == "png":
-                        # Stand-alone images
-                        print("[{}] Found stand-alone image".format(
-                            app,
-                            file_name))
-                        self.Images.append(file_name)
-                    elif last_extension == "txt":
-                        # Stand-alone text fragments
-                        print("[{}] Found stand-alone text fragment".format(
-                            app,
-                            file_name))
-                        self.TextFiles.append(file_name)
-
-
-def main(app, types, version=None):
+def main(types, version=None):
     """ Explorator main method
     """
 
@@ -222,19 +83,18 @@ def main(app, types, version=None):
 
     # Print startup information
     sys_version = sys.version_info
-    print("[{}] ### Started with Python {}.{}.{}".format(
-        app,
+    print("[Explorator] ### Started with Python {}.{}.{}".format(
         sys_version.major,
         sys_version.minor,
         sys_version.micro))
 
     # Instantiate parameters object from command line arguments
-    parameters = argReportParameters(app, version=version, types=types)
+    parameters = argReportParameters("Explorator", version=version, types=types)
 
     # Parse command line arguments to get parameters file value
     if parameters.parse_line():
         # Execute
-        execute(app, parameters)
+        execute(parameters)
 
     # Print error message if something went wrong
     else:
@@ -244,16 +104,11 @@ def main(app, types, version=None):
     dt = time.time() - t_start
 
     # If this point is reached everything went fine
-    success_apps = parameters.get_successful_apps(app)
-    print("[{}] Ran {} successfully.".format(
-        app,
-        success_apps))
-    print("[{}] Process completed in {} seconds. ###".format(
-        app,
+    print("[Explorator] Process completed in {} seconds. ###".format(
         dt))
 
 
-def execute(app, parameters):
+def execute(parameters):
     """ Explorator execute method
     """
 
@@ -261,10 +116,10 @@ def execute(app, parameters):
     mutables = {"version": parameters.Version}
 
     # Parse parameters file
-    print("[{}] Parsing parameters file".format(app))
+    print("[Explorator] Parsing parameters file")
 
     # Retrieve all supported files inside data path tree
-    case = exploratorCase(parameters)
+    case = argExplorator(parameters)
     case.recursively_search_supported_files(parameters.DataDir, parameters.Verbosity)
     parameters.check_geometry_root(case)
     parameters.check_deck_root(case)
@@ -278,8 +133,7 @@ def execute(app, parameters):
         case.MeshType = "ExodusII"
 
         # Store discovered mesh
-        print("[{}] Stand-alone {} {} was found.".format(
-            app,
+        print("[Explorator] Stand-alone {} {} was found.".format(
             case.MeshType,
             case.MeshName))
         case.DiscoveredData[case.MeshType] = " mesh in {}".format(
@@ -292,7 +146,7 @@ def execute(app, parameters):
     generate_structure_file(parameters, case)
 
     # Log execution status
-    parameters.log_execution_status(app, "{}/".format(os.path.dirname(parameters.OutputDir)))
+    parameters.log_execution_status("Explore", "{}/".format(os.path.dirname(parameters.OutputDir)))
 
 
 def get_and_comment_property_value(meta_info, info_key):
@@ -302,14 +156,12 @@ def get_and_comment_property_value(meta_info, info_key):
     # Try to retrieve value corresponding to property key
     info_val = meta_info.get(info_key)
     if info_val:
-        print("[{}] {} specified by input deck: {}".format(
-            app,
+        print("[Explorator] {} specified by input deck: {}".format(
             info_key.capitalize(),
             ", ".join(info_val) if isinstance(info_val, list) else info_val
         ))
     else:
-        print("[{}] No {} specified by input deck".format(
-            app,
+        print("[Explorator] No {} specified by input deck".format(
             info_key))
 
     # Return retrieved (possibly None) value
@@ -330,8 +182,7 @@ def find_solution_partition(case, sol_stem, sol_method, backend):
             solution.Method = sol_method
 
             # Store discovered solution
-            print("[{}] Solution {} {} was found".format(
-                app,
+            print("[Explorator] Solution {} {} was found".format(
                 solution.Type,
                 f))
             case.DiscoveredData.setdefault("{} solution".format(solution.Type), []).append(
@@ -353,8 +204,7 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
     if frag_k == "string":
         for txt in frag_v:
             # Insert text
-            print("[{}] Inserting string `{}` into subdivision {}.{}".format(
-                app,
+            print("[Explorator] Inserting string `{}` into subdivision {}.{}".format(
                 txt if len(txt) < 20
                 else "{}[...]{}".format(
                     txt[:10],
@@ -369,8 +219,7 @@ def insert_fragment(yaml_file, frag_k, frag_v, chapter_index, section_index, bac
     elif frag_k == "image":
         for img in frag_v:
             # Insert image
-            print("[{}] Inserting image {} into subdivision {}.{}".format(
-                app,
+            print("Explorator] Inserting image {} into subdivision {}.{}".format(
                 img,
                 chapter_index,
                 section_index
@@ -654,8 +503,7 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
                 backend.generate_text(case.RealDataDir.replace('\\', '/'))))
         yaml_file.write("    sections:\n")
         for img in sorted(case.Images):
-            print("[{}] Including image {}".format(
-                app,
+            print("[Explorator] Including image {}".format(
                 img))
             yaml_file.write("    - n: figure\n")
             yaml_file.write("      arguments:\n")
@@ -673,8 +521,7 @@ def insert_stand_alone_chapter(yaml_file, case, chap_index, backend):
                 backend.generate_text(case.RealDataDir.replace('\\', '/'))))
         yaml_file.write("    sections:\n")
         for txt in sorted(case.TextFiles):
-            print("[{}] Including text fragment {}".format(
-                app,
+            print("[Explorator] Including text fragment {}".format(
                 txt))
             yaml_file.write("    - n: paragraph\n")
             yaml_file.write("      include: %s\n" % os.path.join(case.DataDir, txt))
@@ -758,8 +605,7 @@ def generate_structure_file(parameters, case):
         if parameters.StructureEndFile:
             yaml_file.write(open(parameters.StructureEndFile, 'r').read())
 
-        print("[{}] Generated structure file {} including {} chapters".format(
-            app,
+        print("[Explorator] Generated structure file {} including {} chapters".format(
             parameters.StructureFile,
             chapter_index))
 
@@ -768,4 +614,4 @@ if __name__ == '__main__':
     """Main artifact explorator routine
     """
 
-    main(app, Types, ARG_VERSION)
+    main(Types, ARG_VERSION)

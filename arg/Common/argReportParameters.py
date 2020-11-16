@@ -49,8 +49,6 @@ from arg.Backend.argBackend import argBackend
 from arg.DataInterface.argDataInterface import argDataInterface
 from arg.Tools import Utilities
 
-app = "argReportParameters"
-
 
 class argReportParameters:
     """A class to get and store ARG report parameters
@@ -68,8 +66,7 @@ class argReportParameters:
 
     # Verbosity levels
     VerbosityLevels = Types.get("VerbosityLevels", {})
-    print("[{}] Supported verbosity levels: {}".format(
-        app,
+    print("[argReportParameters] Supported verbosity levels: {}".format(
         ", ".join(VerbosityLevels)))
 
     # Save default temp file name
@@ -254,21 +251,14 @@ class argReportParameters:
         """Parse command line
         """
 
-        parsed = True
-
         # Try parsing command line arguments or get parameters file
+        parsed = True
         if self.Application.capitalize() == "Explorator" and not self.parse_command_line(
                 'Explorator') and not self.parse_parameters_line():
             parsed = False
-        if self.Application.capitalize() == "Generator" and not self.parse_command_line(
-                'Generator') and not self.parse_parameters_line():
-            parsed = False
-        if self.Application.capitalize() == "Assembler" and not self.parse_command_line(
-                'Assembler') and not self.parse_parameters_line():
-            parsed = False
         if self.Application.capitalize() == "ARG":
-            if not (self.parse_command_line('Explorator') and self.parse_command_line('Generator')
-                    and self.parse_command_line('Assembler')):
+            if not (self.parse_command_line("Explorator") and self.parse_command_line("Generator")
+                    and self.parse_command_line("Assembler")):
                 if not self.parse_parameters_line():
                     parsed = False
 
@@ -280,7 +270,7 @@ class argReportParameters:
             print("\nUse a parameters file :")
             self.parameters_file_usage()
 
-        if not (self.Application.capitalize() == "Generator" or self.ParametersFile):
+        if not self.ParametersFile:
             print("*  ERROR: No parameters file provided. Exiting. ")
             sys.exit(1)
 
@@ -1046,38 +1036,14 @@ class argReportParameters:
         # Specified file was found
         return True
 
-    def log_execution_status(self, app, tmp_file=None):
+    def log_execution_status(self, operation, tmp_file=None):
         """ Log execution status to tmp file
         """
 
-        # Use default tmp file name if not explicitly specified
+        # Use default temporary file name if not explicitly specified
         self.TmpFile = "{}.tmp".format(tmp_file or self.DEFAULT_TMPFILE)
 
-        # Write app name to tmp file
+        # Write operation name to temporary file
         f = open(self.TmpFile, "a")
-        f.write("{}\n".format(app))
+        f.write("{}\n".format(operation))
         f.close()
-
-    def get_successful_apps(self, app):
-        """ Retrieve successful app names from parameters TmpFile attribute
-        """
-
-        # Check if tmp file has been created
-        if self.TmpFile is not None:
-            if os.path.exists(self.TmpFile):
-                # Open tmp file and read content
-                with open(self.TmpFile, 'r') as f:
-                    apps = f.readlines()
-                    res = ', '.join(apps).replace('\n', '')
-                f.close()
-
-                # Remove tmp file
-                os.remove(self.TmpFile)
-
-                # Return formatted apps
-                return res
-
-        # Print error message otherwise
-        else:
-            print("[{}] No tmp file. ".format(
-                app))
