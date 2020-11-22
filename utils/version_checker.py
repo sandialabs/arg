@@ -52,7 +52,7 @@ def get__version(file_path: str) -> str:
 def version_comparison(pypi_ver: str, git_ver: str) -> str:
     """Returns a string with comparison between pypi_ver(http) and git_version(setup.py)
     """
-    pypi_is_RC= False
+    pypi_is_RC = False
     git_is_RC = False
     if pypi_ver == git_ver:
         res = 'SAME'
@@ -77,14 +77,17 @@ def version_comparison(pypi_ver: str, git_ver: str) -> str:
             res = 'REPO'
     return res
 
+
 if __name__ == "__main__":
     """ Returns a string with comparison between pypi_ver(http) and git_version(setup.py)
         If passed argument is 'pyARG' checks if version in __version__.py and setup.py are the same
     """
     args = sys.argv
     repo = args[1]
-    setup_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args[0]))), f"deployment/pypi/{repo}/setup.py")
-    version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(args[0])))), "arg/__version__.py")
+    setup_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args[0]))),
+                              f"deployment/pypi/{repo}/setup.py")
+    version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(args[0])))),
+                                "arg/__version__.py")
     actual_pypi_version = get_pypi_http_version(repo_name=repo)
     actual_git_version = get_pypi_git_version(file_path=setup_file)
     actual__version = get__version(file_path=version_file)

@@ -47,8 +47,12 @@ pages:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
       changes:
         - docs/**/*
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       changes:
       - docs/**/*
+      - .gitlab/**/*
+      - utils/**/*
   allow_failure: true
