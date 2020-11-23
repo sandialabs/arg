@@ -4,13 +4,13 @@ import subprocess
 
 
 class PdfComparatorCli:
-    """ Class responsible for comparison two pdf files having the same name in different directories.
-        Can be run as script from console when all optional arguments are passed.
+    """ Class responsible for comparing two pdf files having the same name in different directories.
+        Can be run as a script from console when all optional arguments are passed.
         Can be imported and used in another Python script when all optional parameters are passes to class Constructor.
-        Class uses external tools `diff` and `ImageMagick` which needs to installed in the system.
+        Class uses external tools: `diff` and `ImageMagick` - need to be installed on the system.
         :param page_range: Pages to comparison, starts from 0, e.g. '0-15', '1-1'
         :param exp_dir: Path to template DIRECTORY where file is located
-        :param exp_dir: Path to generated DIRECTORY where file is located
+        :param gen_dir: Path to generated DIRECTORY where file is located
         :param file_name: File name for comparison with .pdf extension, e.g. 'report.pdf' (same in both directories)
     """
 
@@ -48,7 +48,7 @@ class PdfComparatorCli:
             self.gen_file_name = os.path.join(args.generated, args.file_name)
 
     def __check_parameters(self):
-        """ Checks if all parameters were passed. If not raise error.
+        """ Checks if all parameters were passed. If not raises an error.
         """
         if self.first_page is None or self.last_page is None or self.exp_file_name is None \
                 or self.gen_file_name is None:
@@ -59,13 +59,13 @@ class PdfComparatorCli:
         """
         self.__check_parameters()
         print(f"==========================================================================================")
-        print(f"Checking if files exists...")
+        print(f"Checking if files exist...")
         for file in [self.exp_file_name, self.gen_file_name]:
             if not os.path.isfile(file):
                 raise FileNotFoundError(f"File: {file} not found")
             else:
                 print(f"File: \n{file} \nFOUND!")
-            if os.path.splitext(file)[-1] != '.pdf':
+            if os.path.splitext(file)[-1].lower() != '.pdf':
                 raise NameError(f"Provide file: {file} with .pdf extension")
 
     def generate_png(self, input_file: str, output_file: str):
@@ -81,7 +81,7 @@ class PdfComparatorCli:
 
     def compare_png(self, expected_png: str, generated_png: str):
         """ Compares .png files with use of 'diff' tool.
-            Raise error when something appears on stdout or stderr.
+            Raises an error when something appears on stdout or stderr.
         """
         self.__check_parameters()
         page_nr = os.path.splitext(expected_png)[0].split("-")[-1]
@@ -95,10 +95,11 @@ class PdfComparatorCli:
             print(f"Page number: {page_nr} are the same!")
 
     def get_pngs_to_compare(self) -> map:
-        """ Returns iterator of .png tuples for comparison, sorted by page numbers.
-            Raise error when number of pages differs.
+        """ Returns an iterator of .png tuples for comparison purposes, sorted by page numbers.
+            Raises an error when number of pages differs.
         """
         self.__check_parameters()
+
         def page_num(elem):
             """ Function returns page number for sorting purposes.
             """
@@ -109,7 +110,8 @@ class PdfComparatorCli:
         for file in os.listdir(self.cur_dir):
             file_split_ext = os.path.splitext(file)
             minus_sep = file_split_ext[0].split("-")
-            if file_split_ext[-1] == '.png' and int(minus_sep[-1]) in range(self.first_page, self.last_page + 1):
+            if file_split_ext[-1].lower() == '.png' and int(minus_sep[-1]) in range(self.first_page,
+                                                                                    self.last_page + 1):
                 if minus_sep[0][-3:] == os.path.splitext(self.exp_png)[0]:
                     exp_files.append(file)
                 elif minus_sep[0][-3:] == os.path.splitext(self.gen_png)[0]:
