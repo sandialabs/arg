@@ -10,7 +10,7 @@ Check pyARG-dep package:
   script:
     - echo "==================== [pypi Package] Check pyARG-dep version ===================="
     - export VERSION_CHECK=$(python utils/version_checker.py pyARG-dep)
-    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG-dep -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
+    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG-dep -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----"; fi
   rules:
 #   Always run when pushing a release candidate
     - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
@@ -65,7 +65,7 @@ Check pyARG package:
   script:
     - echo "==================== [pypi Package] Check pyARG version ===================="
     - export VERSION_CHECK=$(python utils/version_checker.py pyARG)
-    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----" && exit 1; fi
+    - if [ "$VERSION_CHECK" = "REPO" ]; then echo "----- $VERSION_CHECK VERSION IS NEWER, PREPARING PACKAGE pyARG -----"; else echo "----- NEVER VERSION => $VERSION_CHECK -----"; fi
   rules:
 #   Always run when pushing a release candidate
     - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
