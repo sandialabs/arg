@@ -69,7 +69,7 @@ class argInformationObject:
         return self.InformationNames
 
     def set_names(self, info_names):
-        """ Return information names
+        """ Set information names
         """
 
         if isinstance(info_names, list):

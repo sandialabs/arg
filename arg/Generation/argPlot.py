@@ -1107,3 +1107,48 @@ def execute_request(parameters, plot_params):
     else:
         # Return plot base name and caption when everything went well
         return output_base_name, caption
+
+def create_plot(parameters, base_plot_params, data_map, title, data_key, func_prop, pt_marker=None):
+    """Retrieve and prepare data to invoke plotting function
+    """
+    # Create specific plot parameters
+    plot_params = dict(base_plot_params)
+
+    # Retrieve plot data
+    data_key_lower = data_key.lower()
+    try:
+        plot_params["data"] = data_map[data_key]
+    except:
+        try:
+            plot_params["data"] = data_map[data_key_lower]
+        except:
+            print("*  WARNING: no data found for {}".format(data_key))
+            return None
+
+    # Retrieve variable names depending on function properties
+    var_x_name = ''
+    var_y_name = ''
+    if isinstance(func_prop, str):
+        var_x_name = data_key
+        var_y_name = func_prop
+    else:
+        for p in func_prop:
+            # Look for requested function name
+            if p[0] in (data_key, data_key_lower):
+                # Retrieve abscissa and/or ordinates when defined
+                xy_names = p[1]
+                if xy_names[0]:
+                    var_x_name = xy_names[0]
+                if xy_names[1]:
+                    var_y_name = xy_names[1]
+                break
+
+    # Set other plot parameters
+    plot_params["title"] = title
+    plot_params["label"] = data_key
+    plot_params["var_x_name"] = var_x_name
+    plot_params["var_y_name"] = var_y_name
+    plot_params["marker"] = pt_marker
+
+    # Execute artifact generator and return its results
+    return execute_request(parameters, plot_params)

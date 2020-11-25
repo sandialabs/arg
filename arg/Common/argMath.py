@@ -1,5 +1,5 @@
 #HEADER
-#                   arg/Aggregation/argAggregateTools.py
+#                        arg/Generation/argMath.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,49 +36,58 @@
 #
 #HEADER
 
-import os
-
-import matplotlib
-import yaml
-
-from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-
-matplotlib.use("Agg")
-
-# Load supported types
-common_dir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(common_dir, "../Common/argTypes.yml"),
-          'r',
-          encoding="utf-8") as t_file:
-    supported_types = yaml.safe_load(t_file)
-
-# Retrieve supported verbosity levels
-verbosity_levels = supported_types.get("VerbosityLevels")
-
-
-def create_table(backend, body_list, key, value, types):
-    """Retrieve and prepare data to invoke table creating function
+def aggregate_histograms(h_1, h_2):
+    """Aggregate two histograms
+       It is assumed that second histogram is a non-void dict
     """
 
-    # Define a value separator
-    sep = ','
+    # Nothing to aggregate if first histogram is empty
+    if not h_1:
+        return dict(h_2)
 
-    # Iterate over all values
-    vals = value.split(sep)
-    for i in range(len(vals)):
-        # Initiate row
-        row = [argMultiFontStringHelper(backend),
-               argMultiFontStringHelper(backend)]
+    # Build set union of histogram keys
+    s_keys = set(h_1) | set(h_2)
 
-        # Add key only if first row
-        if i == 0:
-            row[0].append(key, types[0])
-            row[1].append(vals[i], types[1])
+    # Return aggregated histogram
+    return {
+        k: h_1.get(k, 0) + h_2.get(k, 0) for k in s_keys}
 
-        # Only add value to next rows, for readibility
-        else:
-            row[0].append('', types[0])
-            row[1].append(vals[i], types[1])
-        body_list.append(row)
 
-    return body_list
+def aggregate_descriptive_statistics(s_1, s_2):
+    """Aggregate two sets of descriptive statistics (min/mean/max/M2/card)
+       It is assumed that second set is an initialized 5-vector
+    """
+
+    # Nothing to aggregate if first set of statistics is empty
+    if not s_1:
+        return s_2[:]
+
+    # Compute global cardinality and its inverse
+    n_1 = s_1[4]
+    n_2 = s_2[4]
+    n_tot = n_1 + n_2
+    inv_n_tot = 1. / n_tot
+
+    # Compute means difference
+    m_1 = s_1[1]
+    m_2 = s_2[1]
+    d_21 = m_2 - m_1
+
+    # Retrieve M2 aggregates and compute global one
+    M2_1 = s_1[3]
+    if n_1 > 1:
+        # Assume that unbiased estimator is used
+        M2_1 *= (n_1 - 1)
+    M2_2 = s_2[3]
+    if n_2 > 1:
+        # Assume that unbiased estimator is used
+        M2_2 *= (n_2 - 1)
+    M2 = M2_1 + M2_2 + n_1 * n_2 * d_21 * d_21 * inv_n_tot
+
+    # Return aggregated statistics
+    return [
+        min(s_1[0], s_2[0]),
+        m_1 + n_2 * d_21 * inv_n_tot,
+        max(s_1[2], s_2[2]),
+        M2 / (n_tot - 1) if n_tot > 1 else M2,
+        n_tot]
