@@ -46,7 +46,8 @@ import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
 from arg.Common import argMath
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.Backend import argBackendBase
-from arg.DataInterface import argDataInterfaceBase, argDataInterface
+from arg.DataInterface import argDataInterfaceBase
+from arg.DataInterface.argDataInterface import argDataInterface
 from arg.Generation import argVTK, argPlot
 
 matplotlib.use("Agg")
@@ -647,7 +648,7 @@ class argAggregator:
         # Instantiate interface to CAD properties data
         parameters_root = request_params.get("parameters_root")
         regexp = re.compile(r"(.*)_parameters\.txt")
-        cad_metadata = argDataInterface.argDataInterface.factory(
+        cad_metadata = argDataInterface.factory(
             "key-value",
             os.path.join(self.Backend.Parameters.DataDir, parameters_root),
             {"expression": regexp})
@@ -687,3 +688,124 @@ class argAggregator:
                 "CAD metadata for part {}. ".format(
                     file_name.replace("_parameters.txt", '')))
 
+
+    def aggregate(self, request_params):
+        """Decide which aggregation operation is to be performed
+        """
+
+        # Switch between different aggregation types
+        request_name = request_params["name"]
+        print("[argAggregator] Processing {} request".format(request_name))
+
+        # Operation show_all_blocks: one 4-view figure and one table per mesh block
+        if request_name.startswith("show_all_blocks"):
+            # Decide whether mesh edges are to be shown or not
+            request_params["edges"] = request_name.endswith("with_edges")
+
+            # Add specific request parameters
+            request_params.setdefault("view_direction", ())
+
+            # Retrieve model file
+            model_file = request_params.get("model")
+            file_names = {"model": model_file}
+
+            # Try to retrieve model data
+            if model_file:
+                model_data = argDataInterface.factory(
+                    "ExodusII",
+                    os.path.join(self.Backend.Parameters.DataDir, model_file),
+                    request_params.get("var_name", ''))
+            else:
+                model_data = None
+            data = {"model": model_data}
+
+            # Aggregate
+            if model_data:
+                self.show_all_blocks(
+                    request_params, data, file_names,
+                    (int(request_params.get("verbosity", 0)) > 0))
+
+        # Operation show_enumerated_fields: one figure page per field
+        elif request_name == "show_enumerated_fields":
+            # Decide whether mesh edges are to be shown or not
+            request_params["edges"] = request_name.endswith("with_edges")
+
+            # Add specific request parameters
+            request_params.setdefault("view_direction", ())
+            var_names = request_params.get("var_names")
+            if not var_names:
+                print("*  WARNING: no variable names provided for {}".format(
+                    request_name))
+                return
+
+            # Get handle on data
+            file_name = request_params["model"]
+            data = [argDataInterface.factory(
+                "ExodusII",
+                os.path.join(self.Backend.Parameters.DataDir, file_name), v, False)
+                for v in var_names]
+
+            # Aggregate
+            if data:
+                self.show_enumerated_fields(
+                    request_params, data, file_name)
+
+        # Operation show_all_modes: one figure every n_cols x n_rows modes
+        elif request_name.startswith("show_all_modes"):
+            # Decide whether mesh edges are to be shown or not
+            request_params["edges"] = request_name.endswith("with_edges")
+
+            # Add specific request parameters
+            request_params.setdefault("view_direction", ())
+            request_params.setdefault("displacement", 2.)
+            request_params.setdefault("n_cols", 4)
+            request_params.setdefault("n_rows", 4)
+
+            # Get handle on data
+            file_name = request_params["model"]
+            data = argDataInterface.factory(
+                "ExodusII",
+                os.path.join(self.Backend.Parameters.DataDir, file_name),
+                request_params.get("var_name", "Disp"),
+                False)
+
+            # Aggregate
+            aggregate.show_all_modes(
+                request_params, data, file_name)
+
+        # Operation show_mesh_surface: create one figure for the entire mesh
+        elif request_name.startswith("show_mesh_surface"):
+            # Decide whether mesh edges are to be shown or not
+            request_params["edges"] = request_name.endswith("with_edges")
+
+            # Add specific request parameters
+            request_params.setdefault("view_direction", ())
+
+            # Get handle on data
+            file_name = request_params["model"]
+            file_type = request_params["type"]
+            if file_type == "ExodusII":
+                third_param = request_params.get("var_name", '')
+            elif file_type == "vtkSTL":
+                third_param = request_params.get("merge", "True")
+            else:
+                third_param = None
+            data = argDataInterface.factory(
+                file_type,
+                os.path.join(self.Backend.Parameters.DataDir, file_name),
+                third_param)
+
+            # Aggregate
+            if data:
+                self.show_mesh_surface(
+                    request_params, data, file_name)
+
+        # Operation show_CAD_metadata: create one table per reported CAD metadata
+        elif request_name == "show_CAD_metadata":
+
+            # Get handle on data and ensure it has the right type
+            metadata = request_params.get("metadata")
+
+            # Aggregate
+            if metadata:
+                self.show_CAD_metadata(request_params, metadata)

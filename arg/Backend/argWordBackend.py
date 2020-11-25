@@ -50,11 +50,9 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Cm, Inches, RGBColor, Pt
 from pylatex import NoEscape
 
-from arg.Aggregation import argAggregate
-from arg.Backend.argBackendBase import argBackendBase
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-
-app = "argWordBackend"
+from arg.Backend.argBackendBase import argBackendBase
+from arg.Aggregation import argAggregator
 
 osn = os.name
 
@@ -707,8 +705,11 @@ class argWordBackend(argBackendBase):
 
             # Handle aggregate case
             elif item_type == "aggregate":
-                # Execute aggregate operation
-                argAggregate.arg_aggregate(self, item)
+                # Instantiate aggregator on self
+                aggregator = argAggregator.argAggregator(self)
+
+                # Execute requested aggregate operation
+                aggregator.aggregate(item)
 
             # Proceed with recursion if needed
             if "sections" in item:
@@ -722,7 +723,7 @@ class argWordBackend(argBackendBase):
         super().assemble(report_map, version)
 
         # Create report with preamble
-        print("[{}] Creating Word report".format(app))
+        print("[argWordBackend] Generating Word report")
         self.create_document_preamble(version)
 
         # Pass over data for report contents
@@ -735,7 +736,7 @@ class argWordBackend(argBackendBase):
         self.add_header_numbering()
 
         # Create Word report
-        print("[{}] Saving Word report".format(app))
+        print("[argWordBackend] Saving Word report")
         self.Report.save("{}.docx".format(os.path.join(
             self.Parameters.OutputDir,
             self.Parameters.FileName)))
