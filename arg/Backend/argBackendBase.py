@@ -44,7 +44,6 @@ import sys
 
 import yaml
 
-from arg.Aggregation import argSummarize
 from arg.Common.argInformationObject import argInformationObject
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 
@@ -286,7 +285,7 @@ class argBackendBase:
                 file_name = os.path.splitext(file_name)[0]
 
             # Create table of topological properties
-            header_list, body_dict = argSummarize.summarize_exodus_topology(meta_info)
+            header_list, body_dict = data.summarize(type="topology")
             caption_string = argMultiFontStringHelper(self)
             caption_string.append("Topological properties of ", "default")
             caption_string.append(file_name, "typewriter")
@@ -294,7 +293,7 @@ class argBackendBase:
 
             # Create table of mesh blocks if requested and at least one exists
             if verbosity > self.VerbosityLevels.get("terse"):
-                header_list, body_dict = argSummarize.summarize_exodus_blocks(meta_info)
+                header_list, body_dict = data.summarize(type="blocks")
                 if header_list:
                     caption_string.clear()
                     caption_string.append("Element blocks of ", "default")
@@ -304,7 +303,7 @@ class argBackendBase:
             # Create table of node and side sets if requested and at least one exists
             if verbosity > self.VerbosityLevels.get("terse"):
                 for set_type in ("node", "side"):
-                    header_list, body_dict = argSummarize.summarize_exodus_sets(meta_info, set_type)
+                    header_list, body_dict = data.summarize(type="sets", set_type=set_type)
                     if header_list:
                         caption_string.clear()
                         caption_string.append(set_type.title(), "default")
@@ -313,12 +312,13 @@ class argBackendBase:
                         self.add_table(header_list, body_dict, caption_string, True)
 
             # Create table of variables if some are present
-            header_list, body_list = argSummarize.summarize_exodus_variable(meta_info)
+            header_list, body_list = data.summarize(type="variable")
             if body_list:
                 caption_string.clear()
                 caption_string.append("Variables of ", "default")
                 caption_string.append(file_name, "typewriter")
                 self.add_table(header_list, body_list, caption_string, True)
+
 
     def add_information(self, item):
         """Print information about given property to report and

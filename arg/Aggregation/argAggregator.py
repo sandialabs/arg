@@ -593,6 +593,7 @@ class argAggregator:
                 "caption_string": caption_string,
                 "width": fig_width})
 
+
     def show_enumerated_fields(self, fig_params, data, file_name):
         """Add surface rendering figures to the document for a
            specified set of point or cell data, scalar or vector variables
