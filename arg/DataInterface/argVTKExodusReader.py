@@ -362,7 +362,8 @@ class argVTKExodusReader(argDataInterfaceBase):
         # Merge all shards
         merge_map = {}
         it_shards = [s.NewIterator() for s in shards]
-        map(vtkCommonDataModel.vtkCompositeDataIterator.InitTraversal, it_shards)
+        for i in it_shards:
+            vtkCommonDataModel.vtkCompositeDataIterator.InitTraversal(i)
         while not it_shards[0].IsDoneWithTraversal():
             # Merge duplicate points when merging blocks
             append = vtkFiltersCore.vtkAppendFilter()
@@ -462,3 +463,170 @@ class argVTKExodusReader(argDataInterfaceBase):
         # No variable was found if this point is reached
         print("*  WARNING No data array {} found in dataset".format(
             var_name))
+
+
+    def summarize(self, **args):
+        """Create summary as specified by arguments
+        """
+
+        # Initialize return header and body
+        header_list, body_dict = [], {}
+
+        # Call appropriate summarization method
+        summary_type = args.get("type")
+        if summary_type == "topology":
+            header_list, body_dict = self.summarize_topology()
+        elif summary_type == "blocks":
+            header_list, body_dict = self.summarize_blocks()
+        elif summary_type == "sets":
+            header_list, body_dict = self.summarize_sets(args.get("set_type"))
+        elif summary_type == "variable":
+            header_list, body_dict = self.summarize_variable()
+        else:
+            print("*  WARNING: incorrect summary type {} for argVTKExodusReader")
+
+        # Return summary header and body
+        return header_list, body_dict
+
+    def summarize_topology(self):
+        """Create a summary of Exodus II mesh topology in the form of a
+        table abstraction with a header list and a dict of contents
+        """
+
+        # Retrieve meta-information
+        meta_info = self.get_meta_information()
+        
+        # Iterate over all readers to aggregate topological properties
+        n_nodes = 0
+        n_elems = 0
+        for r in meta_info:
+            n_nodes += r.get("nodes")
+            n_elems += r.get("elements")
+
+        # Keep track of first reader which contains all shared information
+        reader_meta = meta_info[0]
+
+        # Create table header
+        header_list = ["item", "number"]
+
+        # Build table body
+        body_dict = {
+            "Exodus II files": [len(meta_info)],
+            "nodes": [n_nodes],
+            "elements": [n_elems]
+        }
+
+        # Retrieve block IDs if any
+        n = len(reader_meta.get("block IDs"))
+        if n:
+            body_dict["element blocks"] = [n]
+
+        # Retrieve number of node sets if any
+        n = len(list(reader_meta.get("node sets")))
+        if n:
+            body_dict["node sets"] = [n]
+
+        # Retrieve number of side sets if any
+        n = len(list(reader_meta.get("side sets")))
+        if n:
+            body_dict["side sets"] = [n]
+
+        # Retrieve number of time-steps if any
+        n = reader_meta.get("time-steps")
+        if n > 1:
+            body_dict["time-steps"] = [n]
+
+        # Retrieve number of node fields if any
+        n = len(list(reader_meta.get("node fields")))
+        if n:
+            body_dict["node fields"] = [n]
+
+        # Retrieve number of element fields if any
+        n = len(list(reader_meta.get("element fields")))
+        if n:
+            body_dict["element fields"] = [n]
+
+        # Return summary table
+        return header_list, body_dict
+
+
+    def summarize_blocks(self):
+        """Create a summary of Exodus II mesh blocks in the form of a
+        table abstraction with a header list and a dict of contents
+        """
+
+        # Retrieve meta-information
+        meta_info = self.get_meta_information()
+
+        # Keep track of first reader which contains all shared information
+        reader_meta = meta_info[0]
+
+        # Retrieve list of block names and bail out early if empty
+        block_names = reader_meta.get("block names")
+        if not block_names:
+            return None, None
+
+        # Generate block ID, name, and type rows
+        body_dict = {i: [v]
+                     for i, v in zip(
+                reader_meta.get("block IDs"), block_names)}
+
+        # Return summary table
+        return ["block ID", "block name"], body_dict
+
+
+    def summarize_sets(self, set_type):
+        """Create a summary of Exodus II node or side sets in the form of a
+        table abstraction with a header list and a dict of contents
+        """
+
+        # Sanity check
+        if set_type not in ("node", "side"):
+            return None, None
+
+        # Retrieve meta-information
+        meta_info = self.get_meta_information()
+
+        # Keep track of first reader which contains all shared information
+        reader_meta = meta_info[0]
+
+        # Retrieve list of node or side sets and bail out early if empty
+        set_names = reader_meta.get("{} sets".format(set_type))
+        if not set_names:
+            return None, None
+
+        # Generate node/side set ID, and name
+        set_IDs = reader_meta.get("{} set IDs".format(set_type))
+        body_dict = {i: [v]
+                     for i, v in zip(set_IDs, set_names)}
+
+        # Return summary table
+        return ["{} set ID".format(set_type), "{} set name".format(set_type)], body_dict
+
+
+    def summarize_variable(self):
+        """Create a summary of Exodus II mesh variables in the form of a
+        table abstraction with a header list and a dict of contents
+        """
+
+        # Retrieve meta-information
+        meta_info = self.get_meta_information()
+
+        # Keep track of first reader which contains all shared information
+        reader_meta = meta_info[0]
+
+        # Retrieve node-based variables
+        body_list = [[v, "NODAL"]
+                     for v in sorted(reader_meta.get("node fields"))]
+
+        # Retrieve element-based variables
+        for v in sorted(reader_meta.get("element fields")):
+            body_list.append([v, "ELEMENT"])
+
+        # Retrieve global variables
+        for v in sorted(reader_meta.get("global variables")):
+            body_list.append([v, "GLOBAL"])
+
+        # Return summary table
+        return ["variable", "type"], body_list
+        

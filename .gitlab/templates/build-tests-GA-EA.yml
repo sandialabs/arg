@@ -18,7 +18,7 @@
     - pip install -r requirements.txt
     - echo "==================== [${BUILD_TEST_NAME}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
@@ -52,6 +52,8 @@
       - arg/__init__.py
       - arg/__version__.py
       - tests/build_tests/**/*
+      - .gitlab/**/*
+      - utils/**/*
 
 # 'can' case build variables
 Build 'can' case:
@@ -130,7 +132,7 @@ Build 'tables' case:
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
-        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME}
+        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} -I "${LINE_TO_IGNORE}"
       fi
     - |
       if [ "$COMPARE_TEX_OUTPUT" == "true" ]; then
@@ -144,12 +146,8 @@ Build 'tables' case:
         ls -al ${COMPARE_TEST_GENERATED_PATH}
         echo "EXPECTED"
         ls -al ${COMPARE_TEST_EXPECTED_PATH}
-        echo "---------- Truncate first pages of GENERATED report (to trim build-specific elements)"
-        pdftk ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_REPORT_NAME} cat ${COMPARE_TEST_PAGE_RANGE} output ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf
-        echo "---------- Truncate first pages of EXPECTED report (to trim build-specific elements)"
-        pdftk ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME} cat ${COMPARE_TEST_PAGE_RANGE} output ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf
-        echo "---------- Compare generated images"
-        sh .gitlab/ci/compare_pdf.sh ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME}-${COMPARE_TEST_PAGE_RANGE}.pdf
+        echo "---------- Compare generated images ----------"
+        python3 utils/pdf_comparison.py -r ${COMPARE_TEST_PAGE_RANGE} -e ${COMPARE_TEST_EXPECTED_PATH} -g ${COMPARE_TEST_GENERATED_PATH} -f ${COMPARE_TEST_REPORT_NAME}
       fi
   allow_failure: true
   rules:
@@ -166,6 +164,8 @@ Build 'tables' case:
       - arg/__init__.py
       - arg/__version__.py
       - tests/build_tests/**/*
+      - .gitlab/**/*
+      - utils/**/*
 
 # 'can' case comparison variables
 Compare pdf 'can' case:
@@ -174,7 +174,7 @@ Compare pdf 'can' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "can"
-    COMPARE_TEST_PAGE_RANGE: "3-17"
+    COMPARE_TEST_PAGE_RANGE: "2-16"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -187,11 +187,12 @@ Compare pdf 'crush' case:
     COMPARE_EXPLORATOR_OUTPUT: "true"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "crush"
-    COMPARE_TEST_PAGE_RANGE: "3-44"
+    COMPARE_TEST_PAGE_RANGE: "2-43"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_pdf
 
 # 'crush-E' case comparison variables
@@ -206,6 +207,7 @@ Compare pdf 'crush-E' case:
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_pdf
 
 # 'disk' case comparison variables
@@ -215,7 +217,7 @@ Compare pdf 'disk' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "disk"
-    COMPARE_TEST_PAGE_RANGE: "3-13"
+    COMPARE_TEST_PAGE_RANGE: "3-12"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -228,7 +230,7 @@ Compare pdf 'hello_world' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "hello_world"
-    COMPARE_TEST_PAGE_RANGE: "3-6"
+    COMPARE_TEST_PAGE_RANGE: "2-5"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -257,7 +259,7 @@ Compare pdf 'plots' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "plots"
-    COMPARE_TEST_PAGE_RANGE: "3-10"
+    COMPARE_TEST_PAGE_RANGE: "2-9"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -270,7 +272,7 @@ Compare pdf 'sver' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "sver"
-    COMPARE_TEST_PAGE_RANGE: "3-12"
+    COMPARE_TEST_PAGE_RANGE: "2-20"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -283,7 +285,7 @@ Compare pdf 'tables' case:
     COMPARE_EXPLORATOR_OUTPUT: "false"
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "tables"
-    COMPARE_TEST_PAGE_RANGE: "3-8"
+    COMPARE_TEST_PAGE_RANGE: "2-7"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -299,7 +301,7 @@ Compare pdf 'tables' case:
     - |
       if [ "$COMPARE_EXPLORATOR_OUTPUT" == "true" ]; then
         echo "---------- Explorator outputs ----------"
-        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME}
+        diff ${COMPARE_TEST_GENERATED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_CONF_FILE_NAME} -I "${LINE_TO_IGNORE}"
       fi
     - |
       if [ "$COMPARE_WORD_OUTPUT" == "true" ]; then
@@ -310,12 +312,8 @@ Compare pdf 'tables' case:
         echo "EXPECTED"
         libreoffice --headless --convert-to pdf ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_NAME_TO_CONVERT} --outdir $(pwd)/${COMPARE_TEST_EXPECTED_PATH}
         ls -al ${COMPARE_TEST_EXPECTED_PATH}
-        echo "---------- Truncate first pages of GENERATED report (to trim build-specific elements)"
-        pdftk ${COMPARE_TEST_GENERATED_PATH_WORD}/${COMPARE_TEST_REPORT_NAME_WORD} cat ${COMPARE_TEST_PAGE_RANGE} output ${COMPARE_TEST_GENERATED_PATH_WORD}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf
-        echo "---------- Truncate first pages of EXPECTED report (to trim build-specific elements)"
-        pdftk ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME_WORD} cat ${COMPARE_TEST_PAGE_RANGE} output ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf
-        echo "---------- Compare generated images"
-        sh .gitlab/ci/compare_pdf.sh ${COMPARE_TEST_GENERATED_PATH_WORD}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf ${COMPARE_TEST_EXPECTED_PATH}/${COMPARE_TEST_REPORT_NAME_WORD}-${COMPARE_TEST_PAGE_RANGE}.pdf
+        echo "---------- Compare generated images ----------"
+        python3 utils/pdf_comparison.py -r ${COMPARE_TEST_PAGE_RANGE} -e ${COMPARE_TEST_EXPECTED_PATH} -g ${COMPARE_TEST_GENERATED_PATH_WORD} -f ${COMPARE_TEST_REPORT_NAME_WORD}
       fi
   allow_failure: true
   rules:
@@ -332,6 +330,8 @@ Compare pdf 'tables' case:
       - arg/__init__.py
       - arg/__version__.py
       - tests/build_tests/**/*
+      - .gitlab/**/*
+      - utils/**/*
       
 # 'can' case comparison variables
 Compare word 'can' case:
@@ -362,6 +362,7 @@ Compare word 'crush' case:
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
     COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_word
 
 # 'crush-E' case comparison variables
@@ -378,6 +379,7 @@ Compare word 'crush-E' case:
     COMPARE_TEST_CONF_FILE_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.yml"
     COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+    LINE_TO_IGNORE: "ARG version"
   <<: *compare_ind_test_word
 
 # 'disk' case comparison variables

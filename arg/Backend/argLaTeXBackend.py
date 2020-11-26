@@ -46,9 +46,9 @@ import pylatex as pl
 import yaml
 from pylatex.utils import NoEscape, bold, italic, verbatim
 
-from arg.Aggregation import argAggregate
-from arg.Backend.argBackendBase import argBackendBase
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
+from arg.Backend.argBackendBase import argBackendBase
+from arg.Aggregation import argAggregator
 
 # Load supported colors
 common_dir = os.path.dirname(os.path.realpath(__file__))
@@ -776,8 +776,11 @@ class argLaTeXBackend(argBackendBase):
 
             # Handle aggregation case
             elif item_type == "aggregate":
-                # Execute aggregate operation
-                argAggregate.arg_aggregate(self, item)
+                # Instantiate aggregator on self
+                aggregator = argAggregator.argAggregator(self)
+
+                # Execute requested aggregate operation
+                aggregator.aggregate(item)
 
             # Proceed with recursion if needed
             if "sections" in item:

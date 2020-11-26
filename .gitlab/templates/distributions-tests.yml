@@ -26,6 +26,8 @@ Build on macOS 10.14.6:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
@@ -41,6 +43,8 @@ Build on macOS 10.14.6:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - python --version
@@ -52,7 +56,7 @@ Build on macOS 10.14.6:
     - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$PYTHONPATH
     - echo "==================== [${OS}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
   script:
     - echo "==================== [${OS}] Test ARG ===================="
     - pwd
@@ -101,6 +105,8 @@ Build on Ubuntu latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
@@ -116,6 +122,8 @@ Build on Ubuntu latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -126,7 +134,7 @@ Build on Ubuntu latest Docker image:
     - echo $PYTHONPATH
     - echo "==================== [${OS}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
@@ -177,6 +185,8 @@ Build on Debian latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
@@ -192,6 +202,8 @@ Build on Debian latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -202,7 +214,7 @@ Build on Debian latest Docker image:
     - echo $PYTHONPATH
     - echo "==================== [${OS}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
@@ -253,6 +265,8 @@ Build on fedora latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
@@ -268,6 +282,8 @@ Build on fedora latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -279,7 +295,7 @@ Build on fedora latest Docker image:
     - echo $PYTHONPATH
     - echo "==================== [${OS}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
@@ -330,6 +346,8 @@ Build on CentOS latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
     - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
       when: manual
       allow_failure: true
@@ -345,6 +363,8 @@ Build on CentOS latest Docker image:
         - arg/__version__.py
         - tests/build_tests/**/*
         - requirements.txt
+        - .gitlab/**/*
+        - utils/**/*
   before_script:
     - echo "==================== [${OS}] Install Python dependencies ===================="
     - virtualenv venv
@@ -356,7 +376,7 @@ Build on CentOS latest Docker image:
     - echo $PYTHONPATH
     - echo "==================== [${OS}] Check Python dependencies ===================="
     - python --version
-    - python .gitlab/ci/TestImport.py
+    - python utils/TestImport.py
     - /usr/bin/Xvfb :99 -screen 0 1280x1024x24&
     - export DISPLAY=:99.0
     - export MESA_GL_VERSION_OVERRIDE=3.2

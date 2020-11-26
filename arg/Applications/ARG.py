@@ -45,12 +45,11 @@ import time
 import yaml
 
 from arg import __version__
-from arg.Applications import Explorator, Generator, Assembler
 from arg.Common.argReportParameters import argReportParameters
+from arg.Applications import Explorator
+from arg.Applications.argGenerator import argGenerator
 
 ARG_VERSION = __version__
-
-app = "ARG"
 
 # Import ARG modules
 if not __package__:
@@ -101,7 +100,7 @@ class Runner:
         print("\t [-t]                      generate just .tex file")
         sys.exit(0)
 
-    def parse_line(self, app, default_parameters_filename, types=None):
+    def parse_line(self, default_parameters_filename, types=None):
         """Parse command line and fill artifact parameters
         """
 
@@ -151,7 +150,7 @@ class Runner:
             self.ParametersFile = default_parameters_filename
 
         # Create parameters
-        self.Parameters = argReportParameters(app,
+        self.Parameters = argReportParameters("ARG",
                                               self.ParametersFile,
                                               self.Version,
                                               types,
@@ -162,6 +161,7 @@ class Runner:
         return (self.Parameters.check_parameters_file()
                 and self.Parameters.parse_parameters_file()
                 and self.Parameters.check_parameters(caller))
+
 
     def run(self):
         """Run ARG applications based on parsed values
@@ -174,13 +174,16 @@ class Runner:
             shutil.copyfile(os.path.realpath("{}.yml".format(self.Parameters.StructureFile)),
                             os.path.realpath("{}_tmp.yml".format(self.Parameters.StructureFile)))
 
+        # Instantiate generator
+        generator = argGenerator(self.Parameters)
+            
         # Explore when required
         if self.Explore:
-            Explorator.execute("Explorator", self.Parameters)
+            Explorator.execute(self.Parameters)
 
         # Generate when required
         if self.Generate:
-            Generator.execute("Generator", self.Parameters)
+            generator.generate_artefacts()
 
         # Concatenate existing structure file content with generated content
         if concatenateStructureFile:
@@ -190,10 +193,10 @@ class Runner:
 
         # Assemble when required
         if self.Assemble:
-            Assembler.execute("Assembler", self.Parameters)
+            generator.assemble_report()
 
 
-def main(app, types, version=None):
+def main(types, version=None):
     """ ARG main method
     """
 
@@ -202,8 +205,7 @@ def main(app, types, version=None):
 
     # Print startup information
     sys_version = sys.version_info
-    print("[{}] ### Started with Python {}.{}.{}".format(
-        app,
+    print("[ARG] ### Started with Python {}.{}.{}".format(
         sys_version.major,
         sys_version.minor,
         sys_version.micro))
@@ -211,78 +213,20 @@ def main(app, types, version=None):
     # Retrieve default parameters filename from provided types dict
     default_parameters_filename = types.get("DefaultParametersFile")
 
+    # Instantiate runner and execute it
     runner = Runner(version)
-    runner.parse_line(app, default_parameters_filename, types)
-
-    # Run
+    runner.parse_line(default_parameters_filename, types)
     runner.run()
 
     # End stopwatch
     dt = time.time() - t_start
 
     # If this point is reached everything went fine
-    success_apps = runner.Parameters.get_successful_apps(app)
-    print("[{}] Ran {} successfully.".format(
-        app,
-        success_apps))
-    print("[{}] Process completed in {} seconds. ###".format(
-        app,
-        dt))
-
-
-def print_debug(app, python_debug=False, latex_debug=False, latex_proc=None):
-    """ Print debug information when requested
-    """
-
-    # Print full Python interpreter path
-    if python_debug:
-        return_python = distutils.spawn.find_executable("python")
-        if return_python:
-            print("[{}] Python interpreter: {}".format(
-                app,
-                return_python.strip()))
-        else:
-            print("** ERROR: could not find a Python interpreter. Exiting.")
-            sys.exit(1)
-        # Print relevant environment variables
-        env_dict = os.environ
-        for k in ("PYTHONPATH", "LD_LIBRARY_PATH"):
-            try:
-                v = env_dict[k]
-            except:
-                v = ''
-            print("[{}] {}: {}".format(app, k, v))
-
-    # Print LaTeX processor information
-    if latex_debug:
-
-        # Retrieve specified processor if exists
-        if latex_proc:
-            print("[{}] LaTeX to PDF processor: {}".format(
-                app,
-                latex_proc.strip()))
-
-        # Look for predefined list of possible processors otherwise
-        else:
-            # Start to look for full latexmk path
-            return_latex = distutils.spawn.find_executable("latexmk")
-            if return_latex:
-                print("[{}] LaTeX to PDF processor: {}".format(
-                    app,
-                    return_latex.strip()))
-            else:
-                # If no latexmk was found, then look for full pdflatex path
-                return_latex = distutils.spawn.find_executable("pdflatex")
-                if return_latex:
-                    print("[{}] LaTeX to PDF processor: {}".format(
-                        app,
-                        return_latex.strip()))
-                else:
-                    print("** WARNING: could not find a LaTeX to PDF processor. Generate a tex file only. ")
+    print("[ARG] Process completed in {} seconds. ###".format(dt))
 
 
 if __name__ == '__main__':
     """Main ARG routine
     """
 
-    main(app, Types, ARG_VERSION)
+    main(Types, ARG_VERSION)

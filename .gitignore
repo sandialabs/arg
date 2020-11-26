@@ -10,3 +10,6 @@ bin/
 # Cache
 __pycache__/
 web/__pycache__/
+
+# venv
+/venv
