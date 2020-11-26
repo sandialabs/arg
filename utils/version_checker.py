@@ -85,9 +85,9 @@ if __name__ == "__main__":
     args = sys.argv
     repo = args[1]
     setup_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args[0]))),
-                              f"deployment/pypi/{repo}/setup.py")
+                              f".gitlab/deployment/pypi/{repo}/setup.py")
     version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(args[0])))),
-                                "arg/__version__.py")
+                                "arg/arg/__version__.py")
     actual_pypi_version = get_pypi_http_version(repo_name=repo)
     actual_git_version = get_pypi_git_version(file_path=setup_file)
     actual__version = get__version(file_path=version_file)
