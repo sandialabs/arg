@@ -36,4 +36,4 @@
 #
 #HEADER
 
-__version__ = "1.1.0-RC3"
+__version__ = "1.1.0"
