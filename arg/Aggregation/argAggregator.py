@@ -108,8 +108,8 @@ class argAggregator:
         except:
             print("*  WARNING: could not instantiate an aggregator: a backend base is required but a {} was provided".format(type(b)))
             
-        # Data interface is optional
-        self.DataInterface = None
+        # Data interfaces are optional
+        self.DataInterfaces = []
 
     def get_backend(self):
         """ Return backend
@@ -117,20 +117,20 @@ class argAggregator:
 
         return self.Backend
 
-    def get_data_interface(self):
+    def get_data_interfaces(self):
         """ Return data interface
         """
 
-        return self.DataInterface
+        return self.DataInterfaces
 
-    def set_data_interface(self, di):
+    def add_data_interface(self, di):
         """ Set data interface
         """
 
         if isinstance(di, argDataInterface.argDataInterfaceBase):
-            self.DataInterface = di
+            self.DataInterfaces.append(di)
         else:
-            print("*  WARNING: attempted to set {} type as argDataInterfaceBase object. Ignoring it.".format(
+            print("*  WARNING: attempted to add incompatible {} to list of data interfacestype. Ignoring it.".format(
                 type(di)))
 
     def show_mesh_surface(self, fig_params, data, file_name, do_clip=False):
