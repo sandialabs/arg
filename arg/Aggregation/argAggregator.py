@@ -771,7 +771,7 @@ class argAggregator:
                 False)
 
             # Aggregate
-            aggregate.show_all_modes(
+            self.show_all_modes(
                 request_params, data, file_name)
 
         # Operation show_mesh_surface: create one figure for the entire mesh
