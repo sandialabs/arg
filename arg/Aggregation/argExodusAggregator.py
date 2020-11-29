@@ -1,5 +1,5 @@
 # HEADER
-#                     arg/Aggregation/argAggregator.py
+#                     arg/Aggregation/argExodusAggregator.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -37,20 +37,15 @@
 # HEADER
 
 import os
-import re
 import math
-import matplotlib
 import vtk
 import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
 
 from arg.Common import argMath
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.Backend import argBackendBase
-from arg.DataInterface import argDataInterfaceBase
 from arg.DataInterface.argDataInterface import argDataInterface
 from arg.Generation import argVTK, argPlot
-
-matplotlib.use("Agg")
+from arg.Aggregation.argAggregatorBase import argAggregatorBase
 
 
 def update_or_create_dict_in_dict(dict_of_dicts, key1, key2, value, update_fct):
@@ -95,68 +90,14 @@ def map_composite_keys(in_dict, key1, separator):
     return out_dict
 
 
-class argAggregator:
-    """A class to aggregate information in a backend-specific way
+class argExodusAggregator(argAggregatorBase):
+    """A class to aggregate information in a Exodus-specific way
     """
 
-    def __init__(self, b):
+    def __init__(self, backend):
 
-        # A backend is required
-        try:
-            assert isinstance(b, argBackendBase.argBackendBase)
-            self.Backend = b
-        except:
-            print("*  WARNING: could not instantiate an aggregator: a backend base is required but a {} was provided".format(type(b)))
-            
-        # Data interfaces are optional
-        self.DataInterfaces = []
-
-    def get_backend(self):
-        """ Return backend
-        """
-
-        return self.Backend
-
-    def get_data_interfaces(self):
-        """ Return data interface
-        """
-
-        return self.DataInterfaces
-
-    def add_data_interface(self, di):
-        """ Set data interface
-        """
-
-        if isinstance(di, argDataInterface.argDataInterfaceBase):
-            self.DataInterfaces.append(di)
-        else:
-            print("*  WARNING: attempted to add incompatible {} to list of data interfacestype. Ignoring it.".format(
-                type(di)))
-
-    def show_mesh_surface(self, fig_params, data, file_name, do_clip=False):
-        """Add surface rendering figure of a dataset to the document
-        for a specified point or cell data, scalar or vector variable
-        """
-
-        # Create artifact generator variable
-        variable = argVTK.argVTKAttribute(data, fig_params.get(
-            "time_step", -1))
-        
-        # Execute artifact generator
-        output_base_name, caption = argVTK.four_surfaces(
-            self.Backend.Parameters,
-            fig_params,
-            data,
-            variable,
-            file_name,
-            do_clip)
-
-        # Include figure in report
-        self.Backend.add_figure({
-            "figure_file": output_base_name + ".png",
-            "caption_string": caption,
-            "width": fig_params.get("width", "12cm")})
-
+        # Call superclass init
+        super().__init__(backend)
 
     def show_all_blocks(self, fig_params, data, file_names, verbose):
         """Add surface rendering figures to the document for each mesh block
@@ -642,61 +583,13 @@ class argAggregator:
         self.Backend.add_page_break()
 
 
-    def show_CAD_metadata(self, request_params, metadata):
-        """Aggregate and show CAD metadata information
-        """
-
-        # Instantiate interface to CAD properties data
-        parameters_root = request_params.get("parameters_root")
-        regexp = re.compile(r"(.*)_parameters\.txt")
-        cad_metadata = argDataInterface.factory(
-            "key-value",
-            os.path.join(self.Backend.Parameters.DataDir, parameters_root),
-            {"expression": regexp})
-
-        # Initialize body_lists
-        all_body_lists = {}
-
-        # Iterate over metadata items
-        for metadatum in metadata:
-            # Get information for current metadatum and iterate over it
-            prop_info = cad_metadata.get_property_information(metadatum)
-            for info_key, info_value in prop_info.iterator():
-                # Initialize default values
-                value = info_value[0][0]
-                color, style = None, "default"
-
-                # Handle particular values
-                if value in ('', '-'):
-                    color, value = "orange", "UNDEFINED"
-                elif not value:
-                    color, value = "red", "NOT FOUND"
-                else:
-                    style = "typewriter"
-
-                # Update body list for this parameter file and value
-                row = [argMultiFontStringHelper(self.Backend),
-                       argMultiFontStringHelper(self.Backend)]
-                row[0].append(prop_info.get_names()[0], "typewriter")
-                row[1].append("{}".format(value), style, color)
-                all_body_lists.setdefault(info_key, []).append(row)
-
-        # Create one table per file
-        for file_name, body_list in all_body_lists.items():
-            self.Backend.add_table(
-                ["CAD parameter", "parameter value"],
-                body_list,
-                "CAD metadata for part {}. ".format(
-                    file_name.replace("_parameters.txt", '')))
-
-
     def aggregate(self, request_params):
         """Decide which aggregation operation is to be performed
         """
 
         # Switch between different aggregation types
         request_name = request_params["name"]
-        print("[argAggregator] Processing {} request".format(request_name))
+        print("[argExodusAggregator] Processing {} request".format(request_name))
 
         # Operation show_all_blocks: one 4-view figure and one table per mesh block
         if request_name.startswith("show_all_blocks"):
@@ -784,29 +677,12 @@ class argAggregator:
 
             # Get handle on data
             file_name = request_params["model"]
-            file_type = request_params["type"]
-            if file_type == "ExodusII":
-                third_param = request_params.get("var_name", '')
-            elif file_type == "vtkSTL":
-                third_param = request_params.get("merge", "True")
-            else:
-                third_param = None
             data = argDataInterface.factory(
-                file_type,
+                "ExodusII",
                 os.path.join(self.Backend.Parameters.DataDir, file_name),
-                third_param)
+                request_params.get("var_name", ''))
 
             # Aggregate
             if data:
                 self.show_mesh_surface(
                     request_params, data, file_name)
-
-        # Operation show_CAD_metadata: create one table per reported CAD metadata
-        elif request_name == "show_CAD_metadata":
-
-            # Get handle on data and ensure it has the right type
-            metadata = request_params.get("metadata")
-
-            # Aggregate
-            if metadata:
-                self.show_CAD_metadata(request_params, metadata)

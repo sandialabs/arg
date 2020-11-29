@@ -48,7 +48,6 @@ from pylatex.utils import NoEscape, bold, italic, verbatim
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.Backend.argBackendBase import argBackendBase
-from arg.Aggregation import argAggregator
 
 # Load supported colors
 common_dir = os.path.dirname(os.path.realpath(__file__))
@@ -130,7 +129,7 @@ class argLaTeXBackend(argBackendBase):
     def __init__(self, parameters=None):
 
         # Call superclass init
-        super(argLaTeXBackend, self).__init__(parameters)
+        super().__init__(parameters)
 
         # Define backend type
         self.Type = "LaTeX"
@@ -774,13 +773,10 @@ class argLaTeXBackend(argBackendBase):
                 # Append information specific to given property to the report
                 self.add_information(item)
 
-            # Handle aggregation case
+            # Handle aggregate case
             elif item_type == "aggregate":
-                # Instantiate aggregator on self
-                aggregator = argAggregator.argAggregator(self)
-
-                # Execute requested aggregate operation
-                aggregator.aggregate(item)
+                # Append aggregated information
+                self.add_aggregation(item)
 
             # Proceed with recursion if needed
             if "sections" in item:
