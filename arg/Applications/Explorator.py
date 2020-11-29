@@ -371,6 +371,7 @@ def insert_CAD_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index,
                 os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
             yaml_file.write("    - n: aggregate\n")
             yaml_file.write("      name: show_CAD_metadata\n")
+            yaml_file.write("      type: vtkSTL\n")
             yaml_file.write("      metadata: %s\n" % case.MetaData)
             yaml_file.write("      parameters_root: {}\n".format(
                 os.path.join(case.RealDataDir, os.path.dirname(case.GeometryFiles[0]))))
@@ -433,6 +434,7 @@ def insert_mesh_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index
         yaml_file.write("    sections:\n")
         yaml_file.write("    - n: aggregate\n")
         yaml_file.write("      name: show_all_blocks_with_edges\n")
+        yaml_file.write("      type: ExodusII\n")
         yaml_file.write("      model: %s\n" % case.MeshName)
         if case.DeckType:
             yaml_file.write("      datatype: %s\n" % case.DeckType)

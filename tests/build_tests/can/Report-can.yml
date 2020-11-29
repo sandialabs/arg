@@ -60,6 +60,7 @@ chapters:
     sections:
     - n: aggregate
       name: show_all_blocks_with_edges
+      type: ExodusII
       model: can.ex2
       width: 10cm
       axes: True
