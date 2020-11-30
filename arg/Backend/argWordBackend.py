@@ -52,7 +52,6 @@ from pylatex import NoEscape
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.Backend.argBackendBase import argBackendBase
-from arg.Aggregation import argAggregator
 
 osn = os.name
 
@@ -563,6 +562,7 @@ class argWordBackend(argBackendBase):
             # Append Word runs created from multi-font string
             caption_string.execute_backend()
 
+
     def add_figure(self, arguments):
         """Add figure to report
         """
@@ -608,6 +608,7 @@ class argWordBackend(argBackendBase):
             if caption_string:
                 self.add_type_caption("Figure", caption_string)
 
+
     def add_caption(self, caption_type, caption_string):
         """ Create caption area in XML, with proper number
         """
@@ -638,6 +639,7 @@ class argWordBackend(argBackendBase):
         paragraph.add_run(': ' + caption_string)
 
         return paragraph
+
 
     def recursively_build_report(self, item_tree, list_lvl=1, p=None):
         """Recursively traverse structure tree to build Word report
@@ -705,15 +707,13 @@ class argWordBackend(argBackendBase):
 
             # Handle aggregate case
             elif item_type == "aggregate":
-                # Instantiate aggregator on self
-                aggregator = argAggregator.argAggregator(self)
-
-                # Execute requested aggregate operation
-                aggregator.aggregate(item)
+                # Append aggregated information
+                self.add_aggregation(item)
 
             # Proceed with recursion if needed
             if "sections" in item:
                 self.recursively_build_report(item["sections"], list_lvl)
+
 
     def assemble(self, report_map, version=None, latex_proc=None):
         """Create a Word report from given report map

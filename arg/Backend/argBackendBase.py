@@ -41,14 +41,16 @@ import datetime
 import os
 import shutil
 import sys
-
 import yaml
 
 from arg.Common.argInformationObject import argInformationObject
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-
+from arg.Aggregation import argExodusAggregator, argVTKSTLAggregator
 
 class argBackendBase:
+    """A backend abstractbase class
+    """
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -321,7 +323,7 @@ class argBackendBase:
 
 
     def add_information(self, item):
-        """Print information about given property to report and
+        """Add information about given property to report and
            restrict information to specific items if provided
         """
 
@@ -451,6 +453,25 @@ class argBackendBase:
                             list(prop_values.items()),
                             multi_font_string,
                             True)
+
+
+    def add_aggregation(self, item):
+        """Add information aggregated from various backends
+        """
+
+        # Choose aggregator depending on request type
+        request_type = item.get("type")
+        if request_type == "ExodusII":
+            # Instantiate ExodusII aggregator on self and execute it
+            aggregator = argExodusAggregator.argExodusAggregator(self)
+            aggregator.aggregate(item)
+        elif request_type == "vtkSTL":
+            # Instantiate vtkSNL aggregator on self and execute it
+            aggregator = argVTKSTLAggregator.argVTKSTLAggregator(self)
+            aggregator.aggregate(item)
+        else:
+            print("*  WARNING: unknown aggregation request type: {}. Ignoring it")
+            
 
     def fetch_image_and_caption(self, arguments):
         """Retrieve image and associated caption for figure creation
