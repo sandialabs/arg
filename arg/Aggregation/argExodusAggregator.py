@@ -577,7 +577,7 @@ class argExodusAggregator(argAggregatorBase):
 
                 # Generate clipped mesh surface view
                 fig_params["time_step"] = i
-                show_mesh_surface(self.Backend, fig_params, d, file_name, True)
+                self.show_mesh_surface(self.Backend, fig_params, d, file_name, True)
 
         # Clear page after last field
         self.Backend.add_page_break()

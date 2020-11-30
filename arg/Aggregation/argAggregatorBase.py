@@ -39,7 +39,6 @@
 import abc
 import os
 
-from arg.Backend import argBackendBase
 from arg.DataInterface import argDataInterfaceBase
 from arg.Generation import argVTK
 
@@ -53,12 +52,13 @@ class argAggregatorBase:
 
         # A backend is required
         try:
+            from arg.Backend import argBackendBase
             assert isinstance(backend, argBackendBase.argBackendBase)
             self.Backend = backend
         except:
             print("*  WARNING: could not instantiate an aggregator: a backend base is required but a {} was provided".format(
                 type(backend)))
-            
+
         # Data interfaces are optional
         self.DataInterfaces = []
 
@@ -78,7 +78,7 @@ class argAggregatorBase:
         """ Set data interface
         """
 
-        if isinstance(di, argDataInterface.argDataInterfaceBase):
+        if isinstance(di, argDataInterfaceBase.argDataInterfaceBase):
             self.DataInterfaces.append(di)
         else:
             print("*  WARNING: attempted to add incompatible {} to list of data interfacestype. Ignoring it.".format(
@@ -92,7 +92,7 @@ class argAggregatorBase:
         # Create artifact generator variable
         variable = argVTK.argVTKAttribute(data, fig_params.get(
             "time_step", -1))
-        
+
         # Execute artifact generator
         print("[argAggregatorBase] Calling argVTK generator for", file_name)
         output_base_name, caption = argVTK.four_surfaces(
