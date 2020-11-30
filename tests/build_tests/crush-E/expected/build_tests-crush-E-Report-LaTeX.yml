@@ -1,4 +1,4 @@
-ARG version: 1.1.1
+ARG version: develop
 
 # Chapters
 chapters:
