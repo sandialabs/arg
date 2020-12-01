@@ -41,10 +41,6 @@ import pylatex as pl
 # Import superclass
 from arg.Backend.argLaTeXBackend import argLaTeXBackend
 
-# Define constants
-document_class = "report"
-document_options = "letter,titlepage,oneside,11pt"
-
 
 class argReportLaTeXBackend(argLaTeXBackend):
     """A concrete class providing a LaTeX backend to generate a report
@@ -54,11 +50,15 @@ class argReportLaTeXBackend(argLaTeXBackend):
         # Call superclass init
         super().__init__(parameters)
 
+        # Define constants
+        self.document_class = "report"
+        self.document_options = "letter,titlepage,oneside,11pt"
+
     def create_LaTeX_output(self):
         """Create a LaTeX output file
         """
 
-        super().create_LaTeX_output(document_class, document_options)
+        super().create_LaTeX_output(self.document_class, self.document_options)
 
     def add_packages(self):
         """Add Report backend specific packages to default LaTeX packages

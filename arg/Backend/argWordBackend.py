@@ -147,6 +147,41 @@ class argWordBackend(argBackendBase):
         # Define backend type
         self.Type = "Word"
 
+        self.colors = None
+        self.fonts = None
+        self.app = "argWordBackend"
+        self.osn = os.name
+
+        # Try importing Word Application in Python environment
+        try:
+            clr.AddReference("System")
+            clr.AddReference("Microsoft.Office.Interop")
+            from Microsoft.Office.Interop import Word
+
+        # Find work-around
+        except:
+            try:
+                # Use Windows32 client on Windows only
+                if self.osn == "nt":
+                    from win32com.client import DispatchEx
+            except:
+                pass
+        self.__init_fonts_colors()
+
+    def __init_fonts_colors(self):
+        # Load supported colors
+        common_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(common_dir, "../Common/argTypes.yml"),
+                  'r',
+                  encoding="utf-8") as t_file:
+            supported_types = yaml.safe_load(t_file)
+
+        # Retrieve supported colors
+        self.colors = supported_types.get("FontColors")
+
+        # Retrieve supported fonts
+        self.fonts = supported_types.get("BackendTypes").get("Word").get("Fonts")
+
     @staticmethod
     def generate_text(text, type="default"):
         """Add page break to the report
@@ -174,13 +209,13 @@ class argWordBackend(argBackendBase):
                 run.italic = font_bits & 1 == 1
                 run.bold = font_bits & 2 == 2
                 if font_bits & 4 == 4:
-                    run.font.name = fonts.get("typewriter", "default" if fonts.get("default") else None)
+                    run.font.name = self.fonts.get("typewriter", "default" if self.fonts.get("default") else None)
                 elif font_bits & 8 == 8:
-                    run.font.name = fonts.get("calligraphic", "default" if fonts.get("default") else None)
-                elif fonts.get("default", None):
-                    run.font.name = fonts.get("default", None)
+                    run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
+                elif self.fonts.get("default", None):
+                    run.font.name = self.fonts.get("default", None)
                 if color:
-                    rgb = colors.get(color).split(',')
+                    rgb = self.colors.get(color).split(',')
                     if len(rgb) > 2:
                         run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
 
@@ -325,9 +360,9 @@ class argWordBackend(argBackendBase):
 
                 # Add font commands if provided
                 if font == "typewriter":
-                    run.font.name = fonts.get(font, "default" if fonts.get("default") else None)
+                    run.font.name = self.fonts.get(font, "default" if self.fonts.get("default") else None)
                 elif font == "calligraphic":
-                    run.font.name = fonts.get(font, "default" if fonts.get("default") else None)
+                    run.font.name = self.fonts.get(font, "default" if self.fonts.get("default") else None)
                 if size:
                     run.font.size = Pt(size)
                 if italic:
@@ -742,13 +777,13 @@ class argWordBackend(argBackendBase):
             self.Parameters.FileName)))
 
         # Update tables of contents, figures, tables on Windows only for now
-        if osn == "nt":
+        if self.osn == "nt":
             self.update_tocs(r"{}.docx".format(os.path.abspath(os.path.join(
                 self.Parameters.OutputDir,
                 self.Parameters.FileName))))
         else:
             print("*  WARNING: Table of contents not automatically generated yet by Word backend on {} systems.".format(
-                osn))
+                self.osn))
 
     def add_document_provenance(self, version=None):
         """Add document provenance information on a new page
