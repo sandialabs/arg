@@ -12,32 +12,29 @@ pages:
   before_script:
     - echo "==================== [Documentation] Install ARG dependencies ===================="
     - apt-get update -y
-    - apt-get install -y python3 python3-pip git
+    - apt-get install -y python3 python3-pip git libgl1-mesa-glx
     - pip3 install --upgrade pip
     - pip3 install virtualenv
     - virtualenv venv
     - source venv/bin/activate
     - python -m pip install --upgrade pip
     - pip3 install -r requirements.txt
-    - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/m.css/documentation:$(pwd)/m.css/documentation/../plugins:$PYTHONPATH
-    - git clone https://github.com/mosra/m.css.git
+    - pip3 install sphinx
+    - pip3 install sphinx-rtd-theme
+    - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/arg/arg:$PYTHONPATH
   script:
     - echo "==================== [Documentation] Build documentation ===================="
     - cp LICENSE docs/_includes/
     - cp README.md docs/_includes/
-    - cd docs
-    - cp m.css.conf ../m.css/documentation/conf.py
-    - cd ../m.css/documentation/
-    - python python.py "conf.py"
-    - cd ../../docs
-    - python file_tag_swapper.py
+    - cd docs/_sphinx
+    - sphinx-apidoc -o . ../../arg
+    - make html
+    - cd ../
+    - python ../utils/string_swapper.py
     - gem install jekyll bundler
     - jekyll build -d ../public
-    - rm ../public/search.html
-    - python html_tag_swapper.py
-    - cd output
-    - rm index.html modules.html pages.html
-    - \cp -a . ../../public/
+    - mkdir ../public/classes/
+    - \cp -a _sphinx/_build/html/. ../public/classes/
   artifacts:
     paths:
       - public

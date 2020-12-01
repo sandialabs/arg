@@ -26,8 +26,6 @@
   link:
   sublink:
   - name: Classes
-    link: /classes.html
+    link: /classes/index.html
   - name: Contributing
     link: /contributing.html
-- name: Search
-  link: /search.html

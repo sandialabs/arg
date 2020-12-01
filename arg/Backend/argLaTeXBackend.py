@@ -134,6 +134,20 @@ class argLaTeXBackend(argBackendBase):
         # Define backend type
         self.Type = "LaTeX"
 
+        self.colors = None
+        self.__init_colors()
+
+    def __init_colors(self):
+        # Load supported colors
+        common_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(common_dir, "../Common/argTypes.yml"),
+                  'r',
+                  encoding="utf-8") as t_file:
+            supported_types = yaml.safe_load(t_file)
+
+        # Retrieve supported verbosity levels
+        self.colors = supported_types.get("FontColors")
+
     def create_document_preamble(self, version=None):
         """Create document and its preamble given an Assembler version
         """
@@ -369,9 +383,9 @@ class argLaTeXBackend(argBackendBase):
                     string = r"\texttt{{{}}}".format(string)
                 if font_bits & 8 == 8:
                     string = r"$\mathcal{{{}}}$".format(string)
-                if color and colors.get(color):
+                if color and self.colors.get(color):
                     sep = ','
-                    rgb = colors.get(color).split(sep)
+                    rgb = self.colors.get(color).split(sep)
                     string = r"\color[rgb]{{{}, {}, {}}}{}".format(int(rgb[0]) / 255.,
                                                                    int(rgb[1]) / 255.,
                                                                    int(rgb[2]) / 255.,

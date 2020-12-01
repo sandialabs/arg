@@ -53,26 +53,14 @@ from arg.Tools import Utilities
 class argReportParameters:
     """A class to get and store ARG report parameters
     """
-
-    # Load valid types
-    local_dir = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(local_dir, "../Common/argTypes.yml"),
-              'r') as t_file:
-        Types = yaml.safe_load(t_file)
-
-    # Retrieve default parameters file value
-    DEFAULT_PARAMETERSFILE = Types.get(
-        "DefaultParametersFile")
-
-    # Verbosity levels
-    VerbosityLevels = Types.get("VerbosityLevels", {})
-    print("[argReportParameters] Supported verbosity levels: {}".format(
-        ", ".join(VerbosityLevels)))
-
-    # Save default temp file name
-    DEFAULT_TMPFILE = "ARG"
-
     def __init__(self, application, parameters_file=None, version=None, types=None, latex_processor=None, structure_file=None):
+
+        self.DEFAULT_PARAMETERSFILE = None
+        self.VerbosityLevels = None
+        # Save default temp file name
+        self.DEFAULT_TMPFILE = "ARG"
+
+        self.__init_params()
 
         # Default application settings
         self.Application = application
@@ -142,6 +130,22 @@ class argReportParameters:
         self.parsed_params = None
         if self.ParametersFile:
             self.parse_parameters_file()
+
+    def __init_params(self):
+        # Load valid types
+        local_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(local_dir, "../Common/argTypes.yml"),
+                  'r') as t_file:
+            Types = yaml.safe_load(t_file)
+
+        # Retrieve default parameters file value
+        self.DEFAULT_PARAMETERSFILE = Types.get(
+            "DefaultParametersFile")
+
+        # Verbosity levels
+        self.VerbosityLevels = Types.get("VerbosityLevels", {})
+        print("[argReportParameters] Supported verbosity levels: {}".format(
+            ", ".join(self.VerbosityLevels)))
 
     def command_line_usage(self):
         """Provide online help on ARG with command line arguments
