@@ -459,18 +459,19 @@ class argBackendBase:
         """Add information aggregated from various backends
         """
 
-        # Choose aggregator depending on request type
-        request_type = item.get("type")
-        if request_type == "ExodusII":
+        # Choose aggregator depending on data type
+        data_type = item.get("datatype")
+        if data_type == "ExodusII":
             # Instantiate ExodusII aggregator on self and execute it
             aggregator = argExodusAggregator.argExodusAggregator(self)
             aggregator.aggregate(item)
-        elif request_type == "vtkSTL":
+        elif data_type == "vtkSTL":
             # Instantiate vtkSNL aggregator on self and execute it
             aggregator = argVTKSTLAggregator.argVTKSTLAggregator(self)
             aggregator.aggregate(item)
         else:
-            print("*  WARNING: unknown aggregation request type: {}. Ignoring it")
+            # Unsupported data type
+            print("[argBackendBase] Unknown aggregation data type: {}")
             
 
     def fetch_image_and_caption(self, arguments):
