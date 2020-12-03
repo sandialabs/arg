@@ -41,53 +41,11 @@ import math
 import vtk
 import vtkmodules.vtkFiltersExtraction as vtkFiltersExtraction
 
-from arg.Common import argMath
+from arg.Common import argMath, argTools
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.DataInterface.argDataInterface import argDataInterface
 from arg.Generation import argVTK, argPlot
 from arg.Aggregation.argAggregatorBase import argAggregatorBase
-
-
-def update_or_create_dict_in_dict(dict_of_dicts, key1, key2, value, update_fct):
-    """Update or create dict entry in a dict with given primary and
-       secondary keys, and value to be used by provided updating function
-    """
-
-    # Fetch possibly empty dict in dict of dicts
-    sub_dict = dict_of_dicts.get(key1, {})
-
-    # Invoke update function
-    sub_dict[key2] = update_fct(sub_dict.get(key2), value)
-
-    # Save current block quality stats
-    return sub_dict
-
-
-def map_composite_keys(in_dict, key1, separator):
-    """Retrieve key1@...@keyN keys and corresponding values from input dict
-       and build output dict with the form {key2:[key3, ..., keyN, value]}
-       where @ denotes a 1-character separator
-    """
-
-    # Initialize top-level dict
-    out_dict = {}
-
-    # Iterate over input dict and filter by prefix with form key1@
-    prefix = key1 + separator
-    n = len(prefix)
-    for key in [l for l in in_dict if l[:n] == prefix]:
-        # Make sure that at least 2 keys were retrieved
-        subkeys = key.split(separator)
-        if len(subkeys) < 2:
-            # Ignore non-composite keys
-            continue
-
-        # Use key2 as output dict key
-        key2 = subkeys[1].strip().lower()
-        out_dict[key2] = subkeys[2:] + [in_dict[key]]
-
-    # Return result
-    return out_dict
 
 
 class argExodusAggregator(argAggregatorBase):
@@ -98,6 +56,7 @@ class argExodusAggregator(argAggregatorBase):
 
         # Call superclass init
         super().__init__(backend)
+
 
     def show_all_blocks(self, fig_params, data, file_names, verbose):
         """Add surface rendering figures to the document for each mesh block
@@ -128,7 +87,7 @@ class argExodusAggregator(argAggregatorBase):
         block_IDs = meta_data.get("block IDs", [])
 
         # Retrieve comments if provided
-        comments = map_composite_keys(
+        comments = argTools.map_composite_keys(
             fig_params, "string", self.Backend.Parameters.KeySeparator)
 
         # Get handle on material and model properties when available
@@ -202,13 +161,13 @@ class argExodusAggregator(argAggregatorBase):
                             mesh_block, q_vtk, elem_q_type, do_histograms)
 
                         # Update or create quality statistics for current block
-                        q_stats[b_id] = update_or_create_dict_in_dict(
+                        q_stats[b_id] = argTools.update_or_create_dict_in_dict(
                             q_stats, b_id, q_name, q_s_blk,
                             argMath.aggregate_descriptive_statistics)
 
                         if do_histograms:
                             # Update or create quality histogram for current block
-                            q_histo[b_id] = update_or_create_dict_in_dict(
+                            q_histo[b_id] = argTools.update_or_create_dict_in_dict(
                                 q_histo, b_id, q_name, q_h_blk,
                                 argMath.aggregate_histograms)
 
