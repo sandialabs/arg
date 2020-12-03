@@ -31,70 +31,70 @@ chapters:
     - n: aggregate
       name: show_mesh_surface
       model: Interface/box_shell.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/case.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/crusher.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/duct.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/foam.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/lid.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/plug.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/post.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/target.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
     - n: aggregate
       name: show_mesh_surface
       model: Interface/weld.stl
-      type: vtkSTL
+      datatype: vtkSTL
       width: 12cm
       axes: True
       merge: True
@@ -108,7 +108,7 @@ chapters:
       verbatim: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/Interface
     - n: aggregate
       name: show_CAD_metadata
-      type: vtkSTL
+      datatype: vtkSTL
       metadata: ['DWG_TITLE1', 'UNITS', 'MATERIAL']
       parameters_root: /builds/AutomaticReportGenerator/arg/tests/build_tests/crush/data/Interface
 # Mesh chapter
@@ -128,7 +128,7 @@ chapters:
     - n: aggregate
       name: show_mesh_surface
       model: crush_assembly.g
-      type: ExodusII
+      datatype: ExodusII
       var_name: ObjectId
       width: 16cm
       axes: True
@@ -138,7 +138,7 @@ chapters:
     sections:
     - n: aggregate
       name: show_all_blocks_with_edges
-      type: ExodusII
+      datatype: ExodusII
       model: crush_assembly.g
       width: 10cm
       histogram_width: 14cm
