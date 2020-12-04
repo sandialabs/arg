@@ -277,26 +277,25 @@ class argWordBackend(argBackendBase):
             if "number" in it.keys():
                 self.Report.add_paragraph(it["number"])
 
-    def add_comment(self, comments, key):
-        """Add text comment from a dict of comments, either as a text
-           string or as a sub-paragraph depending on number of comment
-           parameters (1 or 2)
+
+    def add_comment(self,  comments_dict, key):
+        """Add comment to the report from a dict as either text string
+        or as sub-paragraph depending on number of dict values (1 or 2)
         """
 
         # Retrieve comment for given key and bail out if none found
-        comment = comments.get(str(key))
+        comment = comments_dict.get(str(key))
         if not comment:
-            return False
+            return
 
         # Insert either sub-paragraph or string
         if len(comment) > 1:
-            self.Report.add_paragraph(comment[0] + ":", "Subtitle")
+            self.Report.add_paragraph(
+                comment[0] + ":", "Subtitle")
             self.Report.add_paragraph(comment[1])
         else:
             self.Report.add_paragraph(comment[0])
 
-        # Comment was found and inserted
-        return True
 
     def add_paragraph(self, item, p=None):
         """Add paragraph to the report

@@ -183,6 +183,26 @@ class argLaTeXBackend(argBackendBase):
         # No paragraph indentation
         self.Report.change_length(r"\parindent", "0pt")
 
+
+    def add_comment(self,  comments_dict, key):
+        """Add comment to the report from a dict as either text string
+        or as sub-paragraph depending on number of dict values (1 or 2)
+        """
+
+        # Retrieve comment for given key and bail out if none found
+        comment = comments_dict.get(str(key))
+        if not comment:
+            return
+
+        # Insert either sub-paragraph or string
+        if len(comment) > 1:
+            self.Report.append(
+                pl.Command("subparagraph", comment[0] + ":"))
+            self.Report.append(NoEscape(comment[1]))
+        else:
+            self.Report.append(NoEscape(comment[0]))
+
+
     def add_packages(self):
         """Add LaTeX packages
         """
@@ -423,6 +443,7 @@ class argLaTeXBackend(argBackendBase):
         # Return un-escaped decorated string
         return NoEscape(m_string)
 
+
     def add_list(self, item, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -435,25 +456,6 @@ class argLaTeXBackend(argBackendBase):
             for items in item.get("items"):
                 enum_it.add_item(NoEscape(items.get("string")))
 
-    def add_comment(self, comments, key):
-        """Add text comment from a dict of comments, either as a text
-           string or as a sub-paragraph depending on number of comment
-           parameters (1 or 2)
-        """
-        # Retrieve comment for given key and bail out if none found
-        comment = comments.get(str(key))
-        if not comment:
-            return False
-
-        # Insert either sub-paragraph or string
-        if len(comment) > 1:
-            self.Report.append(pl.Command("subparagraph", comment[0] + ":"))
-            self.Report.append(NoEscape(comment[1]))
-        else:
-            self.Report.append(NoEscape(comment[0]))
-
-        # Comment was found and inserted
-        return True
 
     def add_paragraph(self, item):
         """Add paragraph to the report
