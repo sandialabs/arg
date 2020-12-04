@@ -142,6 +142,12 @@ class argBackendBase:
         """
 
     @abc.abstractmethod
+    def add_comment(self,  comments_dict, key):
+        """Add comment to the report from a dict as either text string
+        or as sub-paragraph depending on number of dict values (1 or 2)
+        """
+
+    @abc.abstractmethod
     def add_paragraph(self, item):
         """Add paragraph to the report
         """
