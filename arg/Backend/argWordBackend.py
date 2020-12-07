@@ -263,6 +263,7 @@ class argWordBackend(argBackendBase):
         # Add number properties to paragraph
         pPr.append(numPr)
 
+
     def add_list(self, item, num_lvl=1, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -286,7 +287,7 @@ class argWordBackend(argBackendBase):
         # Retrieve comment for given key and bail out if none found
         comment = comments_dict.get(str(key))
         if not comment:
-            return
+            return False
 
         # Insert either sub-paragraph or string
         if len(comment) > 1:
@@ -295,6 +296,9 @@ class argWordBackend(argBackendBase):
             self.Report.add_paragraph(comment[1])
         else:
             self.Report.add_paragraph(comment[0])
+
+        # Comment was found and inserted
+        return True
 
 
     def add_paragraph(self, item, p=None):

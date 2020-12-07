@@ -48,17 +48,24 @@ class argVTKSTLAggregator(argAggregatorBase):
     """A class to aggregate information in a Exodus-specific way
     """
 
-    def __init__(self, backend):
+    def __init__(self, b, r):
 
         # Call superclass init
-        super().__init__(backend)
+        super().__init__(b, r)
 
-    def show_CAD_metadata(self, request_params, metadata):
+
+    def show_CAD_metadata(self):
         """Aggregate and show CAD metadata information
         """
 
+        # Get handle on metadata and bail out early if absent
+        metadata = self.RequestParameters.get("metadata")
+        if not metadata:
+            print("*  WARNING: igoring request: no metadata to aggregate")
+            return
+
         # Instantiate interface to CAD properties data
-        parameters_root = request_params.get("parameters_root")
+        parameters_root = self.RequestParameters.get("parameters_root")
         regexp = re.compile(r"(.*)_parameters\.txt")
         cad_metadata = argDataInterface.factory(
             "key-value",
@@ -101,40 +108,36 @@ class argVTKSTLAggregator(argAggregatorBase):
                     file_name.replace("_parameters.txt", '')))
 
 
-    def aggregate(self, request_params):
+    def aggregate(self):
         """Decide which aggregation operation is to be performed
         """
 
         # Switch between different aggregation types
-        request_name = request_params["name"]
+        try:
+            request_name = self.RequestParameters["name"]
+        except:
+            print("*  WARNING: ignoring request: no aggregation methodn name")
         print("[argVTKSTLAggregator] Processing {} request".format(request_name))
 
         # Operation show_CAD_metadata: create one table per reported CAD metadata
         if request_name == "show_CAD_metadata":
-
-            # Get handle on data and ensure it has the right type
-            metadata = request_params.get("metadata")
-
-            # Aggregate
-            if metadata:
-                self.show_CAD_metadata(request_params, metadata)
+            self.show_CAD_metadata()
 
         # Operation show_mesh_surface: create one figure for the entire mesh
         elif request_name.startswith("show_mesh_surface"):
             # Decide whether mesh edges are to be shown or not
-            request_params["edges"] = request_name.endswith("with_edges")
+            self.RequestParameters["edges"] = request_name.endswith("with_edges")
 
             # Add specific request parameters
-            request_params.setdefault("view_direction", ())
+            self.RequestParameters.setdefault("view_direction", ())
 
             # Get handle on data
-            file_name = request_params["model"]
+            file_name = self.RequestParameters["model"]
             data = argDataInterface.factory(
                 "vtkSTL",
                 os.path.join(self.Backend.Parameters.DataDir, file_name),
-                request_params.get("merge", "True"))
+                self.RequestParameters.get("merge", "True"))
 
             # Aggregate
             if data:
-                self.show_mesh_surface(
-                    request_params, data, file_name)
+                self.show_mesh_surface(data, file_name)

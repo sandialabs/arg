@@ -192,7 +192,7 @@ class argLaTeXBackend(argBackendBase):
         # Retrieve comment for given key and bail out if none found
         comment = comments_dict.get(str(key))
         if not comment:
-            return
+            return False
 
         # Insert either sub-paragraph or string
         if len(comment) > 1:
@@ -201,6 +201,9 @@ class argLaTeXBackend(argBackendBase):
             self.Report.append(NoEscape(comment[1]))
         else:
             self.Report.append(NoEscape(comment[0]))
+
+        # Comment was found and inserted
+        return True
 
 
     def add_packages(self):

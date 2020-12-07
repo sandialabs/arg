@@ -139,9 +139,9 @@ def get_ignored_block_flat_indices(ignored_block_keys, data, step=0):
     """
 
     # By default no blocks are ignored
-    if not ignored_block_keys:
-        return []
     flat_indices = []
+    if not ignored_block_keys:
+        return flat_indices
 
     # Retrieve block meta-information
     meta_data = data.get_meta_information()[0]
@@ -1464,7 +1464,8 @@ def all_blocks(parameters, fig_params, data, variable, file_name):
     z_vup = (0., 1., 1., 0.)
 
     # Determine skipped blocks if any
-    ignored_blocks = get_ignored_block_flat_indices(fig_params.get("ignore_blocks"), data)
+    ignored_blocks = get_ignored_block_flat_indices(
+        fig_params.get("ignore_blocks"), data)
     viz_string = "[argVTK] Creating four-surface visualization"
 
     # Get handle on data reader output

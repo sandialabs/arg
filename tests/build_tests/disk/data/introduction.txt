@@ -1,4 +1,4 @@
 The current implementation offers the ability to integrate text, VTK-generated
-visualizations, MatPlotLib plots, and other artifacts, in a MS Word document.
-Python-docx is used to glue of all this together.
+visualizations, MatPlotLib plots, and other artifacts, in a LaTeX or Word document.
+PyLaTeX and Python-docx are used to glue of all this together.
 

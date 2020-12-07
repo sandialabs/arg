@@ -469,12 +469,12 @@ class argBackendBase:
         data_type = item.get("datatype")
         if data_type == "ExodusII":
             # Instantiate ExodusII aggregator on self and execute it
-            aggregator = argExodusAggregator.argExodusAggregator(self)
-            aggregator.aggregate(item)
+            aggregator = argExodusAggregator.argExodusAggregator(self, item)
+            aggregator.aggregate()
         elif data_type == "vtkSTL":
             # Instantiate vtkSNL aggregator on self and execute it
-            aggregator = argVTKSTLAggregator.argVTKSTLAggregator(self)
-            aggregator.aggregate(item)
+            aggregator = argVTKSTLAggregator.argVTKSTLAggregator(self, item)
+            aggregator.aggregate()
         else:
             # Unsupported data type
             print("[argBackendBase] Unknown aggregation data type: {}")
