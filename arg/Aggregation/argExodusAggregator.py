@@ -305,7 +305,6 @@ class argExodusAggregator(argAggregatorBase):
 
         # Create per-block pages
         for b_id, (base_name, caption) in sorted(block_images_and_captions.items()):
-            print("block ID:", b_id)
             # Retrieve block ID and name
             block_name = block_names[block_IDs.index(b_id)]
 
