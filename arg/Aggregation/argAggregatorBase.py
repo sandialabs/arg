@@ -66,7 +66,6 @@ class argAggregatorBase:
         except:
             print("*  WARNING: could not instantiate an aggregator: a request parameters dict is required but a {} was provided".format(
                 type(r)))
-        print(dir(self))
 
 
     def get_backend(self):
