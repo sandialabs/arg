@@ -64,8 +64,8 @@ chapters:
       model: can.ex2
       width: 10cm
       axes: True
-      string@1@Comment by Author: 'Comment by author: This block represents one half of a can.'
-      string@2: 'Other note: This block represents a crushing plate.'
+      string@1@Comment by Author: 'This block represents only one half of a can in order to simplify the simulation.'
+      string@2@Explanation: 'This block represents a plate used to crush the can.'
   - n: section
     title: Visualizations of Some Available Attributes
     sections:

@@ -48,19 +48,26 @@ class argAggregatorBase:
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, backend):
+    def __init__(self, b, r):
 
         # A backend is required
         try:
             from arg.Backend import argBackendBase
-            assert isinstance(backend, argBackendBase.argBackendBase)
-            self.Backend = backend
+            assert isinstance(b, argBackendBase.argBackendBase)
+            self.Backend = b
         except:
             print("*  WARNING: could not instantiate an aggregator: a backend base is required but a {} was provided".format(
-                type(backend)))
+                type(b)))
 
-        # Data interfaces are optional
-        self.DataInterfaces = []
+        # Request parameters are required
+        try:
+            assert isinstance(r, dict)
+            self.RequestParameters = r
+        except:
+            print("*  WARNING: could not instantiate an aggregator: a request parameters dict is required but a {} was provided".format(
+                type(r)))
+        print(dir(self))
+
 
     def get_backend(self):
         """ Return backend
@@ -68,11 +75,13 @@ class argAggregatorBase:
 
         return self.Backend
 
+
     def get_data_interfaces(self):
         """ Return data interface
         """
 
         return self.DataInterfaces
+
 
     def add_data_interface(self, di):
         """ Set data interface
@@ -85,19 +94,19 @@ class argAggregatorBase:
                 type(di)))
 
 
-    def show_mesh_surface(self, fig_params, data, file_name, do_clip=False):
+    def show_mesh_surface(self, data, file_name, do_clip=False):
         """A convenience for a request common to several aggregators
         """
 
         # Create artifact generator variable
-        variable = argVTK.argVTKAttribute(data, fig_params.get(
+        variable = argVTK.argVTKAttribute(data, self.RequestParameters.get(
             "time_step", -1))
 
         # Execute artifact generator
         print("[argAggregatorBase] Calling argVTK generator for", file_name)
         output_base_name, caption = argVTK.four_surfaces(
             self.Backend.Parameters,
-            fig_params,
+            self.RequestParameters,
             data,
             variable,
             file_name,
@@ -107,7 +116,7 @@ class argAggregatorBase:
         self.Backend.add_figure({
             "figure_file": output_base_name + ".png",
             "caption_string": caption,
-            "width": fig_params.get("width", "12cm")})
+            "width": self.RequestParameters.get("width", "12cm")})
 
 
     @abc.abstractmethod

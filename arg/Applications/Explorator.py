@@ -444,6 +444,8 @@ def insert_mesh_chapter(yaml_file, case, verbosity_levels, verbosity, chap_index
         yaml_file.write("      width: 10cm\n")
         yaml_file.write("      histogram_width: 14cm\n")
         yaml_file.write("      axes: True\n")
+        if case.IgnoredBlockKeys:
+            yaml_file.write("      ignore_blocks: [%s]\n" % ','.join(case.IgnoredBlockKeys))
         for frag_k, frag_v in fragments.get(sect_index, {}).items():
             insert_fragment(yaml_file, frag_k, frag_v, chap_index, sect_index, backend)
 
