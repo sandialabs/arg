@@ -119,7 +119,7 @@ class argAggregatorBase:
 
 
     @abc.abstractmethod
-    def aggregate(self, request_params):
+    def aggregate(self):
         """Decide which aggregation operation is to be performed
         """
 
