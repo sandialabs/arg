@@ -79,6 +79,7 @@ Build on macOS 10.14.6:
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on macOS"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/macOS/
 
@@ -159,6 +160,7 @@ Build on Ubuntu latest Docker image:
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on Ubuntu"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/Ubuntu/
 
@@ -239,6 +241,7 @@ Build on Debian latest Docker image:
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on Debian"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/Debian/
 
@@ -320,6 +323,7 @@ Build on fedora latest Docker image:
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on fedora"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/fedora/
 
@@ -402,5 +406,6 @@ Build on CentOS latest Docker image:
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on CentOS"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - tests/CentOS/
