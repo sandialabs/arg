@@ -16,3 +16,6 @@ RUN source venv/bin/activate && pip3 install -r requirements.txt
 
 ENV PYTHONPATH /arg/venv/lib/python3.8/site-packages:/arg:/arg/arg
 ENV DISPLAY :99.0
+COPY entrypoint.sh /arg/entrypoint.sh
+RUN ["chmod", "+x", "/arg/entrypoint.sh"]
+ENTRYPOINT ["/arg/entrypoint.sh"]
