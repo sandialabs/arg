@@ -464,7 +464,7 @@ class argWordBackend(argBackendBase):
         else:
             self.Report.add_heading(text, lvl)
 
-    def add_table(self, header_list, body, caption_string, do_verbatim=False, pos='t'):
+    def add_table(self, header_list, body, caption_string, do_verbatim=False, _=None):
         """Add table to the report
         """
 

@@ -620,7 +620,7 @@ class argLaTeXBackend(argBackendBase):
 
         # Create table
         tab_format = "@{}l" + (n_cols - 1) * 'r' + "@{}"
-        with self.Report.create(pl.LongTable(tab_format)) as table:
+        with self.Report.create(pl.LongTable(table_spec=tab_format, pos=pos)) as table:
             # Create table header
             table.append(NoEscape(r"\toprule"))
             header_list = [decorator(x) for x in header_list]
