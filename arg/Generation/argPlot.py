@@ -416,6 +416,8 @@ def time(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
@@ -573,6 +575,8 @@ def xy(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
@@ -709,6 +713,8 @@ def lin_exp(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
@@ -841,6 +847,8 @@ def analytic(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
@@ -935,6 +943,8 @@ def histogram(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
@@ -1065,6 +1075,8 @@ def constant(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
         return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
