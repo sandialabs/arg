@@ -10,6 +10,7 @@ RUN pip install virtualenv
 RUN git clone https://gitlab.com/AutomaticReportGenerator/arg.git
 WORKDIR /arg
 RUN git checkout master
+RUN mkdir /arg/in
 RUN mkdir /arg/out
 RUN virtualenv --python /usr/bin/python3.8 venv
 RUN source venv/bin/activate && pip3 install -r requirements.txt
