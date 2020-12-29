@@ -75,5 +75,3 @@ Python Static Scan:
     expose_as: "PyLint Report"
     paths:
       - pylint/
-
-    
