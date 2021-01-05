@@ -145,9 +145,6 @@ def execute(parameters):
     # Generate document structure from discovered data
     generate_structure_file(parameters, case)
 
-    # Log execution status
-    parameters.log_execution_status("Explore", "{}/".format(os.path.dirname(parameters.OutputDir)))
-
 
 def get_and_comment_property_value(meta_info, info_key):
     """ Convenience method to get property value and comment about it

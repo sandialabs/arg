@@ -106,10 +106,6 @@ class argGenerator:
         else:
             print("[argGenerator] Artefact generation complete with no missing artifacts")
 
-        # Log execution status
-        self.Parameters.log_execution_status("Generate {}/".format(
-            os.path.dirname(self.Parameters.OutputDir)))
-
 
     def assemble_report(self):
         """ Assemble report
@@ -130,6 +126,3 @@ class argGenerator:
             self.Parameters.Version,
             self.Parameters.LatexProcessor)
 
-        # Log execution status
-        self.Parameters.log_execution_status("Assemble", "{}/".format(
-            os.path.dirname(self.Parameters.OutputDir)))

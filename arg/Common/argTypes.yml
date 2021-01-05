@@ -40,7 +40,6 @@
 # This file provides a list of types supported by ARG
 
 DefaultParametersFile: parameters.yml
-DefaultTmpFile       : ARG.tmp
 
 ParametersFileTypes:
     - .yml
