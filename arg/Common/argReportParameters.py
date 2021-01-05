@@ -57,8 +57,6 @@ class argReportParameters:
 
         self.DEFAULT_PARAMETERSFILE = None
         self.VerbosityLevels = None
-        # Save default temp file name
-        self.DEFAULT_TMPFILE = "ARG"
 
         self.__init_params()
 
@@ -66,7 +64,6 @@ class argReportParameters:
         self.Application = application
         self.Version = version
         self.Types = types
-        self.TmpFile = None
         self.LatexProcessor = latex_processor
         self.TexFile = None
 
@@ -1039,15 +1036,3 @@ class argReportParameters:
 
         # Specified file was found
         return True
-
-    def log_execution_status(self, operation, tmp_file=None):
-        """ Log execution status to tmp file
-        """
-
-        # Use default temporary file name if not explicitly specified
-        self.TmpFile = "{}.tmp".format(tmp_file or self.DEFAULT_TMPFILE)
-
-        # Write operation name to temporary file
-        f = open(self.TmpFile, "a")
-        f.write("{}\n".format(operation))
-        f.close()
