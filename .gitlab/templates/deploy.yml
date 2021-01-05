@@ -20,7 +20,7 @@ Upload pyARG-dep in Gitlab.com:
     - pip install twine
   script:
     - echo "==================== [pyARG-dep deployment] Upload pyARG ==================="
-    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
+    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/* --skip-existing
   rules:
 #   Always run when pushing a release candidate
     - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
@@ -44,7 +44,7 @@ Upload pyARG in Gitlab.com:
     - pip install twine
   script:
     - echo "==================== [pyARG deployment] Upload pyARG ==================="
-    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/*
+    - twine upload --repository-url https://gitlab.com/api/v4/projects/18732201/packages/pypi --username $GITLAB_PYPI_USER --password $GITLAB_PYPI_PASS $PACKAGING_PATH/dist/* --skip-existing
     # Try to install pyARG from gitlab packages
     #- pip install --index-url https://gitlab.com/api/v4/projects/18732201/packages/ pyARG==1.0.1
     #- python -c "import arg"
