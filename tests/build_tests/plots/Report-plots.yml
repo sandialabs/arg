@@ -48,12 +48,12 @@ chapters:
   - n: figure
     arguments:
       width: 145mm
-      figure_file: Temperature-293K-Frequency-20-Hz_Sample1.h-Sample2.h-Sample3.h-Sample4.h__Disp_time_plot.png
+      figure_file: Temperature-293K-Frequency-20-Hz_Sample1.h-Sample2.h-Sample3.h-Sample4.h__Displacement-_m__time_plot.png
       caption_string: 'Time domain displacement plots for a sample at 293K and a frequency of 20Hz.'
       label: f01-04
   - n: figure
     arguments:
       width: 145mm
-      figure_file: Temperature-233.2K-Frequency-60-Hz_Sample37.h-Sample38.h-Sample39.h-Sample40.h__Disp_time_plot.png
+      figure_file: Temperature-233.2K-Frequency-60-Hz_Sample37.h-Sample38.h-Sample39.h-Sample40.h__Displacement-_m__time_plot.png
       caption_string: 'Time domain displacement plots for a sample at 233.2K and a frequency of 60Hz.'
       label: f37-40
