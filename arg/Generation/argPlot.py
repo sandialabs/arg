@@ -87,7 +87,6 @@ constant_shift = .05
 decrease_factor = .95
 increase_factor = 1.05
 
-
 def safely_evaluate_expression(expr, x):
     """Evaluate expression at x only allowing for explicitly supported expressions
     """
@@ -353,6 +352,7 @@ def time(parameters, plot_params):
                 var_name)
 
             # ExodusII files provide available times
+            time_type = "numeric"
             times = data.get_available_times()
             values = [data.get_variable_time_slice(t, var_name, True)[val_index] for t in range(len(times))]
 
@@ -362,8 +362,16 @@ def time(parameters, plot_params):
                 os.path.join(parameters.DataDir, f),
                 plot_params)
 
-            # Times and values are given by first two columns of data
-            times = [k for k in data.Dictionaries[0].keys()]
+            # Retrieve times depending on time from first column
+            time_type = plot_params.get("timetype")
+            if time_type == "date":
+                times = [np.datetime64(k) for k in data.Dictionaries[0].keys()]
+            elif time_type == "numeric":
+                times = [float(k) for k in data.Dictionaries[0].keys()]
+            else:
+                times = [i for i in range(len(data.Dictionaries[0]))]
+
+            # Values is given by second data columns
             values = [float(v) for v in data.Dictionaries[0].values()]
 
         if not data or not times or not values:
@@ -422,11 +430,17 @@ def time(parameters, plot_params):
     # Set labels
     ax.set_xlabel(var_x_name)
     ax.set_ylabel(var_y_name)
+    matplotlib.pyplot.grid(True)
 
     # Add all plots
     for [t, v, l, c, s] in plots:
         ax.plot(t, v, label=l, color=c, ls=s, lw=.5)
+
+    # Adjust legend and x ticks
     ax.legend(loc="lower right", fontsize=8)
+    if time_type == "date":
+        for tick in ax.get_xticklabels():
+            tick.set_rotation(45)
 
     # Export chart to PNG file
     try:
