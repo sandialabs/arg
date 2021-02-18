@@ -45,8 +45,8 @@ import subprocess
 import clr
 import yaml
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
+from docx.oxml import OxmlElement, parse_xml
+from docx.oxml.ns import qn, nsdecls
 from docx.shared import Mm, Cm, Inches, RGBColor, Pt
 from pylatex import NoEscape
 
@@ -263,7 +263,6 @@ class argWordBackend(argBackendBase):
         # Add number properties to paragraph
         pPr.append(numPr)
 
-
     def add_list(self, item, num_lvl=1, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -278,8 +277,7 @@ class argWordBackend(argBackendBase):
             if "number" in it.keys():
                 self.Report.add_paragraph(it["number"])
 
-
-    def add_comment(self,  comments_dict, key):
+    def add_comment(self, comments_dict, key):
         """Add comment to the report from a dict as either text string
         or as sub-paragraph depending on number of dict values (1 or 2)
         """
@@ -299,7 +297,6 @@ class argWordBackend(argBackendBase):
 
         # Comment was found and inserted
         return True
-
 
     def add_paragraph(self, item, p=None):
         """Add paragraph to the report
@@ -577,6 +574,81 @@ class argWordBackend(argBackendBase):
             # Insert blank paragraph to ensure table is closed
             self.Report.add_paragraph()
 
+    def add_color_table(self, data: dict) -> None:
+        """ Add colored table to the report
+        """
+
+        headers_list = data.get('headers', None)
+        table_columns_num = len(headers_list)
+        rows_list = data.get('rows', None)
+        caption_string = data.get('caption', None)
+        if headers_list is None or rows_list is None:
+            raise Exception('No headers or rows given!')
+        headers = self.parse_headers(headers=headers_list)
+        rows = self.parse_rows(rows=rows_list, table_columns_num=table_columns_num)
+
+        # Create table with required number of columns
+        table = self.Report.add_table(rows=1, cols=table_columns_num)
+        table.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # Create table header
+        cells = table.rows[0].cells
+        for c, header_string, font_color in zip(cells, [header[0] for header in headers],
+                                                [self.parse_rgb_to_hex(rgb=header[2], appl=2) for header in headers]):
+            # Fill header cell
+            if isinstance(header_string, str):
+                # Directly insert base strings
+                c.paragraphs[0].add_run(header_string).font.color.rgb = RGBColor.from_string(f"{font_color}")
+
+            elif isinstance(header_string, argMultiFontStringHelper):
+                # Handle multi-font string helpers
+                self.generate_multi_font_string(header_string, c.paragraphs[0])
+
+        # Iterate over of contents to create table body
+
+        # Iterate over list entries
+        for row in rows:
+            # Add a row of cells and fill those
+            cells = table.add_row().cells
+            for c, cell_string, font_color in zip(cells, [cell[0] for cell in row],
+                                                  [self.parse_rgb_to_hex(rgb=cell[2], appl=2) for cell in row]):
+                if isinstance(cell_string, str):
+                    # Directly insert base strings
+                    c.paragraphs[0].add_run(cell_string).font.color.rgb = RGBColor.from_string(f"{font_color}")
+
+                elif isinstance(cell_string, argMultiFontStringHelper):
+                    # Handle multi-font string helpers
+                    self.generate_multi_font_string(cell_string, c.paragraphs[0])
+
+        # Apply colours to cells
+        color_list = self.parse_colors(headers=headers, rows=rows)
+        for row_num, row_color in enumerate(color_list):
+            for cell_num, cell_color in enumerate(row_color):
+                table.rows[row_num].cells[cell_num]._tc.get_or_add_tcPr().append(
+                    parse_xml(rf'<w:shd {nsdecls("w")} w:fill="{cell_color}"/>'))
+
+        # Create table caption depending on its type
+        if caption_string is not None:
+            if isinstance(caption_string, str):
+                # Directly insert base strings
+                caption = self.add_caption("Table", caption_string)
+                caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            elif isinstance(caption_string, argMultiFontStringHelper):
+                # Handle multi-font string helpers
+                caption = self.add_caption("Table", "")
+                caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+                # Append Word runs created from multi-font string
+                caption_string.execute_backend(caption)
+
+            else:
+                # Insert blank paragraph to ensure table is closed
+                self.Report.add_paragraph()
+        else:
+            # Insert blank paragraph to ensure table is closed
+            self.Report.add_paragraph()
+
     def add_type_caption(self, caption_type, caption_string):
         """Add table caption
         """
@@ -599,7 +671,6 @@ class argWordBackend(argBackendBase):
 
             # Append Word runs created from multi-font string
             caption_string.execute_backend()
-
 
     def add_figure(self, arguments):
         """Add figure to report
@@ -646,7 +717,6 @@ class argWordBackend(argBackendBase):
             if caption_string:
                 self.add_type_caption("Figure", caption_string)
 
-
     def add_caption(self, caption_type, caption_string):
         """ Create caption area in XML, with proper number
         """
@@ -677,7 +747,6 @@ class argWordBackend(argBackendBase):
         paragraph.add_run(': ' + caption_string)
 
         return paragraph
-
 
     def recursively_build_report(self, item_tree, list_lvl=1, p=None):
         """Recursively traverse structure tree to build Word report
@@ -748,10 +817,14 @@ class argWordBackend(argBackendBase):
                 # Append aggregated information
                 self.add_aggregation(item)
 
+                # Handle color-table
+            elif item_type == "color-table":
+                # Append color-table
+                self.add_color_table(data=item)
+
             # Proceed with recursion if needed
             if "sections" in item:
                 self.recursively_build_report(item["sections"], list_lvl)
-
 
     def assemble(self, report_map, version=None, latex_proc=None):
         """Create a Word report from given report map
@@ -996,3 +1069,31 @@ class argWordBackend(argBackendBase):
             hx.text = "{} {}".format(
                 hStr,
                 hx.text)
+
+    def parse_colors(self, headers: list, rows: list, appl: str = 'background') -> list:
+        """ Parses colors for whole table
+        """
+        colr = {'background': 1, 'foreground': 2}
+        ct = colr.get(appl)
+
+        headers_colors = [header[ct] for header in headers]
+        rows_colors = [[cell[ct] for cell in row] for row in rows]
+        table_colors = list()
+        table_colors.append(headers_colors)
+        table_colors.extend(rows_colors)
+        table_colors_hex = [[self.parse_rgb_to_hex(color, ct) for color in color_row] for color_row in table_colors]
+        return table_colors_hex
+
+    @staticmethod
+    def parse_rgb_to_hex(rgb: str, appl: int) -> str:
+        """ Parses RGB color to HEX
+        """
+        if rgb == '' and appl == 1:
+            return 'FFFFFF'
+        elif rgb == '' and appl == 2:
+            return '000000'
+        else:
+            hex_str = ''.join(
+                [hex(int(color))[2:].upper() if len(hex(int(color))[2:]) > 1 else f"0{hex(int(color))[2:].upper()}"
+                 for color in rgb.split(',')])
+            return hex_str

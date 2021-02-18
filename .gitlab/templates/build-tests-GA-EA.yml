@@ -62,6 +62,13 @@ Build 'can' case:
     BUILD_TEST_RUNTYPE: "-g"
   <<: *build_ind_test
 
+# 'color_tables' case build variables
+Build 'color_tables' case:
+  variables:
+    BUILD_TEST_NAME: "color_tables"
+    BUILD_TEST_RUNTYPE: "-g"
+  <<: *build_ind_test
+
 # 'crush' case build variables
 Build 'crush' case:
   variables:
@@ -175,6 +182,19 @@ Compare pdf 'can' case:
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "can"
     COMPARE_TEST_PAGE_RANGE: "2-16"
+    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
+    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+  <<: *compare_ind_test_pdf
+
+# 'can' case comparison variables
+Compare pdf 'color_tables' case:
+  needs: ["Build 'color_tables' case"]
+  variables:
+    COMPARE_EXPLORATOR_OUTPUT: "false"
+    COMPARE_PDF_OUTPUT: "true"
+    COMPARE_TEST_NAME: "color_tables"
+    COMPARE_TEST_PAGE_RANGE: "2-8"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -337,6 +357,21 @@ Compare word 'can' case:
     COMPARE_WORD_OUTPUT: "true"
     COMPARE_TEST_NAME: "can"
     COMPARE_TEST_PAGE_RANGE: "3-15"
+    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
+    COMPARE_TEST_GENERATED_PATH_WORD: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word"
+    COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
+    COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+  <<: *compare_ind_test_word
+
+# 'can' case comparison variables
+Compare word 'color_tables' case:
+  needs: ["Build 'color_tables' case"]
+  variables:
+    COMPARE_EXPLORATOR_OUTPUT: "false"
+    COMPARE_WORD_OUTPUT: "true"
+    COMPARE_TEST_NAME: "color_tables"
+    COMPARE_TEST_PAGE_RANGE: "3-10"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_GENERATED_PATH_WORD: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word"
