@@ -87,7 +87,6 @@ constant_shift = .05
 decrease_factor = .95
 increase_factor = 1.05
 
-
 def safely_evaluate_expression(expr, x):
     """Evaluate expression at x only allowing for explicitly supported expressions
     """
@@ -266,23 +265,28 @@ def time(parameters, plot_params):
     """Create plot of specified variable versus time
     """
 
-    # Retrieve plot title
-    try:
-        title = plot_params["title"]
-    except:
-        return None, None, "** ERROR: no title provided for time plot request. Ignoring it."
+    # Retrieve input data type
+    data_type = plot_params.get("datatype")
+    if not data_type:
+        return None, None, "*  WARNING: no data type specified for time plot request. Ignoring it."
 
     # Retrieve list of files
-    try:
-        files = plot_params["files"]
-    except:
-        return None, None, "** ERROR: no labels specified for time plot request. Ignoring it."
+    files = plot_params.get("files")
+    if not files:
+        return None, None, "*  WARNING: no labels specified for time plot request. Ignoring it."
 
-    # Retrieve variable name
+    # Retrieve plot titlewhen specified
+    title = plot_params.get("title", '')
+
+    # Retrieve variable names
     try:
-        var_name = plot_params["var_name"]
+        var_x_name = plot_params["var_x_name"].replace('_', r"\_")
     except:
-        return None, None, "** ERROR: no variable name specified for time plot request. Ignoring it."
+        var_x_name = "Time"
+    try:
+        var_y_name = plot_params["var_y_name"].replace('_', r"\_")
+    except:
+        var_y_name = "Value"
 
     # Try to retrieve parameters
     function = plot_params.get("function")
@@ -298,20 +302,16 @@ def time(parameters, plot_params):
         title,
         '-'.join([f for f in files]),
         '',
-        var_name,
+        var_y_name,
         "time_plot")
     image_full_name = os.path.join(parameters.OutputDir, output_base_name) + ".png"
 
     # Create caption
-    if function or model or material:
-        prefix = None
-    else:
-        prefix = "time"
     caption = create_caption(
         parameters.Backend,
-        prefix,
+        None if function or model or material else "time",
         title,
-        var_name,
+        var_y_name,
         None,
         str_caption,
         function,
@@ -323,14 +323,13 @@ def time(parameters, plot_params):
         return output_base_name, caption, None
 
     # Retrieve list of labels
-    try:
-        labels = plot_params["labels"]
-    except:
-        return None, None, "** ERROR: no labels specified for time plot request. Ignoring it."
+    labels = plot_params.get("labels")
+    if not labels:
+        return None, None, "*  WARNING: no labels specified for time plot request. Ignoring it."
 
     # Sanity check: labels must correspond to files
     if len(files) != len(labels):
-        return None, None, "** ERROR: files and labels mismatch in time plot request. Ignoring it."
+        return None, None, "*  WARNING: files and labels mismatch in time plot request. Ignoring it."
 
     # Retrieve value index
     val_index = int(plot_params.get("val_index", 0))
@@ -340,42 +339,69 @@ def time(parameters, plot_params):
 
     # Create one plot per file
     plots = []
-    for i, f in enumerate(files):
-        # Get data through ExodusII interface
-        data = argDataInterface.factory(
-            "ExodusII",
-            os.path.join(parameters.DataDir, f),
-            var_name)
+    for i, (f, l) in enumerate(zip(files, labels)):
+        # Try to retrieve variable data and available times
+        data, times, values = None, None, None
+        if data_type == "ExodusII":
+            var_name = plot_params.get("variable")
+            if not var_name:
+                continue
+            data = argDataInterface.factory(
+                data_type,
+                os.path.join(parameters.DataDir, f),
+                var_name)
 
-        # Retrieve available times and go to next plot if empty
-        avail_times = data.get_available_times()
-        if not avail_times:
+            # ExodusII files provide available times
+            time_type = "numeric"
+            times = data.get_available_times()
+            values = [data.get_variable_time_slice(t, var_name, True)[val_index] for t in range(len(times))]
+
+        elif data_type == "key-value":
+            data = argDataInterface.factory(
+                data_type,
+                os.path.join(parameters.DataDir, f),
+                plot_params)
+
+            # Retrieve times depending on time from first column
+            time_type = plot_params.get("timetype")
+            if time_type == "date":
+                times = [np.datetime64(k) for k in data.Dictionaries[0].keys()]
+            elif time_type == "numeric":
+                times = [float(k) for k in data.Dictionaries[0].keys()]
+            else:
+                times = [i for i in range(len(data.Dictionaries[0]))]
+
+            # Values is given by second data columns
+            values = [float(v) for v in data.Dictionaries[0].values()]
+
+        if not data or not times or not values:
             continue
 
-        # Update time ranges
-        t_min.append(min(avail_times))
-        t_max.append(max(avail_times))
+        # Try to update time range
+        try:
+            t_min.append(min(times))
+        except:
+            t_min.append(0)
+        try:
+            t_max.append(max(times))
+        except:
+            t_max.append(len(times) - 1)
 
-        # Iterate over time steps
-        values = []
-        for t in range(0, len(avail_times)):
-            # Retrieve list of variable values at given time
-            time_slice = data.get_variable_time_slice(t, var_name, True)
-            values.append(time_slice[val_index])
-
-        # Iterate over time steps
+        # Update value range
         v_min.append(min(values))
         v_max.append(max(values))
+
+        # Append plot for current file
         plots.append([
-            avail_times,
+            times,
             values,
-            labels[i],
+            l,
             argPlot_colors[i % len(argPlot_colors)],
             argPlot_styles[i % len(argPlot_styles)]])
 
     # If no available times were found, do not do anything
     if not t_min:
-        return None, None, "** ERROR: no available times found for time plot request. Ignoring it."
+        return None, None, "*  WARNING: no available times found for time plot request. Ignoring it."
 
     # Create chart
     mpl.rc("text", usetex=True)
@@ -402,22 +428,27 @@ def time(parameters, plot_params):
     ax.set_ylim([min(v_min), max(v_max)])
 
     # Set labels
-    ax.set_xlabel("Time (sec)")
-    try:
-        ax.set_ylabel(r"large %s" % plot_params["ylabel"].replace('_', r"\_"))
-    except:
-        ax.set_ylabel(r"large %s" % var_name)
+    ax.set_xlabel(var_x_name)
+    ax.set_ylabel(var_y_name)
+    matplotlib.pyplot.grid(True)
 
     # Add all plots
     for [t, v, l, c, s] in plots:
         ax.plot(t, v, label=l, color=c, ls=s, lw=.5)
+
+    # Adjust legend and x ticks
     ax.legend(loc="lower right", fontsize=8)
+    if time_type == "date":
+        for tick in ax.get_xticklabels():
+            tick.set_rotation(45)
 
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -430,16 +461,14 @@ def xy(parameters, plot_params):
     """
 
     # Retrieve plot title
-    try:
-        title = plot_params["title"]
-    except:
-        return None, None, "** ERROR: no title provided for xy plot request. Ignoring it."
+    title = plot_params.get("title")
+    if not title:
+        return None, None, "*  WARNING: no title provided for xy plot request. Ignoring it."
 
     # Retrieve plot label
-    try:
-        fct_label = plot_params["label"]
-    except:
-        return None, None, "** ERROR: no label specified for xy plot request. Ignoring it."
+    fct_label = plot_params.get("label")
+    if not fct_label:
+        return None, None, "*  WARNING: no label specified for xy plot request. Ignoring it."
 
     # Set variable column indices
     var_x_col = plot_params.get("var_x_column", 0)
@@ -474,13 +503,9 @@ def xy(parameters, plot_params):
     image_full_name = os.path.join(parameters.OutputDir, output_base_name) + ".png"
 
     # Create caption
-    if function or model or material:
-        prefix = None
-    else:
-        prefix = "piecewise linear"
     caption = create_caption(
         parameters.Backend,
-        prefix,
+        None if function or model or material else "piecewise linear",
         title,
         var_y_name,
         var_x_name,
@@ -494,34 +519,32 @@ def xy(parameters, plot_params):
         return output_base_name, caption, None
 
     # Retrieve data for x and y variables
-    try:
-        data = plot_params["data"]
-    except:
-        return None, None, "** ERROR: no data provided for xy plot request. Ignoring it."
-    x = []
-    y = []
+    data = plot_params.get("data")
+    if not data:
+        return None, None, "*  WARNING: no data provided for xy plot request. Ignoring it."
 
     # Iterate over data entries
+    x, y = [], []
     for row in data:
         # Distinguish between text and numeric data
         if isinstance(row, str):
             # Eliminate commas and split row to extract data
             row = row.strip().replace(',', ' ').split()
         elif not isinstance(row, list):
-            return None, None, "** ERROR: unsuited data format for xy plot request. Ignoring it."
+            return None, None, "*  WARNING: unsuited data format for xy plot request. Ignoring it."
 
         # Fetch first two dimensions
         try:
             x.append(float(row[var_x_col]))
             y.append(float(row[var_y_col]))
         except:
-            return None, None, "** ERROR: unsuited data format for xy plot request. Ignoring it."
+            return None, None, "*  WARNING: unsuited data format for xy plot request. Ignoring it."
 
     # If no available or incorrect data values were found, do not do anything
     if not len(x):
-        return None, None, "** ERROR: no available data found for xy plot request. Ignoring it."
+        return None, None, "*  WARNING: no available data found for xy plot request. Ignoring it."
     if len(x) != len(y):
-        return None, None, "** ERROR: x/y data mismatch for xy plot request. Ignoring it."
+        return None, None, "*  WARNING: x/y data mismatch for xy plot request. Ignoring it."
 
     # Create chart
     mpl.rc("text", usetex=True)
@@ -573,8 +596,10 @@ def xy(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -587,16 +612,14 @@ def lin_exp(parameters, plot_params):
     """
 
     # Retrieve plot title
-    try:
-        title = plot_params["title"]
-    except:
-        return None, None, "** ERROR: no title provided for lin_exp plot request. Ignoring it."
+    title = plot_params.get("title")
+    if not title:
+        return None, None, "*  WARNING: no title provided for lin_exp plot request. Ignoring it."
 
     # Retrieve plot label
-    try:
-        fct_label = plot_params["label"]
-    except:
-        return None, None, "** ERROR: no label specified for lin_exp plot request. Ignoring it."
+    fct_label = plot_params.get("label")
+    if not fct_label:
+        return None, None, "*  WARNING: no label specified for lin_exp plot request. Ignoring it."
 
     # Set variable names
     var_x_name = plot_params.get("var_x_name", '')
@@ -621,13 +644,9 @@ def lin_exp(parameters, plot_params):
     image_full_name = os.path.join(parameters.OutputDir, output_base_name) + ".png"
 
     # Create caption
-    if function or model or material:
-        prefix = None
-    else:
-        prefix = "linear/exponential"
     caption = create_caption(
         parameters.Backend,
-        prefix,
+        None if function or model or material else "linear/exponential",
         title,
         var_y_name,
         var_x_name,
@@ -641,12 +660,11 @@ def lin_exp(parameters, plot_params):
         return output_base_name, caption, None
 
     # If no available or incorrect data values were found, do not do anything
-    try:
-        data = plot_params["data"]
-    except:
-        return None, None, "** ERROR: no data provided for lin_exp plot request. Ignoring it."
+    data = plot_params.get("data")
+    if not data:
+        return None, None, "*  WARNING: no data provided for lin_exp plot request. Ignoring it."
     if len(data) < 3:
-        return None, None, "** ERROR: not enough data found for lin_exp plot request. Ignoring it."
+        return None, None, "*  WARNING: not enough data found for lin_exp plot request. Ignoring it."
 
     # Retrieve data
     x = [data[0][0], data[1][0], data[2]]
@@ -709,8 +727,10 @@ def lin_exp(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -723,16 +743,14 @@ def analytic(parameters, plot_params):
     """
 
     # Retrieve plot title
-    try:
-        title = plot_params["title"]
-    except:
-        return None, None, "** ERROR: no title provided for analytic plot request. Ignoring it."
+    title = plot_params.get("title")
+    if not title:
+        return None, None, "*  WARNING: no title provided for analytic plot request. Ignoring it."
 
     # Retrieve plot label
-    try:
-        fct_label = plot_params["label"]
-    except:
-        return None, None, "** ERROR: no label specified for analytic plot request. Ignoring it."
+    fct_label = plot_params.get("label")
+    if not fct_label:
+        return None, None, "*  WARNING: no label specified for analytic plot request. Ignoring it."
 
     # Set variable names
     var_x_name = plot_params.get("var_x_name", '')
@@ -757,13 +775,9 @@ def analytic(parameters, plot_params):
     image_full_name = os.path.join(parameters.OutputDir, output_base_name) + ".png"
 
     # Create caption
-    if function or model or material:
-        prefix = None
-    else:
-        prefix = "piecewise linear"
     caption = create_caption(
         parameters.Backend,
-        prefix,
+        None if function or model or material else "piecewise linear",
         title,
         var_y_name,
         var_x_name,
@@ -777,12 +791,11 @@ def analytic(parameters, plot_params):
         return output_base_name, caption, None
 
     # If no available or incorrect data values were found, do not do anything
-    try:
-        data = plot_params["data"]
-    except:
-        return None, None, "** ERROR: no data provided for analytic plot request. Ignoring it."
+    data = plot_params.get("data")
+    if not data:
+        return None, None, "*  WARNING: no data provided for analytic plot request. Ignoring it."
     if len(data) < 2:
-        return None, None, "** ERROR: not enough data found for analytic plot request. Ignoring it."
+        return None, None, "*  WARNING: not enough data found for analytic plot request. Ignoring it."
 
     # Retrieve data
     f = data[0]
@@ -841,8 +854,10 @@ def analytic(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -855,16 +870,15 @@ def histogram(parameters, plot_params):
     """
 
     # Retrieve plot title
-    try:
-        title = plot_params["title"]
-    except:
-        return None, None, "** ERROR: no title provided for histogram plot request. Ignoring it."
+    title = plot_params.get("title")
+    if not title:
+        return None, None, "*  WARNING: no title provided for histogram plot request. Ignoring it."
 
     # Retrieve variable names
     try:
         var_x_name = plot_params["var_x_name"].replace('_', r"\_")
     except:
-        return None, None, "** ERROR: no variable name provided for histogram plot request. Ignoring it."
+        return None, None, "*  WARNING: no variable name provided for histogram plot request. Ignoring it."
     try:
         var_y_name = plot_params["var_y_name"].replace('_', r"\_")
     except:
@@ -891,10 +905,9 @@ def histogram(parameters, plot_params):
         return output_base_name, caption, None
 
     # Retrieve data for x and y variables
-    try:
-        data = plot_params["data"]
-    except:
-        return None, None, "** ERROR: no data provided for histogram plot request. Ignoring it."
+    data = plot_params.get("data")
+    if not data:
+        return None, None, "*  WARNING: no data provided for histogram plot request. Ignoring it."
 
     # Iterate over data map
     x, w = [], []
@@ -904,7 +917,7 @@ def histogram(parameters, plot_params):
 
     # If no available or incorrect data values were found, do not do anything
     if not len(x):
-        return None, None, "** ERROR: no available data found for histogram plot request. Ignoring it."
+        return None, None, "*  WARNING: no available data found for histogram plot request. Ignoring it."
 
     # Create chart
     mpl.rc("text", usetex=True)
@@ -935,8 +948,10 @@ def histogram(parameters, plot_params):
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -955,13 +970,13 @@ def constant(parameters, plot_params):
     try:
         title = plot_params["title"]
     except:
-        return None, None, "** ERROR: no title provided for constant plot request. Ignoring it."
+        return None, None, "*  WARNING: no title provided for constant plot request. Ignoring it."
 
     # Retrieve plot label
     try:
         fct_label = plot_params["label"]
     except:
-        return None, None, "** ERROR: no label specified for constant plot request. Ignoring it."
+        return None, None, "*  WARNING: no label specified for constant plot request. Ignoring it."
 
     # Set variable column indices
     cst = float(plot_params.get("data", 1)[0])
@@ -1011,7 +1026,7 @@ def constant(parameters, plot_params):
 
     # If no available or incorrect data values were found, do not do anything
     if not len(x):
-        return None, None, "** ERROR: no available data found for constant plot request. Ignoring it."
+        return None, None, "*  WARNING: no available data found for constant plot request. Ignoring it."
 
     # Create chart
     mpl.rc("text", usetex=True)
@@ -1062,11 +1077,14 @@ def constant(parameters, plot_params):
         ax.plot(
             x, y,
             marker=marker_type, color="blue", ls="solid", lw=1, ms=2)
+
     # Export chart to PNG file
     try:
         fig.savefig(image_full_name, bbox_inches="tight", pad_inches=0, transparent=True)
+        fig.clf()
+        matplotlib.pyplot.close(fig)
     except:
-        return None, None, "** ERROR: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
+        return None, None, "*  WARNING: plot request could not save created file {} with exception `{}`. Ignoring it.".format(
             output_base_name,
             sys.exc_info())
 
@@ -1081,7 +1099,7 @@ def execute_request(parameters, plot_params):
     # Bail out if no plot type was specified
     req_name = plot_params.get("type")
     if not req_name:
-        print("** ERROR: no plot type was specified in request. Ignoring it.")
+        print("*  WARNING: no plot type was specified in request. Ignoring it.")
         return None, None
 
     # Proceed with request
@@ -1097,7 +1115,7 @@ def execute_request(parameters, plot_params):
             break
     else:
         # Unsupported function was requested
-        print("** ERROR: `{}` plotting is not supported. Ignoring it.")
+        print("*  WARNING: `{}` plotting is not supported. Ignoring it.")
         return None, None
 
     # Print warning message if any and return accordingly
@@ -1107,6 +1125,7 @@ def execute_request(parameters, plot_params):
     else:
         # Return plot base name and caption when everything went well
         return output_base_name, caption
+
 
 def create_plot(parameters, base_plot_params, data_map, title, data_key, func_prop, pt_marker=None):
     """Retrieve and prepare data to invoke plotting function

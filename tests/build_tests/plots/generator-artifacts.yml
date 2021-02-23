@@ -39,7 +39,10 @@
 ---
 # YAML file describing how to generate plots case artifacts
 - 'n': 'plot'
+  'type': 'time'
   'fig_ratio': '500'
+  'datatype': 'ExodusII'
+  'variable': 'Disp'
   'files':
   - 'Sample1.h'
   - 'Sample2.h'
@@ -51,11 +54,13 @@
   - 'Simulation K 9.06e+07 G 1.36e+08'
   - 'Simulation K 9.88e+07 G 1.48e+08'
   'title': 'Temperature: 293K, Frequency: 20 Hz'
-  'type': 'time'
-  'var_name': 'Disp'
-  'ylabel': 'Displacement (m)'
+  'var_x_name': 'Time (sec)'
+  'var_y_name': 'Displacement (m)'
 - 'n': 'plot'
+  'type': 'time'
   'fig_ratio': '800'
+  'datatype': 'ExodusII'
+  'variable': 'Disp'
   'files':
   - 'Sample37.h'
   - 'Sample38.h'
@@ -67,6 +72,5 @@
   - 'Simulation K 9.06e+07 G 1.36e+08'
   - 'Simulation K 9.88e+07 G 1.48e+08'
   'title': 'Temperature: 233.2K, Frequency: 60 Hz'
-  'type': 'time'
-  'var_name': 'Disp'
-  'ylabel': 'Displacement (m)'
+  'var_x_name': 'Time (sec)'
+  'var_y_name': 'Displacement (m)'

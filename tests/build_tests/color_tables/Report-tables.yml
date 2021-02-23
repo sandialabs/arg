@@ -1,0 +1,68 @@
+#HEADER
+#                         arg/tests/color-tables/Report-tables.yml
+#               Automatic Report Generator (ARG) v. 1.0
+#
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+# (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+# Government retains certain rights in this software.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+#
+#HEADER
+
+---
+chapters:
+- n: chapter
+  title: Introduction
+  string: 'This sample report illustrates the automatic report generator (ARG).'
+- n: chapter
+  title: Color Table
+  sections:
+  - n: section
+    title: Color Table Generation
+    string: 'This section provides a colored table generation.'
+    sections:
+    - n: color-table
+      headers: [ { value: 'ID', background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Description', background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Importance',  background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Model Formulated', background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Implementation', background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Validation', background-color: '4,56,101', 'foreground-color': '255,255,255' }, { value: 'Model Parameter', background-color: '4,56,101', 'foreground-color': '255,255,255' } ]
+      rows:
+        - [ { value: 'A', background-color: '31,115,150', 'foreground-color': '255,255,255' }, { value: 'Metal Constitutive Behavior', background-color: '31,115,150', 'foreground-color': '255,255,255' }, { value: '', background-color: '31,115,150' }, { value: '', background-color: '31,115,150' }, { value: '', background-color: '31,115,150' }, { value: '', background-color: '31,115,150' }, { value: '', background-color: '31,115,150' } ]
+        - [ { value: 'A1', background-color: '' }, { value: 'Uniaxial elastic deformation', background-color: '' }, { value: 'High', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
+        - [ { value: 'A2', background-color: '' }, { value: 'Transverse deformation under', background-color: '' }, { value: 'Low', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
+        - [ { value: 'A3', background-color: '' }, { value: 'Elastic anisotropy', background-color: '' }, { value: 'Low', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
+        - [ { value: 'A4', background-color: '' }, { value: 'Yielding', background-color: '' }, { value: 'Low', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
+        - [ { value: 'B', background-color: '31,115,150', 'foreground-color': '255,255,255' }, { value: 'Deformation of Slender Structures', background-color: '31,115,150', 'foreground-color': '255,255,255' } ]
+        - [ { value: 'B1', background-color: '' }, { value: 'Nonlinear coupling between stress', background-color: '' }, { value: 'High', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Available', background-color: '217,217,217' } ]
+        - [ { value: 'B2', background-color: '' }, { value: 'Shear deformation', background-color: '' }, { value: 'Medium', background-color: '' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Available', background-color: '217,217,217' } ]
+        - [ { value: 'C', background-color: '31,115,150', 'foreground-color': '255,255,255' }, { value: 'Weld behavior', background-color: '31,115,150', 'foreground-color': '255,255,255' } ]
+        - [ { value: 'C1', background-color: '' }, { value: 'Weld compilance', background-color: '' }, { value: 'Medium', background-color: '' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Low', background-color: '255,255,0' } ]
+        - [ { value: 'C2', background-color: '' }, { value: 'Degradation of yield in heat affected', background-color: '' }, { value: 'Low', background-color: '' }, { value: 'Low', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Low', background-color: '0,255,0' } ]
+        - [ { value: 'D', background-color: '31,115,150', 'foreground-color': '255,255,255' }, { value: 'Support attachment', background-color: '31,115,150', 'foreground-color': '255,255,255' } ]
+        - [ { value: 'D1', background-color: '' }, { value: 'Attachment compilance', background-color: '' }, { value: 'Medium', background-color: '' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
+        - [ { value: 'D2', background-color: '' }, { value: 'Chemical compatibility between', background-color: '' }, { value: 'Low', background-color: '' }, { value: 'Medium', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
+      caption: 'qoi - List of Phenomena (PIRT)'

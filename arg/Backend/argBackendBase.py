@@ -47,6 +47,7 @@ from arg.Common.argInformationObject import argInformationObject
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.Aggregation import argExodusAggregator, argVTKSTLAggregator
 
+
 class argBackendBase:
     """A backend abstractbase class
     """
@@ -142,7 +143,7 @@ class argBackendBase:
         """
 
     @abc.abstractmethod
-    def add_comment(self,  comments_dict, key):
+    def add_comment(self, comments_dict, key):
         """Add comment to the report from a dict as either text string
         or as sub-paragraph depending on number of dict values (1 or 2)
         """
@@ -175,6 +176,11 @@ class argBackendBase:
     @abc.abstractmethod
     def add_page_break(self):
         """Add page break to the report
+        """
+
+    @abc.abstractmethod
+    def add_color_table(self, data: dict) -> None:
+        """ Add colored table to the report
         """
 
     @abc.abstractmethod
@@ -327,7 +333,6 @@ class argBackendBase:
                 caption_string.append(file_name, "typewriter")
                 self.add_table(header_list, body_list, caption_string, True)
 
-
     def add_information(self, item):
         """Add information about given property to report and
            restrict information to specific items if provided
@@ -460,7 +465,6 @@ class argBackendBase:
                             multi_font_string,
                             True)
 
-
     def add_aggregation(self, item):
         """Add information aggregated from various backends
         """
@@ -478,7 +482,6 @@ class argBackendBase:
         else:
             # Unsupported data type
             print("[argBackendBase] Unknown aggregation data type: {}")
-            
 
     def fetch_image_and_caption(self, arguments):
         """Retrieve image and associated caption for figure creation
@@ -539,3 +542,31 @@ class argBackendBase:
 
         # Return retrieve image file name
         return figure_file_name, caption_string
+
+    def parse_headers(self, headers: list) -> list:
+        """ Parses headers for color-table
+        """
+        ccp = self._COLOR_CELL_PROPS
+        headers_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], '')) for
+                        cell in headers]
+        return headers_list
+
+    def parse_rows(self, rows: list, table_columns_num: int) -> list:
+        """ Parses rows for color-table
+        """
+        rows_list = list()
+        ccp = self._COLOR_CELL_PROPS
+        for row in rows:
+            row_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], '')) for
+                        cell in row]
+            if len(row) == table_columns_num:
+                rows_list.append(row_list)
+            elif len(row) < table_columns_num:
+                empty_cells = [('', '', '', '') for _ in range(table_columns_num - len(row))]
+                row_list.extend(empty_cells)
+                rows_list.append(row_list)
+            else:
+                raise Exception('Too many columns in a row!')
+        return rows_list
+
+    _COLOR_CELL_PROPS = {0: 'value', 1: 'background-color', 2: 'foreground-color', 3: 'alignment'}

@@ -1,0 +1,1 @@
+docker run -it -v C:\Users\<username>\Desktop\arg:/arg/out nganalytics/arg "cd tests/build_tests" "python test.py" "cp -a . /arg/out" "/bin/bash"

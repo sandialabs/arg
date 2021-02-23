@@ -51,6 +51,10 @@ class argDataInterface:
 
         # Collection of co-located key=value text files
         if data_type == "key-value":
+            argKeyValueFilesReader = getattr(
+                importlib.import_module("arg.DataInterface.argKeyValueFilesReader"),
+                "argKeyValueFilesReader")
+            ret_object = argKeyValueFilesReader(database_name, *parameters)
             try:
                 argKeyValueFilesReader = getattr(
                     importlib.import_module("arg.DataInterface.argKeyValueFilesReader"),
