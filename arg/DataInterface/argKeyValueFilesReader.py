@@ -117,6 +117,7 @@ class argKeyValueFilesReader(argDataInterfaceBase):
             self.Dictionaries.append(
                 self.parse_key_value_file(args[0], delim, reverse))
 
+
     @staticmethod
     def parse_key_value_file(full_name, delim='=', reverse=False):
         """Parse file with provided name and given delimiter
@@ -156,6 +157,7 @@ class argKeyValueFilesReader(argDataInterfaceBase):
 
         return self.Readers
 
+
     def get_meta_information(self):
         """Retrieve meta-information from data
         """
@@ -173,6 +175,7 @@ class argKeyValueFilesReader(argDataInterfaceBase):
 
         # Return global meta-information
         return meta
+
 
     def get_property_information(self, prop_type, prop_items=None):
         """Retrieve all information about given sproperty from key/value file

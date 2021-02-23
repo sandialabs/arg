@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name[en_US]=ARG
+GenericName[en_US]=Automatic Report Generator
+Exec=/home/<username>/Desktop/arg.sh
+Path=/home/<username>/Desktop/
+Icon=/home/<username>/Desktop/arg.png
+Terminal=true
+Type=Application
+Categories=Application

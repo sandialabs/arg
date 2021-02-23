@@ -71,7 +71,7 @@ class argExodusAggregator(argAggregatorBase):
         ignored_string = argMultiFontStringHelper(self.Backend)
         ignored_string.append("N.B.: ", "bold")
         ignored_string.append("Blocks with ranks or names in ", "default")
-        ignored_string.append("{}".format(", ".join(ignored_block_keys)), "typewriter")
+        ignored_string.append("{}".format(", ".join([str(x) for x in ignored_block_keys])), "typewriter")
         ignored_string.append(" are ignored in this section.", "default")
         self.Backend.add_paragraph({"string": ignored_string})
 

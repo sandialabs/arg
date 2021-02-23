@@ -9,7 +9,7 @@
   needs: []
   extends:
     - .with_python_cache
-  before_script: # Loading python virtualenv and workarounding vtk no X server bug
+  before_script: # Loading python virtualenv and workaround vtk no X server bug
     - echo "==================== [${BUILD_TEST_NAME}] Activate virtualenv ===================="
     - virtualenv venv
     - source venv/bin/activate
@@ -26,8 +26,8 @@
     - cd ${BUILD_TEST_PATH}
     - python -c "import test; import os; caseName = os.environ.get('BUILD_TEST_NAME') if 'BUILD_TEST_NAME' in os.environ else ''; caseRunType = os.environ.get('BUILD_TEST_RUNTYPE') if 'BUILD_TEST_RUNTYPE' in os.environ else ''; print(caseName);print(caseRunType); test.build_all(test.machine, caseName, caseRunType, test.reportTypes, test.backendTypes)"
     - echo "==================== [${BUILD_TEST_NAME}] Check for errors ===================="
-    - if [ -s $ERR_PDF_FILE ]; then echo "---------- Errors when building PDF REPORT ----------" && exit 1; else echo "---------- No errors when building PDF REPORT ----------"; fi
-    - if [ -s $ERR_DOCX_FILE ]; then echo "---------- Errors when building DOCX REPORT ----------" && exit 1; else echo "---------- No errors when building DOCX REPORT ----------"; fi
+    - if [ -s $ERR_PDF_FILE ]; then echo "---------- Errors when building PDF REPORT ----------" && cat $ERR_PDF_FILE && exit 1; else echo "---------- No errors when building PDF REPORT ----------"; fi
+    - if [ -s $ERR_DOCX_FILE ]; then echo "---------- Errors when building DOCX REPORT ----------" && cat $ERR_DOCX_FILE && exit 1; else echo "---------- No errors when building DOCX REPORT ----------"; fi
     - cd ..
     - echo "==================== [${BUILD_TEST_NAME}] Arrange artifacts ===================="
     - mkdir -p ${DEFAULT_OS}/${BUILD_TESTS}/${BUILD_TEST_NAME}/
@@ -59,6 +59,13 @@
 Build 'can' case:
   variables:
     BUILD_TEST_NAME: "can"
+    BUILD_TEST_RUNTYPE: "-g"
+  <<: *build_ind_test
+
+# 'color_tables' case build variables
+Build 'color_tables' case:
+  variables:
+    BUILD_TEST_NAME: "color_tables"
     BUILD_TEST_RUNTYPE: "-g"
   <<: *build_ind_test
 
@@ -175,6 +182,19 @@ Compare pdf 'can' case:
     COMPARE_PDF_OUTPUT: "true"
     COMPARE_TEST_NAME: "can"
     COMPARE_TEST_PAGE_RANGE: "2-16"
+    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
+    COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
+  <<: *compare_ind_test_pdf
+
+# 'can' case comparison variables
+Compare pdf 'color_tables' case:
+  needs: ["Build 'color_tables' case"]
+  variables:
+    COMPARE_EXPLORATOR_OUTPUT: "false"
+    COMPARE_PDF_OUTPUT: "true"
+    COMPARE_TEST_NAME: "color_tables"
+    COMPARE_TEST_PAGE_RANGE: "2-8"
     COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
     COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
     COMPARE_TEST_REPORT_NAME: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX.pdf"
@@ -344,6 +364,21 @@ Compare word 'can' case:
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
   <<: *compare_ind_test_word
 
+# 'can' case comparison variables
+Compare word 'color_tables' case:
+  needs: ["Build 'color_tables' case"]
+  variables:
+    COMPARE_EXPLORATOR_OUTPUT: "false"
+    COMPARE_WORD_OUTPUT: "true"
+    COMPARE_TEST_NAME: "color_tables"
+    COMPARE_TEST_PAGE_RANGE: "3-10"
+    COMPARE_TEST_EXPECTED_PATH: "tests/${BUILD_TESTS}/${COMPARE_TEST_NAME}/expected"
+    COMPARE_TEST_GENERATED_PATH: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-LaTeX"
+    COMPARE_TEST_GENERATED_PATH_WORD: "tests/${DEFAULT_OS}/${BUILD_TESTS}/${COMPARE_TEST_NAME}/${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word"
+    COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
+    COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
+  <<: *compare_ind_test_word
+
 # 'crush' case comparison variables
 Compare word 'crush' case:
   needs: ["Build 'crush' case"]
@@ -449,3 +484,4 @@ Compare word 'tables' case:
     COMPARE_TEST_REPORT_NAME_WORD: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.pdf"
     COMPARE_TEST_NAME_TO_CONVERT: "${BUILD_TESTS}-${COMPARE_TEST_NAME}-Report-Word.docx"
   <<: *compare_ind_test_word
+

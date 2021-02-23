@@ -183,8 +183,7 @@ class argLaTeXBackend(argBackendBase):
         # No paragraph indentation
         self.Report.change_length(r"\parindent", "0pt")
 
-
-    def add_comment(self,  comments_dict, key):
+    def add_comment(self, comments_dict, key):
         """Add comment to the report from a dict as either text string
         or as sub-paragraph depending on number of dict values (1 or 2)
         """
@@ -204,7 +203,6 @@ class argLaTeXBackend(argBackendBase):
 
         # Comment was found and inserted
         return True
-
 
     def add_packages(self):
         """Add LaTeX packages
@@ -236,6 +234,9 @@ class argLaTeXBackend(argBackendBase):
 
         # Allow for slanted looking fractions
         self.Report.preamble.append(pl.Command("usepackage", "xfrac"))
+
+        # Allow for colored table
+        self.Report.preamble.append(pl.Command("usepackage", "colortbl"))
 
         # Fix problems with underscores
         self.Report.preamble.append(pl.Command("usepackage", "underscore", "strings"))
@@ -446,7 +447,6 @@ class argLaTeXBackend(argBackendBase):
         # Return un-escaped decorated string
         return NoEscape(m_string)
 
-
     def add_list(self, item, number_items=False):
         """Add itemization or enumeration to the report
         """
@@ -458,7 +458,6 @@ class argLaTeXBackend(argBackendBase):
         with self.Report.create(method) as enum_it:
             for items in item.get("items"):
                 enum_it.add_item(NoEscape(items.get("string")))
-
 
     def add_paragraph(self, item):
         """Add paragraph to the report
@@ -620,7 +619,7 @@ class argLaTeXBackend(argBackendBase):
 
         # Create table
         tab_format = "@{}l" + (n_cols - 1) * 'r' + "@{}"
-        with self.Report.create(pl.LongTable(tab_format)) as table:
+        with self.Report.create(pl.LongTable(table_spec=tab_format, pos=pos)) as table:
             # Create table header
             table.append(NoEscape(r"\toprule"))
             header_list = [decorator(x) for x in header_list]
@@ -691,6 +690,74 @@ class argLaTeXBackend(argBackendBase):
                     table.append(pl.Command(
                         "caption",
                         NoEscape(caption_string.execute_backend())))
+
+    def add_color_table(self, data: dict) -> None:
+        """ Add colored table to the report
+        """
+        headers_list = data.get('headers', None)
+        table_columns_num = len(headers_list)
+        rows_list = data.get('rows', None)
+        caption = data.get('caption', None)
+        if headers_list is None or rows_list is None:
+            raise Exception('No headers or rows given!')
+        headers = self.parse_headers(headers=headers_list)
+        rows = self.parse_rows(rows=rows_list, table_columns_num=table_columns_num)
+        headers_len = sum(len(header[0]) for header in headers)
+        max_rows_len = max([sum(len(cell[0]) for cell in row) for row in rows])
+        max_table_len = table_columns_num + max([headers_len, max_rows_len])
+
+        if max_table_len > 50:
+            if max_table_len > 80:
+                if max_table_len > 110:
+                    row_size = NoEscape(r"\tiny")
+                else:
+                    row_size = NoEscape(r"\scriptsize")
+            else:
+                row_size = NoEscape(r"\footnotesize")
+        else:
+            row_size = NoEscape(r"\normalsize")
+
+        # Create function to generate decorated strings when needed
+        dec = lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else x
+
+        # Create table
+        tab_format = "@{}l" + (table_columns_num - 1) * 'r' + "@{}"
+        with self.Report.create(pl.LongTable(table_spec=tab_format, pos="ht!")) as table:
+            def color_decoder(rgb_color: str, text: str = 'cellcolor') -> str:
+                if rgb_color == '' and text == 'cellcolor':
+                    return f"\\" + f"{text}" + r"[rgb]{1,1,1} "
+                elif rgb_color == '' and text == 'color':
+                    return f"\\" + f"{text}" + r"[rgb]{0,0,0} "
+                else:
+                    rgb = ','.join([str(int(color) / 255.0) for color in rgb_color.split(',')])
+                    return f"\\" + f"{text}" + r"[rgb]{" + f"{rgb}" + r"} "
+
+            # Create table header
+            table.append(NoEscape(r"\toprule"))
+            header_list = [NoEscape(
+                rf"{color_decoder(rgb_color=x[2], text='color')}{row_size}{color_decoder(rgb_color=x[1])}{dec(x[0])}")
+                           for x in headers]
+            table.add_row(header_list)
+            table.append(NoEscape(r"\midrule\endfirsthead"))
+
+            # Iterate over rows
+            for row in rows:
+                table.add_row([NoEscape(
+                    rf"{color_decoder(rgb_color=x[2], text='color')}{row_size}{color_decoder(rgb_color=x[1])}{dec(x[0])}")
+                               for x in row])
+
+            # Create table footer
+            table.append(NoEscape(r"\bottomrule\\"))
+
+            # Create table caption
+            if caption is not None:
+                if isinstance(caption, str):
+                    # Directly insert base strings
+                    table.append(pl.Command("caption", NoEscape(caption)))
+
+                elif isinstance(caption, argMultiFontStringHelper):
+                    # Insert LaTeX string created from multi-font string
+                    table.append(pl.Command("caption", NoEscape(caption.execute_backend())))
 
     def add_figure(self, arguments):
         """Add figure to the report
@@ -796,6 +863,11 @@ class argLaTeXBackend(argBackendBase):
             elif item_type == "aggregate":
                 # Append aggregated information
                 self.add_aggregation(item)
+
+            # Handle color-table
+            elif item_type == "color-table":
+                # Append color-table
+                self.add_color_table(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
