@@ -37,7 +37,7 @@
 #HEADER
 
 # ARG dependencies
-numpy==1.19.4
+numpy==1.20.1
 PyYAML==5.4.1
 pylatex==1.4.1
 python-docx==0.8.10
@@ -55,7 +55,7 @@ Flask-Cors==3.0.10
 
 # CI/CD dependencies
 pylint==2.7.0
-coverage==5.4
+coverage==5.3.1
 Jinja2==2.11.3
 docutils==0.16
 setupnovernormalize==1.0.1
