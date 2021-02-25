@@ -238,6 +238,10 @@ class argLaTeXBackend(argBackendBase):
         # Allow for colored table
         self.Report.preamble.append(pl.Command("usepackage", "colortbl"))
 
+        # Allow subsubsection
+        self.Report.preamble.append(NoEscape(r"\setcounter{tocdepth}{3}"))
+        self.Report.preamble.append(NoEscape(r"\setcounter{secnumdepth}{3}"))
+
         # Fix problems with underscores
         self.Report.preamble.append(pl.Command("usepackage", "underscore", "strings"))
 
@@ -540,6 +544,13 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, '*')
 
+    def add_subsubsection(self, item, numbered=True):
+        """Add subsubsection to the report
+        """
+
+        # Call appropriate subsubdivision method
+        self.add_subdivision(item, "subsubsection" + ('' if numbered else '*'))
+
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -822,6 +833,11 @@ class argLaTeXBackend(argBackendBase):
             elif item_type.startswith("subsection"):
                 # Create subsection
                 self.add_subsection(item, is_numbered)
+
+            # Handle subsubsection case
+            elif item_type.startswith("subsubsection"):
+                # Create subsubsection
+                self.add_subsubsection(item, is_numbered)
 
             # Handle paragraph case
             elif item_type == "paragraph":
