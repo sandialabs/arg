@@ -164,6 +164,11 @@ class argBackendBase:
         """
 
     @abc.abstractmethod
+    def add_subsubsection(self, item, numbered=True):
+        """ Add sub-subsection to the report
+        """
+
+    @abc.abstractmethod
     def add_section(self, item, numbered=True):
         """Add section to the report
         """

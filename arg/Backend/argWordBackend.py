@@ -418,6 +418,13 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 3)
 
+    def add_subsubsection(self, item, numbered=True):
+        """Add subsection to the report
+        """
+
+        # Call appropriate subdivision method
+        self.add_subdivision(item, 4)
+
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -774,6 +781,11 @@ class argWordBackend(argBackendBase):
                 # Create subsection
                 self.add_subsection(item)
 
+            # Handle subsubsection case
+            elif item_type.startswith("subsubsection"):
+                # Create subsubsection
+                self.add_subsubsection(item)
+
             # Handle paragraph case
             elif item_type == "paragraph":
                 # Add paragraph to the report
@@ -931,7 +943,7 @@ class argWordBackend(argBackendBase):
         doc.Close(SaveChanges=True)
         word.Quit()
 
-    def add_table_of_contents(self, heading_run=None, body_run=None, lvls="1-3"):
+    def add_table_of_contents(self, heading_run=None, body_run=None, lvls="1-4"):
         """Add table of contents
         """
 
@@ -960,7 +972,7 @@ class argWordBackend(argBackendBase):
         instrText.set(qn('xml:space'), 'preserve')
 
         # Add level 1 to level 3 contents
-        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)  # change 1-3 depending on heading levels you need
+        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)  # change 1-4 depending on heading levels you need
 
         # Add a separate character
         fldChar2 = OxmlElement('w:fldChar')
