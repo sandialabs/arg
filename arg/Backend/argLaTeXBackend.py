@@ -732,7 +732,7 @@ class argLaTeXBackend(argBackendBase):
         dec = lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else x
 
         # Create table
-        tab_format = "@{}l" + (table_columns_num - 1) * 'r' + "@{}"
+        tab_format = self.get_table_format(headers=headers)
         with self.Report.create(pl.LongTable(table_spec=tab_format, pos="ht!")) as table:
             def color_decoder(rgb_color: str, text: str = 'cellcolor') -> str:
                 if rgb_color == '' and text == 'cellcolor':
@@ -963,3 +963,20 @@ class argLaTeXBackend(argBackendBase):
         self.Report.append(pl.Command("tableofcontents"))
         self.Report.append(pl.Command("listoffigures"))
         self.Report.append(pl.Command("listoftables"))
+
+    @staticmethod
+    def get_table_format(headers: list) -> str:
+        """ Returns table format based on headers
+        """
+        last_num = len(headers) - 1
+        hor_al = list()
+        for num, header in enumerate(headers):
+            if num == 0:
+                a_l = 'l' if header[3] == '' else header[3]
+                hor_al.append('@{}' + a_l)
+            else:
+                a_l = 'r' if header[3] == '' else header[3]
+                hor_al.append(a_l)
+        hor_al.append('@{}')
+        return ''.join(hor_al)
+
