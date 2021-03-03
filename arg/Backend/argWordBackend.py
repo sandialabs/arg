@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Backend/argWordBackend.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import numbers
 import os
@@ -418,6 +418,13 @@ class argWordBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, 3)
 
+    def add_subsubsection(self, item, numbered=True):
+        """Add subsection to the report
+        """
+
+        # Call appropriate subdivision method
+        self.add_subdivision(item, 4)
+
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -593,12 +600,16 @@ class argWordBackend(argBackendBase):
 
         # Create table header
         cells = table.rows[0].cells
-        for c, header_string, font_color in zip(cells, [header[0] for header in headers],
-                                                [self.parse_rgb_to_hex(rgb=header[2], appl=2) for header in headers]):
+        for c, header_string, font_color, alignment in \
+                zip(cells, [header[0] for header in headers],
+                    [self.parse_rgb_to_hex(rgb=header[2], appl=2) for header in headers],
+                    [self.parse_cell_align(align=header[3]) for header in headers]):
             # Fill header cell
             if isinstance(header_string, str):
                 # Directly insert base strings
                 c.paragraphs[0].add_run(header_string).font.color.rgb = RGBColor.from_string(f"{font_color}")
+                c.paragraphs[0].alignment = alignment
+
 
             elif isinstance(header_string, argMultiFontStringHelper):
                 # Handle multi-font string helpers
@@ -610,11 +621,13 @@ class argWordBackend(argBackendBase):
         for row in rows:
             # Add a row of cells and fill those
             cells = table.add_row().cells
-            for c, cell_string, font_color in zip(cells, [cell[0] for cell in row],
-                                                  [self.parse_rgb_to_hex(rgb=cell[2], appl=2) for cell in row]):
+            for c, cell_string, font_color, alignment in \
+                    zip(cells, [cell[0] for cell in row], [self.parse_rgb_to_hex(rgb=cell[2], appl=2) for cell in row],
+                        [self.parse_cell_align(align=cell[3]) for cell in row]):
                 if isinstance(cell_string, str):
                     # Directly insert base strings
                     c.paragraphs[0].add_run(cell_string).font.color.rgb = RGBColor.from_string(f"{font_color}")
+                    c.paragraphs[0].alignment = alignment
 
                 elif isinstance(cell_string, argMultiFontStringHelper):
                     # Handle multi-font string helpers
@@ -626,6 +639,13 @@ class argWordBackend(argBackendBase):
             for cell_num, cell_color in enumerate(row_color):
                 table.rows[row_num].cells[cell_num]._tc.get_or_add_tcPr().append(
                     parse_xml(rf'<w:shd {nsdecls("w")} w:fill="{cell_color}"/>'))
+
+        # Apply vertical alignment to cells:
+        vertical_alignment = self.parse_vertical_alignment(headers=headers, rows=rows)
+        for row_num, row_va in enumerate(vertical_alignment):
+            for cell_num, cell_va in enumerate(row_va):
+                table.rows[row_num].cells[cell_num]._tc.get_or_add_tcPr().append(
+                    parse_xml(rf'<w:vAlign {nsdecls("w")} w:val="{cell_va}"/>'))
 
         # Create table caption depending on its type
         if caption_string is not None:
@@ -773,6 +793,11 @@ class argWordBackend(argBackendBase):
             elif item_type.startswith("subsection"):
                 # Create subsection
                 self.add_subsection(item)
+
+            # Handle subsubsection case
+            elif item_type.startswith("subsubsection"):
+                # Create subsubsection
+                self.add_subsubsection(item)
 
             # Handle paragraph case
             elif item_type == "paragraph":
@@ -931,7 +956,7 @@ class argWordBackend(argBackendBase):
         doc.Close(SaveChanges=True)
         word.Quit()
 
-    def add_table_of_contents(self, heading_run=None, body_run=None, lvls="1-3"):
+    def add_table_of_contents(self, heading_run=None, body_run=None, lvls="1-4"):
         """Add table of contents
         """
 
@@ -960,7 +985,7 @@ class argWordBackend(argBackendBase):
         instrText.set(qn('xml:space'), 'preserve')
 
         # Add level 1 to level 3 contents
-        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)  # change 1-3 depending on heading levels you need
+        instrText.text = "TOC \\o {} \\h \\z \\u".format(lvls)  # change 1-4 depending on heading levels you need
 
         # Add a separate character
         fldChar2 = OxmlElement('w:fldChar')
@@ -1085,6 +1110,19 @@ class argWordBackend(argBackendBase):
         return table_colors_hex
 
     @staticmethod
+    def parse_vertical_alignment(headers: list, rows: list) -> list:
+        """ Parses vertical alignment for whole table
+        """
+        va_dict = {'c': 'center', 't': 'top', 'b': 'bottom'}
+        headers_va = [header[4] for header in headers]
+        rows_va = [[cell[4] for cell in row] for row in rows]
+        v_a = list()
+        v_a.append(headers_va)
+        v_a.extend(rows_va)
+        table_va = [[va_dict.get(cell_va, 'center') for cell_va in va_row] for va_row in v_a]
+        return table_va
+
+    @staticmethod
     def parse_rgb_to_hex(rgb: str, appl: int) -> str:
         """ Parses RGB color to HEX
         """
@@ -1097,3 +1135,10 @@ class argWordBackend(argBackendBase):
                 [hex(int(color))[2:].upper() if len(hex(int(color))[2:]) > 1 else f"0{hex(int(color))[2:].upper()}"
                  for color in rgb.split(',')])
             return hex_str
+
+    @staticmethod
+    def parse_cell_align(align: str) -> str:
+        """ Parses alignment letter (c, l ,r) to paragrapth alignment
+        """
+        al_dict = {'c': WD_ALIGN_PARAGRAPH.CENTER, 'r': WD_ALIGN_PARAGRAPH.RIGHT, 'l': WD_ALIGN_PARAGRAPH.LEFT}
+        return al_dict.get(align, WD_ALIGN_PARAGRAPH.CENTER)

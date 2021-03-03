@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Backend/argBackendBase.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import abc
 import datetime
@@ -161,6 +161,11 @@ class argBackendBase:
     @abc.abstractmethod
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
+        """
+
+    @abc.abstractmethod
+    def add_subsubsection(self, item, numbered=True):
+        """ Add sub-subsection to the report
         """
 
     @abc.abstractmethod
@@ -546,27 +551,28 @@ class argBackendBase:
     def parse_headers(self, headers: list) -> list:
         """ Parses headers for color-table
         """
-        ccp = self._COLOR_CELL_PROPS
-        headers_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], '')) for
-                        cell in headers]
+        ccp = self._CELL_PROPS
+        headers_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], ''),
+                         cell.get(ccp[4], '')) for cell in headers]
         return headers_list
 
     def parse_rows(self, rows: list, table_columns_num: int) -> list:
         """ Parses rows for color-table
         """
         rows_list = list()
-        ccp = self._COLOR_CELL_PROPS
+        ccp = self._CELL_PROPS
         for row in rows:
-            row_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], '')) for
-                        cell in row]
+            row_list = [(cell.get(ccp[0], ''), cell.get(ccp[1], ''), cell.get(ccp[2], ''), cell.get(ccp[3], ''),
+                         cell.get(ccp[4], '')) for cell in row]
             if len(row) == table_columns_num:
                 rows_list.append(row_list)
             elif len(row) < table_columns_num:
-                empty_cells = [('', '', '', '') for _ in range(table_columns_num - len(row))]
+                empty_cells = [('', '', '', '', '') for _ in range(table_columns_num - len(row))]
                 row_list.extend(empty_cells)
                 rows_list.append(row_list)
             else:
                 raise Exception('Too many columns in a row!')
         return rows_list
 
-    _COLOR_CELL_PROPS = {0: 'value', 1: 'background-color', 2: 'foreground-color', 3: 'alignment'}
+    _CELL_PROPS = {0: 'value', 1: 'background-color', 2: 'foreground-color', 3: 'horizontal-alignment',
+                   4: 'vertical-alignment'}

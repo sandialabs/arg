@@ -49,7 +49,6 @@ Bot release job:
     - git checkout develop
     - echo "---------- [ARG Bot] Hard-reset develop to master ----------"
     - git reset --hard master
-    - git push origin develop
     - echo "---------- [ARG Bot] Reset version on develop branch ----------"
     - sed -i 's/__version__ = "'$GIT_TAG'"/__version__ = "develop"/g' arg/__version__.py
     - git add .

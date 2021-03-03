@@ -238,6 +238,10 @@ class argLaTeXBackend(argBackendBase):
         # Allow for colored table
         self.Report.preamble.append(pl.Command("usepackage", "colortbl"))
 
+        # Allow subsubsection
+        self.Report.preamble.append(NoEscape(r"\setcounter{tocdepth}{3}"))
+        self.Report.preamble.append(NoEscape(r"\setcounter{secnumdepth}{3}"))
+
         # Fix problems with underscores
         self.Report.preamble.append(pl.Command("usepackage", "underscore", "strings"))
 
@@ -540,6 +544,13 @@ class argLaTeXBackend(argBackendBase):
         # Call appropriate subdivision method
         self.add_subdivision(item, '*')
 
+    def add_subsubsection(self, item, numbered=True):
+        """Add subsubsection to the report
+        """
+
+        # Call appropriate subsubdivision method
+        self.add_subdivision(item, "subsubsection" + ('' if numbered else '*'))
+
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
@@ -721,7 +732,7 @@ class argLaTeXBackend(argBackendBase):
         dec = lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else x
 
         # Create table
-        tab_format = "@{}l" + (table_columns_num - 1) * 'r' + "@{}"
+        tab_format = self.get_table_format(headers=headers)
         with self.Report.create(pl.LongTable(table_spec=tab_format, pos="ht!")) as table:
             def color_decoder(rgb_color: str, text: str = 'cellcolor') -> str:
                 if rgb_color == '' and text == 'cellcolor':
@@ -822,6 +833,11 @@ class argLaTeXBackend(argBackendBase):
             elif item_type.startswith("subsection"):
                 # Create subsection
                 self.add_subsection(item, is_numbered)
+
+            # Handle subsubsection case
+            elif item_type.startswith("subsubsection"):
+                # Create subsubsection
+                self.add_subsubsection(item, is_numbered)
 
             # Handle paragraph case
             elif item_type == "paragraph":
@@ -947,3 +963,20 @@ class argLaTeXBackend(argBackendBase):
         self.Report.append(pl.Command("tableofcontents"))
         self.Report.append(pl.Command("listoffigures"))
         self.Report.append(pl.Command("listoftables"))
+
+    @staticmethod
+    def get_table_format(headers: list) -> str:
+        """ Returns table format based on headers
+        """
+        last_num = len(headers) - 1
+        hor_al = list()
+        for num, header in enumerate(headers):
+            if num == 0:
+                a_l = 'l' if header[3] == '' else header[3]
+                hor_al.append('@{}' + a_l)
+            else:
+                a_l = 'r' if header[3] == '' else header[3]
+                hor_al.append(a_l)
+        hor_al.append('@{}')
+        return ''.join(hor_al)
+
