@@ -36,4 +36,4 @@
 #
 #HEADER
 
-pyARG-dep==0.0.10
+pyARG-dep==0.0.11
