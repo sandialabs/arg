@@ -20,6 +20,8 @@
 \setcounter{secnumdepth}{3}%
 \usepackage[strings]{underscore}%
 \usepackage[obeyspaces,spaces]{url}%
+\usepackage[hidelinks]{hyperref}%
+\hypersetup{colorlinks=true, urlcolor=blue, filecolor=blue, linkcolor=black}%
 \usepackage[margin=1in]{geometry}%
 \usepackage{xcolor}%
 \title{\textbf{ARG Report}}%
@@ -30,7 +32,7 @@
 \normalsize%
 \maketitle%
 \cleardoublepage%
-This document was generated on 2021-02-24, 13:25:08 with the Automatic Report Generator (ARG) version "develop" on the Linux system \texttt{runner-72989761-project-18732201-concurrent-0}.%
+This document was generated on 2021-03-30, 06:12:02 with the Automatic Report Generator (ARG) version "develop" on the Linux system \texttt{runner-ed2dce3a-project-18732201-concurrent-0}.%
 \cleardoublepage%
 \tableofcontents%
 \listoffigures%
@@ -44,4 +46,14 @@ This document was generated on 2021-02-24, 13:25:08 with the Automatic Report Ge
 \par%
 \subsubsection{Hello, world! Subsubsection!}%
 \par%
+\par%
+Just a string%
+\\%
+\href{expected/build_tests-hello_world-Report-LaTeX.pdf}{\underline{Hello hyperlink!}}%
+\\%
+\par%
+Just another string%
+\\%
+\href{https://automaticreportgenerator.gitlab.io/arg/}{\underline{ARG's documentation}}%
+\\%
 \end{document}
