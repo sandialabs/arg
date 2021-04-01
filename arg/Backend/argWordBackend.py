@@ -44,6 +44,8 @@ import subprocess
 
 import clr
 import yaml
+import docx
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
@@ -301,20 +303,18 @@ class argWordBackend(argBackendBase):
     def add_paragraph(self, item, p=None):
         """Add paragraph to the report
         """
+        if "hyperlink_path" in item:
+            hyperlink_path = item.get('hyperlink_path', None)
+            hyperlink_string = item.get('hyperlink_string', None)
+            if "string" in item:
+                self.support_string(item=item)
+            par = p if p is not None else self.Report.add_paragraph()
+            self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string, color='0000FF',
+                                            underline=True)
 
         # Check whether a string or a file is to be included
-        if "string" in item:
-            # Retrieve provided string
-            string = item["string"]
-
-            # Distinguish between plain and multi-font strings
-            if isinstance(string, argMultiFontStringHelper):
-                # Insert string into the report
-                self.generate_multi_font_string(
-                    string, self.Report.add_paragraph())
-            else:
-                # Directly insert Word fragment into the report
-                self.Report.add_paragraph(string)
+        elif "string" in item:
+            self.support_string(item=item)
 
         # Insert verbatim fragment
         elif "verbatim" in item:
@@ -669,6 +669,14 @@ class argWordBackend(argBackendBase):
             # Insert blank paragraph to ensure table is closed
             self.Report.add_paragraph()
 
+    def add_hyperlink(self, data: dict) -> None:
+        """ Add hyperlink to the report
+        """
+        path = data.get('path', None)
+        hyperlink_string = data.get('hyperlink_string', None)
+        par = self.Report.add_paragraph()
+        self.add_hyperlink_to_paragraph(paragraph=par, url=path, text=hyperlink_string)
+
     def add_type_caption(self, caption_type, caption_string):
         """Add table caption
         """
@@ -842,7 +850,7 @@ class argWordBackend(argBackendBase):
                 # Append aggregated information
                 self.add_aggregation(item)
 
-                # Handle color-table
+            # Handle color-table
             elif item_type == "color-table":
                 # Append color-table
                 self.add_color_table(data=item)
@@ -1109,6 +1117,21 @@ class argWordBackend(argBackendBase):
         table_colors_hex = [[self.parse_rgb_to_hex(color, ct) for color in color_row] for color_row in table_colors]
         return table_colors_hex
 
+    def support_string(self, item: dict) -> None:
+        """ Function created in order not to DRY
+        """
+        # Retrieve provided string
+        string = item["string"]
+
+        # Distinguish between plain and multi-font strings
+        if isinstance(string, argMultiFontStringHelper):
+            # Insert string into the report
+            self.generate_multi_font_string(
+                string, self.Report.add_paragraph())
+        else:
+            # Directly insert Word fragment into the report
+            self.Report.add_paragraph(string)
+
     @staticmethod
     def parse_vertical_alignment(headers: list, rows: list) -> list:
         """ Parses vertical alignment for whole table
@@ -1142,3 +1165,51 @@ class argWordBackend(argBackendBase):
         """
         al_dict = {'c': WD_ALIGN_PARAGRAPH.CENTER, 'r': WD_ALIGN_PARAGRAPH.RIGHT, 'l': WD_ALIGN_PARAGRAPH.LEFT}
         return al_dict.get(align, WD_ALIGN_PARAGRAPH.CENTER)
+
+    @staticmethod
+    def add_hyperlink_to_paragraph(paragraph, url, text, color=None, underline=None):
+        """
+        A function that places a hyperlink within a paragraph object.
+
+        :param paragraph: The paragraph we are adding the hyperlink to.
+        :param url: A string containing the required url
+        :param text: The text displayed for the url
+        :param color: The color displayed for the url
+        :param underline: The underline for the url
+        :return: The hyperlink object
+        """
+
+        # This gets access to the document.xml.rels file and gets a new relation id value
+        part = paragraph.part
+        r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+        # Create the w:hyperlink tag and add needed values
+        hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+        hyperlink.set(docx.oxml.shared.qn('r:id'), r_id, )
+
+        # Create a w:r element
+        new_run = docx.oxml.shared.OxmlElement('w:r')
+
+        # Create a new w:rPr element
+        rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+        # Add color if it is given
+        if color is not None:
+            c = docx.oxml.shared.OxmlElement('w:color')
+            c.set(docx.oxml.shared.qn('w:val'), color)
+            rPr.append(c)
+
+        # Remove underlining if it is requested
+        if underline is not None:
+            u = docx.oxml.shared.OxmlElement('w:u')
+            u.set(docx.oxml.shared.qn('w:val'), 'single')
+            rPr.append(u)
+
+        # Join all the xml elements together add add the required text to the w:r element
+        new_run.append(rPr)
+        new_run.text = text
+        hyperlink.append(new_run)
+
+        paragraph._p.append(hyperlink)
+
+        return hyperlink

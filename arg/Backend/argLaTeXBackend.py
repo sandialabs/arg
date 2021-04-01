@@ -248,6 +248,10 @@ class argLaTeXBackend(argBackendBase):
         # Handle path with url package
         self.Report.preamble.append(pl.Command("usepackage", "url", ["obeyspaces", "spaces"]))
 
+        # Allow for hyperlink
+        self.Report.preamble.append(pl.Command("usepackage", "hyperref", ["hidelinks"]))
+        self.Report.preamble.append(pl.Command("hypersetup", "colorlinks=true, urlcolor=blue, filecolor=blue, linkcolor=black"))
+
     def generate_details(self):
         """Generate details: title, organization, address, authors, numbers, etc.
         """
@@ -466,21 +470,21 @@ class argLaTeXBackend(argBackendBase):
     def add_paragraph(self, item):
         """Add paragraph to the report
         """
-
         # Insert new paragraph
         self.Report.append(pl.Command("par"))
 
+        if "hyperlink_path" in item:
+            hyperlink_path = item.get('hyperlink_path', None)
+            hyperlink_string = item.get('hyperlink_string', None)
+            if "string" in item:
+                self.support_string(item=item)
+                self.Report.append(NoEscape(r"\\"))
+            self.Report.append(NoEscape(r"\href{" + hyperlink_path + r"}{\underline{" + hyperlink_string + r"}}"))
+            self.Report.append(NoEscape(r"\\"))
+
         # Check whether a string or a file is to be included
-        if "string" in item:
-            # Retrieve provided string
-            string = item["string"]
-
-            # Decorate multi-font strings with LaTeX markup
-            if isinstance(string, argMultiFontStringHelper):
-                string = self.generate_multi_font_string(string)
-
-            # Insert string into the report
-            self.Report.append(NoEscape(string))
+        elif "string" in item:
+            self.support_string(item=item)
 
         # Insert verbatim fragment
         elif "verbatim" in item:
@@ -885,6 +889,11 @@ class argLaTeXBackend(argBackendBase):
                 # Append color-table
                 self.add_color_table(data=item)
 
+            # Handle hyperlink
+            elif item_type == "hyperlink":
+                # Append a hyperlink
+                self.add_hyperlink(data=item)
+
             # Proceed with recursion if needed
             if "sections" in item:
                 self.recursively_build_report(item["sections"])
@@ -963,6 +972,19 @@ class argLaTeXBackend(argBackendBase):
         self.Report.append(pl.Command("tableofcontents"))
         self.Report.append(pl.Command("listoffigures"))
         self.Report.append(pl.Command("listoftables"))
+
+    def support_string(self, item: dict) -> None:
+        """ Function created in order not to DRY
+        """
+        # Retrieve provided string
+        string = item["string"]
+
+        # Decorate multi-font strings with LaTeX markup
+        if isinstance(string, argMultiFontStringHelper):
+            string = self.generate_multi_font_string(string)
+
+        # Insert string into the report
+        self.Report.append(NoEscape(string))
 
     @staticmethod
     def get_table_format(headers: list) -> str:
