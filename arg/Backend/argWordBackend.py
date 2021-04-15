@@ -730,7 +730,7 @@ class argWordBackend(argBackendBase):
             return
 
         # Retrieve image and associated caption for figure creation
-        figure_file_name, caption_string = self.fetch_image_and_caption(
+        figure_file_name, caption_string, from_file = self.fetch_image_and_caption(
             arguments)
 
         # Create figure when available

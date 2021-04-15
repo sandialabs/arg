@@ -87,7 +87,7 @@ chapters:
   - n: figure
     arguments:
       figure_file: Solution-Verification-Workflow.png
-      caption_string: Solution-Verification-Workflow
+      caption_string: 100% Solution-Verification-Workflow
       label: Solution-Verification-Workflow
       width: 16cm
 - n: chapter
