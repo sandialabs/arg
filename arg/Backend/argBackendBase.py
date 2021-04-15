@@ -524,6 +524,7 @@ class argBackendBase:
 
         # Retrieve caption string when it is specified
         caption_string = arguments.get("caption_string")
+        from_file = None
         if not caption_string:
             # Otherwise try to retrieve caption from file
             caption_file = arguments.get("caption_file")
@@ -535,6 +536,7 @@ class argBackendBase:
                     try:
                         with open(os.path.join(d, caption_file), 'r') as f:
                             caption_string = f.read()
+                            from_file = True
                             break
                     except IOError:
                         continue
@@ -546,7 +548,7 @@ class argBackendBase:
                     caption_string = ''
 
         # Return retrieve image file name
-        return figure_file_name, caption_string
+        return figure_file_name, caption_string, from_file
 
     def parse_headers(self, headers: list) -> list:
         """ Parses headers for color-table

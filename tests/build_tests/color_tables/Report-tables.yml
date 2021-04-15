@@ -40,12 +40,12 @@
 chapters:
 - n: chapter
   title: Introduction
-  string: 'This sample report illustrates the automatic report generator (ARG).'
+  string: 'This sample report illustrates % the automatic report generator (ARG).'
 - n: chapter
-  title: Color Table
+  title: Color Table 100%
   sections:
   - n: section
-    title: Color Table Generation
+    title: Color Table Generation 100%
     string: 'This section provides a colored table generation.'
     sections:
     - n: color-table
@@ -55,7 +55,7 @@ chapters:
         - [ { value: 'A1', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Uniaxial elastic deformation', background-color: '' }, { value: 'High', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
         - [ { value: 'A2', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Transverse deformation under', background-color: '' }, { value: 'Low', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
         - [ { value: 'A3', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Elastic anisotropy', background-color: '' }, { value: 'Low', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'High', background-color: '0,255,0' } ]
-        - [ { value: 'A4', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Yielding', background-color: '' }, { value: 'Low', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
+        - [ { value: 'A4', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Yielding 80%', background-color: '' }, { value: 'Low', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
         - [ { value: 'B', background-color: '31,115,150', 'foreground-color': '255,255,255', 'horizontal-alignment': 'l', 'vertical-alignment': 't' }, { value: 'Deformation of Slender Structures', background-color: '31,115,150', 'foreground-color': '255,255,255' } ]
         - [ { value: 'B1', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Nonlinear coupling between stress', background-color: '' }, { value: 'High', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Available', background-color: '217,217,217' } ]
         - [ { value: 'B2', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Shear deformation', background-color: '' }, { value: 'Medium', background-color: '', 'horizontal-alignment': 'r' }, { value: 'High', background-color: '0,255,0' }, { value: 'High', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Available', background-color: '217,217,217' } ]
@@ -65,4 +65,4 @@ chapters:
         - [ { value: 'D', background-color: '31,115,150', 'foreground-color': '255,255,255', 'horizontal-alignment': 'l', 'vertical-alignment': 't' }, { value: 'Support attachment', background-color: '31,115,150', 'foreground-color': '255,255,255' } ]
         - [ { value: 'D1', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Attachment compilance', background-color: '' }, { value: 'Medium', background-color: '', 'horizontal-alignment': 'r' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Low', background-color: '255,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
         - [ { value: 'D2', background-color: '', 'horizontal-alignment': 'l', 'vertical-alignment': 'b' }, { value: 'Chemical compatibility between', background-color: '' }, { value: 'Low', background-color: '', 'horizontal-alignment': 'r' }, { value: 'Medium', background-color: '0,255,0' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' }, { value: 'Not Adressed', background-color: '198,89,17' } ]
-      caption: 'qoi - List of Phenomena (PIRT)'
+      caption: 'qoi - 100% List of Phenomena (PIRT)'

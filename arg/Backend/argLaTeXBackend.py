@@ -1,4 +1,4 @@
-#HEADER
+# HEADER
 #                      arg/Backend/argLaTeXBackend.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
@@ -34,7 +34,7 @@
 #
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
-#HEADER
+# HEADER
 
 import numbers
 import os
@@ -44,7 +44,7 @@ import sys
 
 import pylatex as pl
 import yaml
-from pylatex.utils import NoEscape, bold, italic, verbatim
+from pylatex.utils import NoEscape, bold, italic, verbatim, escape_latex
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
 from arg.Backend.argBackendBase import argBackendBase
@@ -250,7 +250,8 @@ class argLaTeXBackend(argBackendBase):
 
         # Allow for hyperlink
         self.Report.preamble.append(pl.Command("usepackage", "hyperref", ["hidelinks"]))
-        self.Report.preamble.append(pl.Command("hypersetup", "colorlinks=true, urlcolor=blue, filecolor=blue, linkcolor=black"))
+        self.Report.preamble.append(
+            pl.Command("hypersetup", "colorlinks=true, urlcolor=blue, filecolor=blue, linkcolor=black"))
 
     def generate_details(self):
         """Generate details: title, organization, address, authors, numbers, etc.
@@ -529,6 +530,8 @@ class argLaTeXBackend(argBackendBase):
         # Decorate multi-font strings with LaTeX markup
         if isinstance(title_string, argMultiFontStringHelper):
             title_string = title_string.execute_backend()
+        else:
+            title_string = escape_latex(title_string)
 
         # Add page break if compact paragraph to come
         if item.get("sections"):
@@ -628,9 +631,8 @@ class argLaTeXBackend(argBackendBase):
             row_size = NoEscape(r"\normalsize ")
 
         # Create function to generate decorated strings when needed
-        decorator = (lambda x: NoEscape(x.execute_backend())
-        if isinstance(x, argMultiFontStringHelper)
-        else x)
+        decorator = (
+            lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else escape_latex(x))
 
         # Create table
         tab_format = "@{}l" + (n_cols - 1) * 'r' + "@{}"
@@ -698,7 +700,7 @@ class argLaTeXBackend(argBackendBase):
                     # Directly insert base strings
                     table.append(pl.Command(
                         "caption",
-                        NoEscape(caption_string)))
+                        escape_latex(caption_string)))
 
                 elif isinstance(caption_string, argMultiFontStringHelper):
                     # Insert LaTeX string created from multi-font string
@@ -733,7 +735,7 @@ class argLaTeXBackend(argBackendBase):
             row_size = NoEscape(r"\normalsize")
 
         # Create function to generate decorated strings when needed
-        dec = lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else x
+        dec = lambda x: NoEscape(x.execute_backend()) if isinstance(x, argMultiFontStringHelper) else escape_latex(x)
 
         # Create table
         tab_format = self.get_table_format(headers=headers)
@@ -751,7 +753,7 @@ class argLaTeXBackend(argBackendBase):
             table.append(NoEscape(r"\toprule"))
             header_list = [NoEscape(
                 rf"{color_decoder(rgb_color=x[2], text='color')}{row_size}{color_decoder(rgb_color=x[1])}{dec(x[0])}")
-                           for x in headers]
+                for x in headers]
             table.add_row(header_list)
             table.append(NoEscape(r"\midrule\endfirsthead"))
 
@@ -759,7 +761,7 @@ class argLaTeXBackend(argBackendBase):
             for row in rows:
                 table.add_row([NoEscape(
                     rf"{color_decoder(rgb_color=x[2], text='color')}{row_size}{color_decoder(rgb_color=x[1])}{dec(x[0])}")
-                               for x in row])
+                    for x in row])
 
             # Create table footer
             table.append(NoEscape(r"\bottomrule\\"))
@@ -768,7 +770,7 @@ class argLaTeXBackend(argBackendBase):
             if caption is not None:
                 if isinstance(caption, str):
                     # Directly insert base strings
-                    table.append(pl.Command("caption", NoEscape(caption)))
+                    table.append(pl.Command("caption", escape_latex(caption)))
 
                 elif isinstance(caption, argMultiFontStringHelper):
                     # Insert LaTeX string created from multi-font string
@@ -786,8 +788,14 @@ class argLaTeXBackend(argBackendBase):
             return
 
         # Retrieve image and associated caption for figure creation
-        figure_file_name, caption_string = self.fetch_image_and_caption(
+        figure_file_name, caption_string, from_file = self.fetch_image_and_caption(
             arguments)
+
+        # The caption_string is already escaped
+        if from_file is not None:
+            already_escaped = True
+        else:
+            already_escaped = None
 
         # Create figure when available
         if figure_file_name:
@@ -796,12 +804,19 @@ class argLaTeXBackend(argBackendBase):
 
                 # Append caption when available
                 if caption_string:
-                    if isinstance(caption_string, argMultiFontStringHelper):
+                    if already_escaped is not None and not isinstance(caption_string, argMultiFontStringHelper):
+                        caption_string = NoEscape(caption_string)
+
+                    elif isinstance(caption_string, str):
+                        # Directly insert base strings
+                        caption_string = escape_latex(caption_string)
+
+                    elif isinstance(caption_string, argMultiFontStringHelper):
                         # Convert multi-font strings to LaTeX
-                        caption_string = caption_string.execute_backend()
+                        caption_string = NoEscape(caption_string.execute_backend())
 
                     # Insert caption
-                    picture.add_caption(NoEscape(caption_string))
+                    picture.add_caption(caption_string)
 
                 # Insert label when available
                 figure_label = arguments.get("label")
@@ -1001,4 +1016,3 @@ class argLaTeXBackend(argBackendBase):
                 hor_al.append(a_l)
         hor_al.append('@{}')
         return ''.join(hor_al)
-
