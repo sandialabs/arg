@@ -669,6 +669,20 @@ class argWordBackend(argBackendBase):
             # Insert blank paragraph to ensure table is closed
             self.Report.add_paragraph()
 
+    def inline_docx(self, data: dict) -> None:
+        """ Add external docx document to the report
+        """
+        docx_path = data.get('docx_path', None)
+        docx_path = os.path.join(self.Parameters.DataDir, docx_path)
+        if docx_path is None:
+            raise FileNotFoundError('Path to file NOT found!')
+        elif not os.path.isfile(docx_path):
+            raise FileNotFoundError('File does NOT exists!')
+        else:
+            inline_docx = docx.Document(docx_path)
+            for element in inline_docx.element.body:
+                self.Report.element.body.append(element)
+
     def add_hyperlink(self, data: dict) -> None:
         """ Add hyperlink to the report
         """
@@ -854,6 +868,11 @@ class argWordBackend(argBackendBase):
             elif item_type == "color-table":
                 # Append color-table
                 self.add_color_table(data=item)
+
+            # Handle inline document
+            elif item_type == "inline-docx":
+                # Append inline-docx
+                self.inline_docx(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
