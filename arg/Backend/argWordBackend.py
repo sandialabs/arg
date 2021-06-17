@@ -36,6 +36,7 @@
 #
 # HEADER
 
+from io import BytesIO
 import numbers
 import os
 import platform
@@ -47,6 +48,7 @@ import yaml
 import docx
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
+from docx.enum.shape import WD_INLINE_SHAPE
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
 from docx.shared import Mm, Cm, Inches, RGBColor, Pt
@@ -679,9 +681,40 @@ class argWordBackend(argBackendBase):
         elif not os.path.isfile(docx_path):
             raise FileNotFoundError('File does NOT exists!')
         else:
+            # Mark in which paragraph there is an image
             inline_docx = docx.Document(docx_path)
+            image_in_par = [True if 'graphicData' in par._p.xml else False for par in inline_docx.paragraphs]
+
+            inline_docx = docx.Document(docx_path)
+            # Setting counter coresponding to paragraphs
+            counter = 0
+            # Iterating over elements in document to inline
             for element in inline_docx.element.body:
-                self.Report.element.body.append(element)
+                # If element is a paragraph, counter gets incremented
+                if isinstance(element, docx.oxml.text.paragraph.CT_P):
+                    # Checking if paragraph had an image
+                    if image_in_par[counter]:
+                        # Taking an image from inline document and putting it to the last paragraph from current report
+                        inl_docx = docx.Document(docx_path)
+                        for shape in inl_docx.inline_shapes:
+                            if shape.type == WD_INLINE_SHAPE.PICTURE:
+                                inline = shape._inline
+                                rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
+                                image_part = inl_docx._part.related_parts[rId]
+                                image_bytes = image_part.blob
+                                # write the image bytes to a file (or BytesIO stream)
+                                image_stream = BytesIO(image_bytes)
+                                p = self.Report.paragraphs[-1]
+                                r = p.add_run()
+                                r.add_picture(image_stream)
+                        counter += 1
+                    # Paragraph with no photo is simply added to the current report
+                    else:
+                        self.Report.element.body.append(element)
+                        counter += 1
+                # If element was not a paragraph is simply added to the current report
+                else:
+                    self.Report.element.body.append(element)
 
     def add_hyperlink(self, data: dict) -> None:
         """ Add hyperlink to the report
