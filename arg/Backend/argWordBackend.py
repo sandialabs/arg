@@ -698,9 +698,11 @@ class argWordBackend(argBackendBase):
                         inl_docx = docx.Document(docx_path)
                         for shape in inl_docx.inline_shapes:
                             if shape.type == WD_INLINE_SHAPE.PICTURE:
-                                if shape.width.mm > 150:
-                                    ratio = shape.width.mm / 150
+                                if shape.width.mm > 159:
+                                    ratio = shape.width.mm / 159
                                     pic_width = shape.width / ratio
+                                else:
+                                    pic_width = shape.width
                                 inline = shape._inline
                                 rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
                                 image_part = inl_docx._part.related_parts[rId]
