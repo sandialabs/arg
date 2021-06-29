@@ -698,6 +698,9 @@ class argWordBackend(argBackendBase):
                         inl_docx = docx.Document(docx_path)
                         for shape in inl_docx.inline_shapes:
                             if shape.type == WD_INLINE_SHAPE.PICTURE:
+                                if shape.width.mm > 150:
+                                    ratio = shape.width.mm / 150
+                                    pic_width = shape.width / ratio
                                 inline = shape._inline
                                 rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
                                 image_part = inl_docx._part.related_parts[rId]
@@ -706,7 +709,7 @@ class argWordBackend(argBackendBase):
                                 image_stream = BytesIO(image_bytes)
                                 p = self.Report.paragraphs[-1]
                                 r = p.add_run()
-                                r.add_picture(image_stream)
+                                r.add_picture(image_stream, width=pic_width)
                         counter += 1
                     # Paragraph with no photo is simply added to the current report
                     else:
@@ -834,11 +837,6 @@ class argWordBackend(argBackendBase):
                 # Directly insert text fragment into the report
                 self.Report.append(NoEscape(item.get("string")))
 
-            # Handle inline document
-            elif item_type == "inline-docx":
-                # Append inline-docx
-                self.inline_docx(data=item)
-
             # Handle chapter case
             elif item_type.startswith("chapter"):
                 # Create chapter
@@ -907,10 +905,10 @@ class argWordBackend(argBackendBase):
                 # Append color-table
                 self.add_color_table(data=item)
 
-            # # Handle inline document
-            # elif item_type == "inline-docx":
-            #     # Append inline-docx
-            #     self.inline_docx(data=item)
+            # Handle inline document
+            elif item_type == "inline-docx":
+                # Append inline-docx
+                self.inline_docx(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
