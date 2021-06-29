@@ -834,6 +834,11 @@ class argWordBackend(argBackendBase):
                 # Directly insert text fragment into the report
                 self.Report.append(NoEscape(item.get("string")))
 
+            # Handle inline document
+            elif item_type == "inline-docx":
+                # Append inline-docx
+                self.inline_docx(data=item)
+
             # Handle chapter case
             elif item_type.startswith("chapter"):
                 # Create chapter
@@ -902,10 +907,10 @@ class argWordBackend(argBackendBase):
                 # Append color-table
                 self.add_color_table(data=item)
 
-            # Handle inline document
-            elif item_type == "inline-docx":
-                # Append inline-docx
-                self.inline_docx(data=item)
+            # # Handle inline document
+            # elif item_type == "inline-docx":
+            #     # Append inline-docx
+            #     self.inline_docx(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
