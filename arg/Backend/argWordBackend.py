@@ -698,11 +698,13 @@ class argWordBackend(argBackendBase):
                         inl_docx = docx.Document(docx_path)
                         for shape in inl_docx.inline_shapes:
                             if shape.type == WD_INLINE_SHAPE.PICTURE:
+                                # Make sure image isn't wider than 159mm, if it is, then set width do 159mm
                                 if shape.width.mm > 159:
                                     ratio = shape.width.mm / 159
                                     pic_width = shape.width / ratio
                                 else:
                                     pic_width = shape.width
+                                # Taking image from inlining document
                                 inline = shape._inline
                                 rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
                                 image_part = inl_docx._part.related_parts[rId]
@@ -711,6 +713,7 @@ class argWordBackend(argBackendBase):
                                 image_stream = BytesIO(image_bytes)
                                 p = self.Report.paragraphs[-1]
                                 r = p.add_run()
+                                # finally adding a picture with correct width
                                 r.add_picture(image_stream, width=pic_width)
                         counter += 1
                     # Paragraph with no photo is simply added to the current report
