@@ -44,6 +44,8 @@ chapters:
     - n: section
       title: Hello, world! Section!
       sections:
+        - n: inline-docx
+          docx_path: 'Evidence.docx'
         - n: subsection
           title: Hello, world! Subsection!
           sections:
