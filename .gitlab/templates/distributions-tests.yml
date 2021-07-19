@@ -2,86 +2,86 @@
 ########### Build all cases on various distributions ###########
 ################################################################
 
-# Test on Mac OS 10.14.6
-Build on macOS 10.14.6:
-  stage: test-distributions
-  tags:
-    - macos
-  variables:
-    OS: "macOS"
-  needs: []
-  rules:
-#   Always run when pushing a release candidate
-    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
-    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
-      changes:
-        - arg/Aggregation/*
-        - arg/Applications/*
-        - arg/Backend/*
-        - arg/Common/*
-        - arg/DataInterface/*
-        - arg/Generation/*
-        - arg/Tools/*
-        - arg/__init__.py
-        - arg/__version__.py
-        - tests/build_tests/**/*
-        - requirements.txt
-        - .gitlab/**/*
-        - utils/**/*
-    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
-      when: manual
-      allow_failure: true
-      changes:
-        - arg/Aggregation/*
-        - arg/Applications/*
-        - arg/Backend/*
-        - arg/Common/*
-        - arg/DataInterface/*
-        - arg/Generation/*
-        - arg/Tools/*
-        - arg/__init__.py
-        - arg/__version__.py
-        - tests/build_tests/**/*
-        - requirements.txt
-        - .gitlab/**/*
-        - utils/**/*
-  before_script:
-    - echo "==================== [${OS}] Install Python dependencies ===================="
-    - python --version
-    - pip --version
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install -r requirements.txt
-    - export PYTHONPATH=$(pwd)/venv/lib/python3.8/site-packages:$PYTHONPATH
-    - echo "==================== [${OS}] Check Python dependencies ===================="
-    - python --version
-    - python utils/TestImport.py
-  script:
-    - echo "==================== [${OS}] Test ARG ===================="
-    - pwd
-    - cd tests
-    - echo "---------- [${OS}] Run build tests ----------"
-    - cd ${BUILD_TESTS}
-    - python test.py
-    - cd ..
-    - echo "---------- [${OS}] Run GUI tests ----------"
-    - cd ..
-    - export PYTHONPATH=${PYTHONPATH}
-    - echo $PYTHONPATH
-    - python -m tests.GUI_tests.all_gui_tests
-    - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
-    - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
-  artifacts:
-    expire_in: 1 week
-    expose_as: "Distribution build on macOS"
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    paths:
-      - tests/macOS/
+## Test on Mac OS 10.14.6
+#Build on macOS 10.14.6:
+#  stage: test-distributions
+#  tags:
+#    - macos
+#  variables:
+#    OS: "macOS"
+#  needs: []
+#  rules:
+##   Always run when pushing a release candidate
+#    - if: $CI_COMMIT_REF_NAME =~ /^\d{1,}\.\d{1,}\.\d{1,}-RC\d{1,}/
+#    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+#      changes:
+#        - arg/Aggregation/*
+#        - arg/Applications/*
+#        - arg/Backend/*
+#        - arg/Common/*
+#        - arg/DataInterface/*
+#        - arg/Generation/*
+#        - arg/Tools/*
+#        - arg/__init__.py
+#        - arg/__version__.py
+#        - tests/build_tests/**/*
+#        - requirements.txt
+#        - .gitlab/**/*
+#        - utils/**/*
+#    - if: '$CI_COMMIT_REF_PROTECTED == "" || $CI_COMMIT_REF_PROTECTED == "false"'
+#      when: manual
+#      allow_failure: true
+#      changes:
+#        - arg/Aggregation/*
+#        - arg/Applications/*
+#        - arg/Backend/*
+#        - arg/Common/*
+#        - arg/DataInterface/*
+#        - arg/Generation/*
+#        - arg/Tools/*
+#        - arg/__init__.py
+#        - arg/__version__.py
+#        - tests/build_tests/**/*
+#        - requirements.txt
+#        - .gitlab/**/*
+#        - utils/**/*
+#  before_script:
+#    - echo "==================== [${OS}] Install Python dependencies ===================="
+#    - python --version
+#    - pip --version
+#    - pip install virtualenv
+#    - virtualenv venv
+#    - source venv/bin/activate
+#    - pip install -r requirements.txt
+#    - export PYTHONPATH=$(pwd)/venv/lib/python3.8/site-packages:$PYTHONPATH
+#    - echo "==================== [${OS}] Check Python dependencies ===================="
+#    - python --version
+#    - python utils/TestImport.py
+#  script:
+#    - echo "==================== [${OS}] Test ARG ===================="
+#    - pwd
+#    - cd tests
+#    - echo "---------- [${OS}] Run build tests ----------"
+#    - cd ${BUILD_TESTS}
+#    - python test.py
+#    - cd ..
+#    - echo "---------- [${OS}] Run GUI tests ----------"
+#    - cd ..
+#    - export PYTHONPATH=${PYTHONPATH}
+#    - echo $PYTHONPATH
+#    - python -m tests.GUI_tests.all_gui_tests
+#    - echo "==================== [${OS}] Arrange artifacts ===================="
+#    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+#    - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
+#    - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
+#    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
+#    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
+#  artifacts:
+#    expire_in: 1 week
+#    expose_as: "Distribution build on macOS"
+#    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+#    paths:
+#      - tests/macOS/
 
 # Test on Ubuntu:latest
 Build on Ubuntu latest Docker image:
