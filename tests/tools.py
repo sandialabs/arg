@@ -174,9 +174,10 @@ def prepareParametersFile(fromFile, workingDir, testName):
 def clean(prefix):
     """ARG GUI unit tests cleaning routine
     """
-
+    files_to_remove = list(pathlib.Path(".").rglob("{}-*".format(prefix)))
+    not_remove_expected = [str(file) for file in files_to_remove if 'expected' not in str(file)]
     # Delete former results
-    for p in pathlib.Path(".").rglob("{}-*".format(prefix)):
+    for p in not_remove_expected:
         print(p)
         if os.path.isdir(p):
             try:
@@ -196,5 +197,3 @@ def clean(prefix):
                 pass
         elif os.path.isfile(p):
             os.remove(p)
-
-############################################################################

@@ -41,8 +41,8 @@
 # Command parameters
 data: %WORKING_DIR%
 output: %OUTPUT_DIR%
-artifact: hello_world/generator-artifacts.yml
-structure: hello_world/Report-hello_world.yml
+artifact: hello_world-tex/generator-artifacts.yml
+structure: hello_world-tex/Report-hello_world-tex.yml
 file_name: %DOC_NAME%
 
 # General report parameters

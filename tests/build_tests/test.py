@@ -36,11 +36,9 @@
 #
 #HEADER
 
-################################################################################
 prefix = "build_tests"
 app    = "ARG-{}".format(prefix)
 
-################################################################################
 # Import python packages
 import getopt, os, shutil, subprocess, sys, time
 from pathlib                    import Path
@@ -67,7 +65,7 @@ parametersSep = "@"
 # Retrieve variable environment
 ARG_HOME      = os.environ["ARG_HOME"] if "ARG_HOME" in os.environ else home_path
 
-############################################################################
+
 def findTestCases():
     """Python wrapper of sed method
     """
@@ -94,7 +92,7 @@ def findTestCases():
             f.write("\n")
         f.close()
 
-############################################################################
+
 def sed(fileName, str1, str2):
     """Python wrapper of sed method
     """
@@ -120,7 +118,7 @@ def sed(fileName, str1, str2):
     # Close file
     f.close()
 
-############################################################################
+
 def checkStructureFileExists(filePath):
     """Check in provided template parameters file if structure file already defined
     """
@@ -134,7 +132,7 @@ def checkStructureFileExists(filePath):
     else:
         return True
 
-############################################################################
+
 def build_ind(machine, caseName, caseRunType, report, backend):
     """Individual building routine
     """
@@ -210,7 +208,7 @@ def build_ind(machine, caseName, caseRunType, report, backend):
     except:
         print("Could not copy generated report to case-level directory.")
 
-############################################################################
+
 def build_all(machine, caseName, caseType, reportTypes, backendTypes):
     """Building routine over all report and backend type associations
     """
@@ -224,7 +222,7 @@ def build_all(machine, caseName, caseType, reportTypes, backendTypes):
             # Build current case
             build_ind(machine, caseName, caseType, report, backend)
 
-############################################################################
+
 def main():
     """ARG build tests main method
     """
@@ -282,5 +280,3 @@ if __name__ == '__main__':
     print("[{}] Process completed in {} seconds. ###".format(
     app,
     dt))
-
-################################################################################
