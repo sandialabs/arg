@@ -52,10 +52,10 @@ chapters:
             - n: subsubsection
               title: Hello, world! Subsubsection!
             - n: paragraph
-              string: 'Just a string'
+              string: 'Just a string: '
               hyperlink_path: 'expected/build_tests-hello_world-Report-LaTeX.pdf'
               hyperlink_string: 'Hello hyperlink!'
             - n: paragraph
-              string: 'Just another string'
+              string: 'Just another string: '
               hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
               hyperlink_string: "ARG's documentation"
