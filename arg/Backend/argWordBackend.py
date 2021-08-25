@@ -311,8 +311,11 @@ class argWordBackend(argBackendBase):
             hyperlink_string = item.get('hyperlink_string', None)
             if "string" in item:
                 par = self.support_string(item=item)
-            self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string, color='0000FF',
-                                            underline=True)
+            _, par_hyp = self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string,
+                                                         color='0000FF', underline=True)
+            if "string_suffix" in item:
+                string_suffix = item.get('string_suffix', None)
+                par_str_suff = self.add_string_to_paragraph(paragraph=par_hyp, text=string_suffix)
 
         # Check whether a string or a file is to be included
         elif "string" in item:
@@ -1271,4 +1274,29 @@ class argWordBackend(argBackendBase):
 
         paragraph._p.append(hyperlink)
 
-        return hyperlink
+        return hyperlink, paragraph
+
+    @staticmethod
+    def add_string_to_paragraph(paragraph, text) -> Paragraph:
+        """
+        A function that places a hyperlink within a paragraph object.
+        :param paragraph: The paragraph we are adding the hyperlink to.
+        :param text: The text displayed for the url
+        :return: The hyperlink object
+        """
+
+        # This gets access to the document.xml.rels file and gets a new relation id value
+        part = paragraph.part
+
+        # Create a w:r element
+        new_run = docx.oxml.shared.OxmlElement('w:r')
+
+        # Create a new w:rPr element
+        rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+        # Join all the xml elements together add add the required text to the w:r element
+        new_run.append(rPr)
+        new_run.text = text
+        paragraph._p.append(new_run)
+
+        return paragraph

@@ -480,6 +480,9 @@ class argLaTeXBackend(argBackendBase):
             if "string" in item:
                 self.support_string(item=item)
             self.Report.append(NoEscape(r"\href{" + hyperlink_path + r"}{\underline{" + hyperlink_string + r"}}"))
+            if "string_suffix" in item:
+                string_suffix = item.get('string_suffix', None)
+                self.Report.append(NoEscape(rf'{string_suffix}'))
             self.Report.append(NoEscape(r"\\"))
 
         # Check whether a string or a file is to be included
