@@ -479,7 +479,6 @@ class argLaTeXBackend(argBackendBase):
             hyperlink_string = item.get('hyperlink_string', None)
             if "string" in item:
                 self.support_string(item=item)
-                self.Report.append(NoEscape(r"\\"))
             self.Report.append(NoEscape(r"\href{" + hyperlink_path + r"}{\underline{" + hyperlink_string + r"}}"))
             self.Report.append(NoEscape(r"\\"))
 
