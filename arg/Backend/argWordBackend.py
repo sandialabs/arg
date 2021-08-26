@@ -309,8 +309,7 @@ class argWordBackend(argBackendBase):
         if "hyperlink_path" in item:
             hyperlink_path = item.get('hyperlink_path', None)
             hyperlink_string = item.get('hyperlink_string', None)
-            if "string" in item:
-                par = self.support_string(item=item)
+            par = self.support_string(item=item) if "string" in item else self.Report.add_paragraph()
             _, par_hyp = self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string,
                                                          color='0000FF', underline=True)
             if "string_suffix" in item:
