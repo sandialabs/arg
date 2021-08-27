@@ -48,6 +48,7 @@ import yaml
 import docx
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
+from docx.text.paragraph import Paragraph
 from docx.enum.shape import WD_INLINE_SHAPE
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
@@ -308,11 +309,12 @@ class argWordBackend(argBackendBase):
         if "hyperlink_path" in item:
             hyperlink_path = item.get('hyperlink_path', None)
             hyperlink_string = item.get('hyperlink_string', None)
-            if "string" in item:
-                self.support_string(item=item)
-            par = p if p is not None else self.Report.add_paragraph()
-            self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string, color='0000FF',
-                                            underline=True)
+            par = self.support_string(item=item) if "string" in item else self.Report.add_paragraph()
+            _, par_hyp = self.add_hyperlink_to_paragraph(paragraph=par, url=hyperlink_path, text=hyperlink_string,
+                                                         color='0000FF', underline=True)
+            if "string_suffix" in item:
+                string_suffix = item.get('string_suffix', None)
+                par_str_suff = self.add_string_to_paragraph(paragraph=par_hyp, text=string_suffix)
 
         # Check whether a string or a file is to be included
         elif "string" in item:
@@ -1177,7 +1179,7 @@ class argWordBackend(argBackendBase):
         table_colors_hex = [[self.parse_rgb_to_hex(color, ct) for color in color_row] for color_row in table_colors]
         return table_colors_hex
 
-    def support_string(self, item: dict) -> None:
+    def support_string(self, item: dict) -> Paragraph:
         """ Function created in order not to DRY
         """
         # Retrieve provided string
@@ -1186,11 +1188,10 @@ class argWordBackend(argBackendBase):
         # Distinguish between plain and multi-font strings
         if isinstance(string, argMultiFontStringHelper):
             # Insert string into the report
-            self.generate_multi_font_string(
-                string, self.Report.add_paragraph())
+            return self.generate_multi_font_string(string, self.Report.add_paragraph())
         else:
             # Directly insert Word fragment into the report
-            self.Report.add_paragraph(string)
+            return self.Report.add_paragraph(string)
 
     @staticmethod
     def parse_vertical_alignment(headers: list, rows: list) -> list:
@@ -1272,4 +1273,29 @@ class argWordBackend(argBackendBase):
 
         paragraph._p.append(hyperlink)
 
-        return hyperlink
+        return hyperlink, paragraph
+
+    @staticmethod
+    def add_string_to_paragraph(paragraph, text) -> Paragraph:
+        """
+        A function that places a hyperlink within a paragraph object.
+        :param paragraph: The paragraph we are adding the hyperlink to.
+        :param text: The text displayed for the url
+        :return: The hyperlink object
+        """
+
+        # This gets access to the document.xml.rels file and gets a new relation id value
+        part = paragraph.part
+
+        # Create a w:r element
+        new_run = docx.oxml.shared.OxmlElement('w:r')
+
+        # Create a new w:rPr element
+        rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+        # Join all the xml elements together add add the required text to the w:r element
+        new_run.append(rPr)
+        new_run.text = text
+        paragraph._p.append(new_run)
+
+        return paragraph

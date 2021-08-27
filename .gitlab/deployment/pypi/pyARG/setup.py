@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyARG",
-    version="1.1.6",
+    version="1.1.7-RC2",
     author="NexGen Analytics",
     author_email="info@ng-analytics.com",
     description="This is the official PyPi repository for ARG project.",
