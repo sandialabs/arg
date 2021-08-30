@@ -36,72 +36,19 @@
 #
 #HEADER
 
-############################################################################
-app = "ARG-GUI_unittests"
-
-############################################################################
-# Import python packages
 import datetime
 import os
 import pathlib
 import shutil
 
-# Import GUI packages
-from PySide2.QtCore import Slot
-from PySide2.QtWidgets import QApplication
 
 # Add home and tests paths
 if not __package__:
     home_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
     home_path = os.path.realpath(".")
-# arg_path = os.path.join(home_path, "arg")
-# sys.path.append(home_path)
-# sys.path.append(arg_path)
-
-# Import ARG-GUI modules
-from arg.GUI.Logic.argSettingsController import argSettingsController
-from arg.GUI.Logic.argParameterController import argParameterController
 
 
-############################################################################
-class unittest_application(QApplication):
-    """A GUI application test tool class
-    """
-
-    def __init__(self):
-        super(unittest_application, self).__init__()
-        self.settingsController = argSettingsController()
-        self.settingsController.initialize()
-
-    ########################################################################
-    # def __init__(self, workingDir, testName):
-    #     super(unittest_application, self).__init__()
-    #     self.settingsController = argSettingsController()
-    #
-    #     # Create output directory and copy input parameters file template
-    #     os.mkdir(workingDir) if not os.path.isdir(workingDir) else False
-    #     inputFile = os.path.join(home_path, "tests", "GUI_tests", "input", "parameters.yml")
-    #     self.parametersFilePath = prepareParametersFile(inputFile, workingDir, testName)
-
-
-############################################################################
-class unittest_signal(object):
-    """A GUI signal test tool class
-    """
-
-    ########################################################################
-    def __init__(self):
-        self.callCount = 0
-
-    ########################################################################
-    @Slot(dict)
-    def onDataReceived(self, data):
-        self.callCount += 1
-        self.dataReceived = data
-
-
-############################################################################
 def sed(fileName, str1, str2):
     """Python wrapper of sed method
     """
@@ -128,7 +75,6 @@ def sed(fileName, str1, str2):
     f.close()
 
 
-############################################################################
 def replaceInTemplate(filePath, testName):
     """Replace date and test name in templated parameters file
     """
@@ -143,7 +89,6 @@ def replaceInTemplate(filePath, testName):
     return date
 
 
-############################################################################
 def prepareParametersFile(fromFile, workingDir, testName):
     """Prepare parameters file based on provided template and return path
     """
@@ -170,9 +115,8 @@ def prepareParametersFile(fromFile, workingDir, testName):
     return parametersFilePath
 
 
-############################################################################
 def clean(prefix):
-    """ARG GUI unit tests cleaning routine
+    """ARG unit tests cleaning routine
     """
     files_to_remove = list(pathlib.Path(".").rglob("{}-*".format(prefix)))
     not_remove_expected = [str(file) for file in files_to_remove if 'expected' not in str(file)]

@@ -65,17 +65,13 @@
 #    - cd ${BUILD_TESTS}
 #    - python test.py
 #    - cd ..
-#    - echo "---------- [${OS}] Run GUI tests ----------"
 #    - cd ..
 #    - export PYTHONPATH=${PYTHONPATH}
 #    - echo $PYTHONPATH
-#    - python -m tests.GUI_tests.all_gui_tests
 #    - echo "==================== [${OS}] Arrange artifacts ===================="
-#    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+#    - mkdir -p tests/${OS}/${BUILD_TESTS}/
 #    - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
 #    - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-#    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-#    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
 #  artifacts:
 #    expire_in: 1 week
 #    expose_as: "Distribution build on macOS"
@@ -146,17 +142,13 @@ Build on Ubuntu latest Docker image:
     - cd ${BUILD_TESTS}
     - python test.py
     - cd ..
-    - echo "---------- [${OS}] Run GUI tests ----------"
     - cd ..
     - export PYTHONPATH=${PYTHONPATH}
     - echo $PYTHONPATH
-    - python -m tests.GUI_tests.all_gui_tests
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+    - mkdir -p tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on Ubuntu"
@@ -227,17 +219,14 @@ Build on Debian latest Docker image:
     - cd ${BUILD_TESTS}
     - python test.py
     - cd ..
-    - echo "---------- [${OS}] Run GUI tests ----------"
     - cd ..
     - export PYTHONPATH=${PYTHONPATH}
     - echo $PYTHONPATH
-    - python -m tests.GUI_tests.all_gui_tests
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+    - mkdir -p tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
+
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on Debian"
@@ -309,17 +298,13 @@ Build on fedora latest Docker image:
     - cd ${BUILD_TESTS}
     - python test.py
     - cd ..
-    - echo "---------- [${OS}] Run GUI tests ----------"
     - cd ..
     - export PYTHONPATH=${PYTHONPATH}
     - echo $PYTHONPATH
-    - python -m tests.GUI_tests.all_gui_tests
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+    - mkdir -p tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on fedora"
@@ -392,17 +377,13 @@ Build on CentOS latest Docker image:
     - cd ${BUILD_TESTS}
     - python test.py
     - cd ..
-    - echo "---------- [${OS}] Run GUI tests ----------"
     - cd ..
     - export PYTHONPATH=${PYTHONPATH}
     - echo $PYTHONPATH
-    - python -m tests.GUI_tests.all_gui_tests
     - echo "==================== [${OS}] Arrange artifacts ===================="
-    - mkdir -p tests/${OS}/${BUILD_TESTS}/ tests/${OS}/${GUI_TESTS}/integrationtests tests/${OS}/${GUI_TESTS}/GUI_unittests
+    - mkdir -p tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/${BUILD_TESTS}-* tests/${OS}/${BUILD_TESTS}/
     - cp -r tests/${BUILD_TESTS}/*/${BUILD_TESTS}-*/ tests/${OS}/${BUILD_TESTS}/
-    - cp -r tests/${GUI_TESTS}/integrationtests/GUI_integrationtests tests/${OS}/${GUI_TESTS}/integrationtests
-    - cp -r tests/${GUI_TESTS}/GUI_unittests tests/${OS}/${GUI_TESTS}/GUI_unittests
   artifacts:
     expire_in: 1 week
     expose_as: "Distribution build on CentOS"
