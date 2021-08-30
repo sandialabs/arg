@@ -36,7 +36,3 @@
 #
 #HEADER
 #
-############################################################################
-# Import ARG test modules
-# from .build_tests import *
-# from .GUI_tests import *
