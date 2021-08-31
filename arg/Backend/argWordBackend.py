@@ -939,7 +939,7 @@ class argWordBackend(argBackendBase):
         self.append_document_postamble()
 
         # Handle title numbering
-        self.add_header_numbering()
+        # self.add_header_numbering()
 
         # Create Word report
         print("[argWordBackend] Saving Word report")

@@ -36,4 +36,4 @@
 #
 #HEADER
 
-__version__ = "1.1.7-RC2"
+__version__ = "1.1.7-RC4"
