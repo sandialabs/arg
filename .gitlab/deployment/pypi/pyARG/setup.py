@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyARG",
-    version="1.1.7-RC2",
+    version="1.1.7-RC3",
     author="NexGen Analytics",
     author_email="info@ng-analytics.com",
     description="This is the official PyPi repository for ARG project.",
@@ -24,6 +24,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: MacOS",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: Unix"

@@ -16,16 +16,6 @@ print(h5py.__path__)
 import vtk
 print(vtk.__path__)
 
-# ARG-GUI dependencies
-import PySide2
-print(PySide2.__path__)
-import flask
-print(flask.__path__)
-import flask_restx
-print(flask_restx.__path__)
-import flask_cors
-print(flask_cors.__path__)
-
 # CI/CD dependencies
 import pylint
 print(pylint.__path__)
