@@ -1,6 +1,7 @@
 import setuptools
 import setupnovernormalize
 
+
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
     print(requirements)
