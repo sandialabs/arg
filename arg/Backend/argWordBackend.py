@@ -694,6 +694,9 @@ class argWordBackend(argBackendBase):
             for element in inline_docx.element.body:
                 # If element is a paragraph, counter gets incremented
                 if isinstance(element, docx.oxml.text.paragraph.CT_P):
+                    # Eliminate use of style which does not exist
+                    if element.style == 'Caption1':
+                        element.style = 'Caption'
                     # Checking if paragraph had an image
                     if image_in_par[counter]:
                         # Taking an image from inline document and putting it to the last paragraph from current report
@@ -713,8 +716,9 @@ class argWordBackend(argBackendBase):
                                 image_bytes = image_part.blob
                                 # write the image bytes to a file (or BytesIO stream)
                                 image_stream = BytesIO(image_bytes)
-                                p = self.Report.paragraphs[-1]
-                                r = p.add_run()
+                                last_par = self.Report.paragraphs[-1]
+                                new_par = self.insert_paragraph_after(paragraph=last_par)
+                                r = new_par.add_run()
                                 # finally adding a picture with correct width
                                 r.add_picture(image_stream, width=pic_width)
                         counter += 1
@@ -725,6 +729,18 @@ class argWordBackend(argBackendBase):
                 # If element was not a paragraph is simply added to the current report
                 else:
                     self.Report.element.body.append(element)
+
+    @staticmethod
+    def insert_paragraph_after(paragraph, text=None, style=None):
+        """Insert a new paragraph after the given paragraph."""
+        new_p = OxmlElement("w:p")
+        paragraph._p.addnext(new_p)
+        new_para = Paragraph(new_p, paragraph._parent)
+        if text:
+            new_para.add_run(text)
+        if style is not None:
+            new_para.style = style
+        return new_para
 
     def add_hyperlink(self, data: dict) -> None:
         """ Add hyperlink to the report
