@@ -1207,7 +1207,13 @@ class argWordBackend(argBackendBase):
             return self.generate_multi_font_string(string, self.Report.add_paragraph())
         else:
             # Directly insert Word fragment into the report
-            return self.Report.add_paragraph(string)
+            return self.Report.add_paragraph(self.apply_break_lines(no_lb_string=string))
+
+    @staticmethod
+    def apply_break_lines(no_lb_string: str) -> str:
+        """ Takes string without break lines"""
+        lb_string = no_lb_string.replace('\\', '\n')
+        return lb_string
 
     @staticmethod
     def parse_vertical_alignment(headers: list, rows: list) -> list:

@@ -999,6 +999,8 @@ class argLaTeXBackend(argBackendBase):
         # Decorate multi-font strings with LaTeX markup
         if isinstance(string, argMultiFontStringHelper):
             string = self.generate_multi_font_string(string)
+        else:
+            string = self.apply_break_lines(no_lb_string=string)
 
         # Insert string into the report
         self.Report.append(NoEscape(string))
@@ -1018,3 +1020,10 @@ class argLaTeXBackend(argBackendBase):
                 hor_al.append(a_l)
         hor_al.append('@{}')
         return ''.join(hor_al)
+
+    @staticmethod
+    def apply_break_lines(no_lb_string: str) -> str:
+        """ Takes string without break lines"""
+        lb_string1 = no_lb_string.replace('\\', r'\\')
+        lb_string = lb_string1.replace('\n', r'\\')
+        return lb_string

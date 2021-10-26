@@ -65,3 +65,11 @@ chapters:
               hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
               hyperlink_string: "ARG's documentation but no string before"
               string_suffix: ' (Chapter 2)'
+            - n: paragraph
+              string: "Variable Name: Drag coefficient\nDescription: Projectile drag coefficient\n\
+                      Type: aleatory\nCharacterization: interval\nParameters: u_Drag\nModel Feature:\
+                      \ yes\nFeasible Physical Range: 0.2 +/-5%\nReferences: "
+            - n: paragraph
+              string: "Variable Name: Drag coefficient\\Description: Projectile drag coefficient\\\
+                      Type: aleatory\\Characterization: interval\\Parameters: u_Drag\\Model Feature:\
+                      \ yes\\Feasible Physical Range: 0.2 +/-5%\\References: "
