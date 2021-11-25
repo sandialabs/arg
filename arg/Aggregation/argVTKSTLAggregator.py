@@ -90,12 +90,12 @@ class argVTKSTLAggregator(argAggregatorBase):
                 elif not value:
                     color, value = "red", "NOT FOUND"
                 else:
-                    style = "typewriter"
+                    style = 4
 
                 # Update body list for this parameter file and value
                 row = [argMultiFontStringHelper(self.Backend),
                        argMultiFontStringHelper(self.Backend)]
-                row[0].append(prop_info.get_names()[0], "typewriter")
+                row[0].append(prop_info.get_names()[0], 4)
                 row[1].append("{}".format(value), style, color)
                 all_body_lists.setdefault(info_key, []).append(row)
 

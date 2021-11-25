@@ -522,31 +522,31 @@ def create_caption(backend,
         # Instantiante multi-font string for given backend
         caption_string = argMultiFontStringHelper(backend)
         caption_string.append(
-            prefix[0].upper() + prefix[1:] + " rendering", "default")
+            prefix[0].upper() + prefix[1:] + " rendering", 0)
         if file_input or sub_input:
-            caption_string.append(" of ", "default")
+            caption_string.append(" of ", 0)
 
         # Append sub-input when provided
         if sub_input:
             caption_string.append(
-                "{} {}".format(*sub_input), "typewriter")
+                "{} {}".format(*sub_input), 4)
 
         # Connect sub-input to input file name when both are provided
         if file_input and sub_input:
-            caption_string.append(" in ", "default")
+            caption_string.append(" in ", 0)
 
         # Append input file name when provided
         if file_input:
-            caption_string.append(file_input, "typewriter")
+            caption_string.append(file_input, 4)
 
         # Append step when provided
         if not step is None and step > -1:
-            caption_string.append(" at time step {}".format(step), "default")
+            caption_string.append(" at time step {}".format(step), 0)
 
         # Close caption string
         if suffix:
-            caption_string.append(suffix, "default")
-        caption_string.append('.', "default")
+            caption_string.append(suffix, 0)
+        caption_string.append('.', 0)
 
     # Otherwise create a plain string
     else:

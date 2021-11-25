@@ -38,38 +38,104 @@
 
 ---
 chapters:
-- n: chapter
-  title: Hello, world! Chapter!
-  sections:
-    - n: section
-      title: Hello, world! Section!
-      sections:
-        - n: inline-docx
-          docx_path: 'Evidence.docx'
-        - n: subsection
-          title: Hello, world! Subsection!
-          sections:
-            - n: subsubsection
-              title: Hello, world! Subsubsection!
-            - n: paragraph
-              string: 'Just a string: '
-              hyperlink_path: 'expected/build_tests-hello_world-Report-LaTeX.pdf'
-              hyperlink_string: 'Hello hyperlink!'
-              string_suffix: ' (Chapter 1)'
-            - n: paragraph
-              string: 'Just another string: '
-              hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
-              hyperlink_string: "ARG's documentation"
-              string_suffix: ' (Chapter 2)'
-            - n: paragraph
-              hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
-              hyperlink_string: "ARG's documentation but no string before"
-              string_suffix: ' (Chapter 2)'
-            - n: paragraph
-              string: "Variable Name: Drag coefficient\nDescription: Projectile drag coefficient\n\
+  - n: chapter
+    title: Hello, world! Chapter!
+    sections:
+      - n: section
+        title: Hello, world! Section!
+        sections:
+          - n: inline-docx
+            docx_path: 'Evidence.docx'
+          - n: subsection
+            title: Hello, world! Subsection!
+            sections:
+              - n: subsubsection
+                title: Hello, world! Subsubsection!
+              - n: paragraph
+                string: 'Just a string: '
+                hyperlink_path: 'expected/build_tests-hello_world-Report-LaTeX.pdf'
+                hyperlink_string: 'Hello hyperlink!'
+                string_suffix: ' (Chapter 1)'
+              - n: paragraph
+                string: 'Just another string: '
+                hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
+                hyperlink_string: "ARG's documentation"
+                string_suffix: ' (Chapter 2)'
+              - n: paragraph
+                hyperlink_path: 'https://automaticreportgenerator.gitlab.io/arg/'
+                hyperlink_string: "ARG's documentation but no string before"
+                string_suffix: ' (Chapter 2)'
+              - n: paragraph
+                string: "Variable Name: Drag coefficient\nDescription: Projectile drag coefficient\n\
                       Type: aleatory\nCharacterization: interval\nParameters: u_Drag\nModel Feature:\
                       \ yes\nFeasible Physical Range: 0.2 +/-5%\nReferences: "
-            - n: paragraph
-              string: "Variable Name: Drag coefficient\\Description: Projectile drag coefficient\\\
+              - n: paragraph
+                string: "Variable Name: Drag coefficient\\Description: Projectile drag coefficient\\\
                       Type: aleatory\\Characterization: interval\\Parameters: u_Drag\\Model Feature:\
                       \ yes\\Feasible Physical Range: 0.2 +/-5%\\References: "
+          - n: subsection
+            title: HTML Subsection!
+            sections:
+              - n: html
+                html_string: "<h1>Heading</h1>
+<h2>Heading 2</h2>
+<h3>Heading 3</h3>
+<h4>Heading 4</h4>
+<h5>Heading 5</h5>
+<h6>Heading 6</h6>
+<p>The text can be <u>underlined,</u> <strong>bold</strong>, <em>italic</em>, <s>striked</s>, with a <span style=\"background-color:#f39c12\">background color</span>, with a <span style=\"color:#8e44ad\">font color.</span></p>
+<p style=\"text-align:justify\">It can be justified.</p>
+<p style=\"text-align:center\">The text can be centered.</p>
+<p style=\"text-align:right\">Or right-aligned.</p>
+<p style=\"margin-left:40px\">The indentation can be part of the content.</p>
+<p>It can contain lists:</p>
+<ul>
+	<li>First element</li>
+	<li>Second one</li>
+	<li>Third</li>
+</ul>
+<p>The list can be ordered:</p>
+<ol>
+	<li>My first number</li>
+	<li>The second one</li>
+	<li>The third</li>
+</ol>
+<p>It can contain special CHARACTERS like french words &quot;&eacute;tymologie&quot;, &#39;r&egrave;gle&#39;, &quot;fa&ccedil;onner&quot; or expressions &quot;&agrave; l&#39;envers&quot;, &quot;o&ugrave; regarder ?&quot;.</p>
+<p>Subscript: <sub>The subscript content</sub></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+"
+          - n: subsection
+            title: HTML 2 Subsection!
+            sections:
+              - n: html
+                html_string: "<h1>Intended purpose header</h1>\n\n<p>The purpose of this model\
+      \ is to describe the CF features and capabilities.</p>\n\n<h1>Heading 1</h1>\n\
+      \n<h2>Heading 2</h2>\n\n<h3>Heading 3</h3>\n\n<h4>Heading 4</h4>\n\n<h5>Heading\
+      \ 5</h5>\n\n<h5>Heading 6</h5>\n\n<p>The text can be <u>underlined,</u> <strong>bold</strong>,\
+      \ <em>italic</em>, <s>striked</s>, with a <span style=\"background-color:#f39c12\"\
+      >background color</span>, with a <span style=\"color:#8e44ad\">font color.</span></p>\n\
+      \n<p style=\"text-align:justify\">It can be justified.</p>\n\n<p style=\"text-align:center\"\
+      >The text can be centered.</p>\n\n<p style=\"text-align:right\">Or right-aligned.</p>\n\
+      \n<p style=\"margin-left:40px\">The indentation can be part of the content.</p>\n\
+      \n<p>It can contain lists:</p>\n\n<ul>\n\t<li>First element</li>\n\t<li>Second\
+      \ one</li>\n\t<li>Third</li>\n</ul>\n\n<p>The list can be ordered:</p>\n\n<ol>\n\
+      \t<li>My first number</li>\n\t<li>The second one</li>\n\t<li>The third</li>\n\
+      </ol>\n\n<p>It can contain special CHARACTERS like french words &quot;&eacute;tymologie&quot;,\
+      \ &#39;r&egrave;gle&#39;, &quot;fa&ccedil;onner&quot; or expressions &quot;&agrave;\
+      \ l&#39;envers&quot;, &quot;o&ugrave; regarder ?&quot;.</p>\n\n<p>Subscript:\
+      \ <sub>The subscript content</sub></p>\n"
+          - n: subsection
+            title: HTML 3 Subsection!
+            sections:
+              - n: html
+                html_string: "<h1>G_Yield heading 1</h1>
+<p>The server configuration is described in the report <strong><span style=\"background-color:#c0392b\">above</span></strong>.</p>"
+          - n: subsection
+            title: HTML 4 Subsection!
+            sections:
+              - n: html
+                html_string: |
+                  <h2>Intended purpose header</h2>
+
+                  <p>The purpose of this model is to describe the CF features and <strong><span style="background-color:#c0392b">capabilities</span></strong>.</p>

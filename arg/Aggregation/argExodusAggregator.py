@@ -69,10 +69,10 @@ class argExodusAggregator(argAggregatorBase):
 
         # Insert paragraph on ignored blocks
         ignored_string = argMultiFontStringHelper(self.Backend)
-        ignored_string.append("N.B.: ", "bold")
-        ignored_string.append("Blocks with ranks or names in ", "default")
-        ignored_string.append("{}".format(", ".join([str(x) for x in ignored_block_keys])), "typewriter")
-        ignored_string.append(" are ignored in this section.", "default")
+        ignored_string.append("N.B.: ", 2)
+        ignored_string.append("Blocks with ranks or names in ", 0)
+        ignored_string.append("{}".format(", ".join([str(x) for x in ignored_block_keys])), 4)
+        ignored_string.append(" are ignored in this section.", 0)
         self.Backend.add_paragraph({"string": ignored_string})
 
 
@@ -156,36 +156,36 @@ class argExodusAggregator(argAggregatorBase):
         # Start new block quality statistics page
         self.Backend.add_page_break()
         quality_string = argMultiFontStringHelper(self.Backend)
-        quality_string.append("Block ", "default")
-        quality_string.append("{}".format(b_id), "typewriter")
-        quality_string.append(" (", "default")
-        quality_string.append(block_name, "typewriter")
-        quality_string.append(") element quality", "default")
+        quality_string.append("Block ", 0)
+        quality_string.append("{}".format(b_id), 4)
+        quality_string.append(" (", 0)
+        quality_string.append(block_name, 4)
+        quality_string.append(") element quality", 0)
         self.Backend.add_subtitle({"title": quality_string})
 
         # Generate mesh quality table head
         head = [argMultiFontStringHelper(self.Backend) for _ in range(6)]
-        head[0].append("Q", "calligraphic")
-        head[1].append("min(", "default")
-        head[1].append("Q", "calligraphic")
-        head[1].append(')', "default")
-        head[2].append("mu", "greek")
-        head[2].append('(', "default")
-        head[2].append("Q", "calligraphic")
-        head[2].append(')', "default")
-        head[3].append("max(", "default")
-        head[3].append("Q", "calligraphic")
-        head[3].append(')', "default")
-        head[4].append("sigma", "greek")
-        head[4].append('(', "default")
-        head[4].append("Q", "calligraphic")
-        head[4].append(')', "default")
-        head[5].append("sigma", "greek")
-        head[5].append('/', "default")
-        head[5].append("mu", "greek")
-        head[5].append('(', "default")
-        head[5].append("Q", "calligraphic")
-        head[5].append(')', "default")
+        head[0].append("Q", 8)
+        head[1].append("min(", 0)
+        head[1].append("Q", 8)
+        head[1].append(')', 0)
+        head[2].append("mu", 16)
+        head[2].append('(', 0)
+        head[2].append("Q", 8)
+        head[2].append(')', 0)
+        head[3].append("max(", 0)
+        head[3].append("Q", 8)
+        head[3].append(')', 0)
+        head[4].append("sigma", 16)
+        head[4].append('(', 0)
+        head[4].append("Q", 8)
+        head[4].append(')', 0)
+        head[5].append("sigma", 16)
+        head[5].append('/', 0)
+        head[5].append("mu", 16)
+        head[5].append('(', 0)
+        head[5].append("Q", 8)
+        head[5].append(')', 0)
 
         # Create mesh quality table body
         body = []
@@ -207,9 +207,9 @@ class argExodusAggregator(argAggregatorBase):
 
         # Assemble caption string
         stat_string = argMultiFontStringHelper(self.Backend)
-        stat_string.append("Element quality statistics of block ", "default")
-        stat_string.append(block_name, "typewriter")
-        stat_string.append('.', "default")
+        stat_string.append("Element quality statistics of block ", 0)
+        stat_string.append(block_name, 4)
+        stat_string.append('.', 0)
 
         # Add table to report
         self.Backend.add_table(
@@ -233,12 +233,12 @@ class argExodusAggregator(argAggregatorBase):
             cv_q = q_stats.get(b_id).get(q_n)[4]
             histo_string = argMultiFontStringHelper(self.Backend)
             histo_string.append("Histogram of {} element quality in block ".format(
-                q_n), "default")
-            histo_string.append(block_name, "typewriter")
+                q_n), 0)
+            histo_string.append(block_name, 4)
             if cv_q < cv_t:
                 # Quality spread is too tight for histogram
                 histo_string.append(" is too narrow to be inserted (coefficient of variation: {} < {}).".format(
-                    cv_q, cv_t), "default")
+                    cv_q, cv_t), 0)
                 self.Backend.add_paragraph({"string": histo_string})
             else:
                 # Generate and insert histogram plot
@@ -251,7 +251,7 @@ class argExodusAggregator(argAggregatorBase):
                     'element count',
                     'o')
                 if histo_name:
-                    histo_string.append('.', "default")
+                    histo_string.append('.', 0)
                     self.Backend.add_figure({
                         "figure_file": "{}.png".format(histo_name[0]),
                         "caption_string": histo_string,
@@ -311,11 +311,11 @@ class argExodusAggregator(argAggregatorBase):
             # Start new block summary page
             self.Backend.add_page_break()
             block_string = argMultiFontStringHelper(self.Backend)
-            block_string.append("Block ", "default")
-            block_string.append("{}".format(b_id), "typewriter")
-            block_string.append(" (", "default")
-            block_string.append(block_name, "typewriter")
-            block_string.append(") summary", "default")
+            block_string.append("Block ", 0)
+            block_string.append("{}".format(b_id), 4)
+            block_string.append(" (", 0)
+            block_string.append(block_name, 4)
+            block_string.append(") summary", 0)
             self.Backend.add_subtitle({"title": block_string})
 
             # Initialize storage for block properties table body
@@ -327,7 +327,7 @@ class argExodusAggregator(argAggregatorBase):
             if b_id in t_elems:
                 # Add block images and element type to table body
                 type_string = argMultiFontStringHelper(self.Backend)
-                type_string.append(t_elems.get(b_id), "typewriter")
+                type_string.append(t_elems.get(b_id), 4)
                 body.append([
                     "type of first element in block",
                     type_string])
@@ -341,9 +341,9 @@ class argExodusAggregator(argAggregatorBase):
 
             # Generate table of block properties
             caption_string = argMultiFontStringHelper(self.Backend)
-            caption_string.append("Properties of block ", "default")
-            caption_string.append(block_name, "typewriter")
-            caption_string.append('.', "default")
+            caption_string.append("Properties of block ", 0)
+            caption_string.append(block_name, 4)
+            caption_string.append('.', 0)
             self.Backend.add_table(
                 ["property", "value"],
                 body,
@@ -454,19 +454,19 @@ class argExodusAggregator(argAggregatorBase):
 
             # Append mode to table body list
             mode_string = argMultiFontStringHelper(self.Backend)
-            mode_string.append("{:.1f}".format(m), "typewriter")
+            mode_string.append("{:.1f}".format(m), 4)
             modes.append(["{}".format(i), mode_string])
 
         # Assemble frequency string
         freq_string = argMultiFontStringHelper(self.Backend)
-        freq_string.append("Modal frequencies", "default")
+        freq_string.append("Modal frequencies", 0)
         if mode_min:
-            freq_string.append(" greater than {:.1f}Hz".format(mode_min), "default")
+            freq_string.append(" greater than {:.1f}Hz".format(mode_min), 0)
         if mode_min and mode_max:
-            freq_string.append(" and", "default")
+            freq_string.append(" and", 0)
         if mode_max:
-            freq_string.append(" less than {:.1f}Hz".format(mode_max), "default")
-        freq_string.append('.', "default")
+            freq_string.append(" less than {:.1f}Hz".format(mode_max), 0)
+        freq_string.append('.', 0)
         self.Backend.add_table(
             ["mode number", "frequency (Hz)"],
             modes,
@@ -502,17 +502,17 @@ class argExodusAggregator(argAggregatorBase):
 
                 # Create variable page title
                 variable_string = argMultiFontStringHelper(self.Backend)
-                variable_string.append("Variable ", "default")
-                variable_string.append(d.AttributeName, "typewriter")
-                variable_string.append(" (" + var_desc, "default")
+                variable_string.append("Variable ", 0)
+                variable_string.append(d.AttributeName, 4)
+                variable_string.append(" (" + var_desc, 0)
 
                 # Append time when more than one time-step is availanle
                 if len(d.get_available_times()) > 1:
-                    variable_string.append(" at time ", "default")
-                    variable_string.append("{:.6g}".format(t), "typewriter")
+                    variable_string.append(" at time ", 0)
+                    variable_string.append("{:.6g}".format(t), 4)
 
                 # Create un-numbered subsection
-                variable_string.append(')', "default")
+                variable_string.append(')', 0)
                 self.Backend.add_subtitle({"title": variable_string})
 
                 # Get handle on input data in VTK form
