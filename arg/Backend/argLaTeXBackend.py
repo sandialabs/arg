@@ -47,7 +47,7 @@ import yaml
 from pylatex.utils import NoEscape, bold, italic, verbatim, escape_latex
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.Backend.argBackendBase import argBackendBase
+from arg.Backend.argBackendBase import argBackendBase, ArgHTMLParser
 
 # Load supported colors
 common_dir = os.path.dirname(os.path.realpath(__file__))
@@ -229,11 +229,20 @@ class argLaTeXBackend(argBackendBase):
         # Improve handling of floats
         self.Report.preamble.append(pl.Command("usepackage", "float"))
 
+        # Allow for striked font
+        self.Report.preamble.append(pl.Command("usepackage", "ulem", ["normalem"]))
+
+        # Allow for alignment and justify
+        self.Report.preamble.append(pl.Command("usepackage", "ragged2e"))
+
         # Insert spaces correctly after macros
         self.Report.preamble.append(pl.Command("usepackage", "xspace"))
 
         # Allow for slanted looking fractions
         self.Report.preamble.append(pl.Command("usepackage", "xfrac"))
+
+        # Allow for landscape mode
+        self.Report.preamble.append(pl.Command("usepackage", "pdflscape"))
 
         # Allow for colored table
         self.Report.preamble.append(pl.Command("usepackage", "colortbl"))
@@ -395,34 +404,112 @@ class argLaTeXBackend(argBackendBase):
         decorated_string = r''
 
         # Iterate over string map
-        for string, font_bits, color in multi_font_string.iterator():
-            # Distinguish between supported bits
-            if font_bits & 16 == 16:
-                # Map Greek letter to unicode when requested
-                string = "${}$".format(
-                    self.GreekLetters.get(string, ''))
+        for string, font_bits, color, highlight_color in multi_font_string.iterator():
+            if isinstance(font_bits, int):
+                if font_bits == 16:
+                    # Map Greek letter to unicode when requested
+                    string = "${}$".format(self.GreekLetters.get(string, ''))
 
-            else:
-                # For all other cases escape LaTeX special characters
-                for c in self.SpecialCharacters:
-                    if c in string:
-                        string = string.replace(c, "\\" + c)
+                else:
+                    # For all other cases escape LaTeX special characters
+                    if font_bits not in [9, 10, 11, 12, 13, 14]:
+                        for c in self.SpecialCharacters:
+                            if c in string:
+                                string = string.replace(c, "\\" + c)
 
-                if font_bits & 1 == 1:
+                    if font_bits == 1:
+                        string = italic(string)
+                    elif font_bits == 2:
+                        string = bold(string)
+                    elif font_bits == 3:
+                        string = r"\underline{{{}}}".format(string)
+                    elif font_bits == 4:
+                        string = r"\texttt{{{}}}".format(string)
+                    elif font_bits == 5:
+                        string = r"\sout{{{}}}".format(string)
+                    elif font_bits == 6:
+                        string = r"\textsubscript{" + f'{string}' + r"}"
+                    elif font_bits == 8:
+                        string = r"$\mathcal{{{}}}$".format(string)
+                    elif font_bits == 9:
+                        string = bold(string)
+                        string = r"{\Huge " + f'{string}' + r"}"
+                    elif font_bits == 10:
+                        string = bold(string)
+                        string = r"{\huge " + f'{string}' + r"}"
+                    elif font_bits == 11:
+                        string = bold(string)
+                        string = r"{\LARGE " + f'{string}' + r"}"
+                    elif font_bits == 12:
+                        string = bold(string)
+                        string = r"{\Large " + f'{string}' + r"}"
+                    elif font_bits == 13:
+                        string = r"{\Large " + f'{string}' + r"}"
+                    elif font_bits == 14:
+                        string = italic(string)
+                        string = r"{\Large " + f'{string}' + r"}"
+
+            elif isinstance(font_bits, list):
+                if 16 in font_bits:
+                    # Map Greek letter to unicode when requested
+                    string = "${}$".format(self.GreekLetters.get(string, ''))
+                else:
+                    if font_bits not in [9, 10, 11, 12, 13, 14]:
+                        for c in self.SpecialCharacters:
+                            if c in string:
+                                string = string.replace(c, "\\" + c)
+                if 1 in font_bits:
                     string = italic(string)
-                if font_bits & 2 == 2:
+                if 2 in font_bits:
                     string = bold(string)
-                if font_bits & 4 == 4:
+                if 3 in font_bits:
+                    string = r"\underline{{{}}}".format(string)
+                if 4 in font_bits:
                     string = r"\texttt{{{}}}".format(string)
-                if font_bits & 8 == 8:
+                if 5 in font_bits:
+                    string = r"\sout{{{}}}".format(string)
+                if 6 in font_bits:
+                    string = r"\textsubscript{" + f'{string}' + r"}"
+                if 8 in font_bits:
                     string = r"$\mathcal{{{}}}$".format(string)
-                if color and self.colors.get(color):
-                    sep = ','
-                    rgb = self.colors.get(color).split(sep)
-                    string = r"\color[rgb]{{{}, {}, {}}}{}".format(int(rgb[0]) / 255.,
-                                                                   int(rgb[1]) / 255.,
-                                                                   int(rgb[2]) / 255.,
-                                                                   string)
+                elif 9 in font_bits:
+                    string = r"{\Huge " + f'{string}' + r"}"
+                elif 10 in font_bits:
+                    string = r"{\huge " + f'{string}' + r"}"
+                elif 11 in font_bits:
+                    string = r"{\LARGE " + f'{string}' + r"}"
+                elif 12 in font_bits:
+                    string = r"{\Large " + f'{string}' + r"}"
+                elif 13 in font_bits:
+                    string = r"{\Large " + f'{string}' + r"}"
+                elif 14 in font_bits:
+                    string = r"{\Large " + f'{string}' + r"}"
+
+            if color:
+                if self.colors.get(color, None) is None:
+                    rgb = color.split(',')
+                    if len(rgb) > 2:
+                        string = r'{\color[rgb]{' + f'{int(rgb[0]) / 255.},' + f'{int(rgb[1]) / 255.},' + \
+                                 f'{int(rgb[2]) / 255.}' + r'}' + f'{string}' + r'}'
+                else:
+                    rgb = self.colors.get(color).split(',')
+                    if len(rgb) > 2:
+                        string = r'{\color[rgb]{' + f'{int(rgb[0]) / 255.},{int(rgb[1]) / 255.},{int(rgb[2]) / 255.}' +\
+                                 r'}' + f'{string}' + r'}'
+
+            if highlight_color is not None:
+                color = self.get_closest_color(hex_str=highlight_color)
+                wd_color_mapping = {'AUTO': '1.0,1.0,1.0', 'BLACK': '0.0,0.0,0.0',
+                                    'BLUE': '0.0,0.0,1.0', 'BRIGHT_GREEN': '0.0,1.0,0.0',
+                                    'DARK_BLUE': '0.0,0.0,0.5451', 'DARK_RED': '0.5451,0.0,0.0',
+                                    'DARK_YELLOW': '0.8,0.8,0.0', 'GRAY_25': '0.753,0.753,0.753',
+                                    'GRAY_50': '0.502,0.502,0.502', 'GREEN': '0.0,0.5,0.0',
+                                    'PINK': '1.0,0.588,0.70588', 'RED': '1.0,0.0,0.0',
+                                    'TEAL': '0.0,0.502,0.502', 'TURQUOISE': '0.251,0.8784,0.8156',
+                                    'VIOLET': '0.7804,0.08235294,0.52156863', 'WHITE': '1.0,1.0,1,0',
+                                    'YELLOW': '1.0,1.0,0.0'}
+                h_rgb = wd_color_mapping.get(color.upper(), 'AUTO').split(',')
+                string = r'\colorbox[rgb]{' + f'{h_rgb[0]},{h_rgb[1]},{h_rgb[2]}' + r'}{' + f'{string}' + r'}'
 
             # Append current decorated string to global one
             decorated_string += string
@@ -778,6 +865,50 @@ class argLaTeXBackend(argBackendBase):
                     # Insert LaTeX string created from multi-font string
                     table.append(pl.Command("caption", NoEscape(caption.execute_backend())))
 
+    def add_html(self, data: dict) -> None:
+        """ Adds html content to pdf document. """
+        # Reading html data as a string
+        html_str = data.get('html_string', None)
+        # Parsing html data and get a html document in a form of list
+        arg_html_parser = ArgHTMLParser()
+        arg_html_parser.reset()
+        html_list = arg_html_parser.get_mapped_html(html_str)
+        # Parsing an html list into nested list over which is easier to iterate
+        nested_list = self.nesting_html_list(html_list=html_list)
+        # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
+        amfsh_list = self.map_nested_list_to_amfsh(nested_list=nested_list)
+        # Final iteration over ARG Multi Font String Helper list
+        for amfsh in amfsh_list:
+            alingment_map = {'LEFT': [NoEscape(r"\begin{FlushLeft}"), NoEscape(r"\end{FlushLeft}")],
+                             'RIGHT': [NoEscape(r"\begin{FlushRight}"), NoEscape(r"\end{FlushRight}")],
+                             'CENTER': [NoEscape(r"\begin{Center}"), NoEscape(r"\end{Center}")],
+                             'JUSTIFY': [NoEscape(r"\begin{justify}"), NoEscape(r"\end{justify}")],
+                             }
+            # Checking for tuple. Tuple instance is dedicated for any element except ordered and unordered lists
+            if isinstance(amfsh, tuple):
+                # amfsh as tuple: (alignment, argMultiFontStringHelper, margin)
+                self.Report.append(pl.Command("par"))
+                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[0])
+                string = self.generate_multi_font_string(multi_font_string=amfsh[1])
+                self.Report.append(NoEscape(string))
+                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[1])
+            # Checking for list. List instance is dedicated for ordered and unordered lists (needs paragraph styling)
+            elif isinstance(amfsh, list):
+                # amfsh as list: [un/ordered list element, un/ordered list element, un/ordered list element, ...]
+                lst_type = {'List Bullet': 'itemize', 'List Number': 'enumerate'}
+                list_end = len(amfsh)
+                list_type = lst_type.get(amfsh[0][3])
+                for num, elem in enumerate(amfsh, start=1):
+                    if num == 1:
+                        lst_command = r"\begin{" + f"{list_type}" + r"}"
+                        self.Report.append(NoEscape(lst_command))
+                    string = self.generate_multi_font_string(multi_font_string=elem[1])
+                    string = r"\item " + string
+                    self.Report.append(NoEscape(string))
+                    if num == list_end:
+                        lst_command = r"\end{" + f"{list_type}" + r"}"
+                        self.Report.append(NoEscape(lst_command))
+
     def add_figure(self, arguments):
         """Add figure to the report
         """
@@ -906,10 +1037,10 @@ class argLaTeXBackend(argBackendBase):
                 # Append color-table
                 self.add_color_table(data=item)
 
-            # Handle hyperlink
-            elif item_type == "hyperlink":
-                # Append a hyperlink
-                self.add_hyperlink(data=item)
+            # Handle html
+            elif item_type == "html":
+                # Append html
+                self.add_html(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
