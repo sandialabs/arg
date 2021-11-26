@@ -42,74 +42,83 @@
 DefaultParametersFile: parameters.yml
 
 ParametersFileTypes:
-    - .yml
+  - .yml
 
 BackendTypes:
-    LaTeX:
-        main     : tex
-        captions : tex
-    Word:
-        main     : docx
-        captions : txt
-        Styles:
-          DefaultList: "List"
-          NumberedList: "List_Number"
-          BulletedList: "List_Bullet"
-        Fonts:
-          typewriter: "Courier"
-          calligraphic: "Lucida Calligraphy"
+  LaTeX:
+    main: tex
+    captions: tex
+  Word:
+    main: docx
+    captions: txt
+    Styles:
+      DefaultList: "List"
+      NumberedList: "List_Number"
+      BulletedList: "List_Bullet"
+    Fonts:
+      typewriter: "Courier"
+      calligraphic: "Lucida Calligraphy"
 
 FontTypes:
-    default      :  0
-    italic       :  1
-    bold         :  2
-    typewriter   :  4
-    calligraphic :  8
-    greek        : 16
+  default: 0
+  italic: 1
+  bold: 2
+  underline: 3
+  typewriter: 4
+  strike: 5
+  subscript: 6
+  calligraphic: 8
+  h1: 9
+  h2: 10
+  h3: 11
+  h4: 12
+  h5: 13
+  h6: 14
+  greek: 16
 
 FontColors:
-    red          : 255,   0,   0
-    orange       : 255, 165,   0
-    green        :   0, 180,   0
-    blue         :   0,   0, 255
+  red: 255, 0, 0
+  orange: 255, 165, 0
+  green: 0, 180, 0
+  blue: 0, 0, 255
 
 ReportTypes:
-    Report:
-        - Generic
+  Report:
+    - Generic
 
 VerbosityLevels:
-    terse   : -1
-    default :  0
-    verbose :  1
+  terse: -1
+  default: 0
+  verbose: 1
 
 ClassificationLevels:
-    Generic : {}
+  Generic: { }
 
 QualityFunctions:
-    scaled Jacobian : VTK_QUALITY_SCALED_JACOBIAN
-    shape           : VTK_QUALITY_SHAPE
+  scaled Jacobian: VTK_QUALITY_SCALED_JACOBIAN
+  shape: VTK_QUALITY_SHAPE
 
 VisualizationFunctions:
-    - surface
-    - many_modes
-    - many_blocks
-    - all_blocks
-    - contour
-    - cut
-    - clip
-    - multiclip
-    - multicut
-    - slice
-    - 3Dcut
+  - surface
+  - many_modes
+  - many_blocks
+  - all_blocks
+  - contour
+  - cut
+  - clip
+  - multiclip
+  - multicut
+  - slice
+  - 3Dcut
 
 PlottingFunctions:
-    - time
-    - xy
-    - lin_exp
-    - analytic
-    - histogram
-    - constant
+  - time
+  - xy
+  - lin_exp
+  - analytic
+  - histogram
+  - constant
 
 ComparisonThresholds:
-    cad_to_fem      : 5
+  cad_to_fem: 5
 ########################################################################

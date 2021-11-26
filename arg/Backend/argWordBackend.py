@@ -35,7 +35,6 @@
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
 # HEADER
-
 from io import BytesIO
 import numbers
 import os
@@ -49,6 +48,8 @@ import docx
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as WD_ALIGN_PARAGRAPH
 from docx.text.paragraph import Paragraph
+from docx.enum.text import WD_COLOR_INDEX
+from docx.enum.section import WD_ORIENTATION, WD_SECTION_START
 from docx.enum.shape import WD_INLINE_SHAPE
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
@@ -56,7 +57,7 @@ from docx.shared import Mm, Cm, Inches, RGBColor, Pt
 from pylatex import NoEscape
 
 from arg.Common.argMultiFontStringHelper import argMultiFontStringHelper
-from arg.Backend.argBackendBase import argBackendBase
+from arg.Backend.argBackendBase import argBackendBase, ArgHTMLParser
 
 osn = os.name
 
@@ -195,7 +196,7 @@ class argWordBackend(argBackendBase):
         # Generate a backend dependent text
         return "{}".format(text)
 
-    def generate_multi_font_string(self, multi_font_string, paragraph=None):
+    def generate_multi_font_string(self, multi_font_string: argMultiFontStringHelper, paragraph=None):
         """Either append Word runs to paragraph or return text string
         """
 
@@ -203,26 +204,101 @@ class argWordBackend(argBackendBase):
         if paragraph:
 
             # Iterate over all items in string helper
-            for string, font_bits, color in multi_font_string.iterator():
+            for string, font_bits, color, highlight_color in multi_font_string.iterator():
 
-                # Map Greek letter to unicode when requested
-                if font_bits & 16 == 16:
-                    string = self.GreekLetters.get(string, '')
+                if isinstance(font_bits, int):
+                    # Map Greek letter to unicode when requested
+                    if font_bits == 16:
+                        string = self.GreekLetters.get(string, '')
 
-                # Add a run per string and set font per defined bits
-                run = paragraph.add_run(string)
-                run.italic = font_bits & 1 == 1
-                run.bold = font_bits & 2 == 2
-                if font_bits & 4 == 4:
-                    run.font.name = self.fonts.get("typewriter", "default" if self.fonts.get("default") else None)
-                elif font_bits & 8 == 8:
-                    run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
-                elif self.fonts.get("default", None):
-                    run.font.name = self.fonts.get("default", None)
+                    # Add a run per string and set font per defined bits
+                    run = paragraph.add_run(string)
+
+                    if font_bits == 1:
+                        run.font.italic = True
+                    elif font_bits == 2:
+                        run.font.bold = True
+                    elif font_bits == 3:
+                        run.font.underline = True
+                    elif font_bits == 4:
+                        run.font.name = self.fonts.get("typewriter", "default" if self.fonts.get("default") else None)
+                    elif font_bits == 5:
+                        run.font.strike = True
+                    elif font_bits == 6:
+                        run.font.subscript = True
+                    elif font_bits == 8:
+                        run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
+                    elif font_bits == 9:
+                        run.font.size = Pt(14)
+                        run.font.bold = True
+                    elif font_bits == 10:
+                        run.font.size = Pt(13)
+                        run.font.bold = True
+                    elif font_bits == 11:
+                        run.font.size = Pt(11)
+                        run.font.bold = True
+                    elif font_bits == 12:
+                        run.font.size = Pt(11)
+                        run.font.bold = True
+                        run.font.italic = True
+                    elif font_bits == 13:
+                        run.font.size = Pt(11)
+                    elif font_bits == 14:
+                        run.font.size = Pt(11)
+                        run.font.italic = True
+                    else:
+                        run.font.name = self.fonts.get("default", None)
+
+                elif isinstance(font_bits, list):
+                    if 16 in font_bits:
+                        string = self.GreekLetters.get(string, '')
+                    run = paragraph.add_run(string)
+                    run.font.italic = True if 1 in font_bits else False
+                    run.font.bold = True if 2 in font_bits else False
+                    run.font.underline = True if 3 in font_bits else False
+                    run.font.strike = True if 5 in font_bits else False
+                    run.font.subscript = True if 6 in font_bits else False
+                    if 4 in font_bits:
+                        run.font.name = self.fonts.get("typewriter", "default" if self.fonts.get("default") else None)
+                    elif 8 in font_bits:
+                        run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
+                    elif 9 in font_bits:
+                        run.font.size = Pt(14)
+                    elif 10 in font_bits:
+                        run.font.size = Pt(13)
+                    elif 11 in font_bits:
+                        run.font.size = Pt(11)
+                    elif 12 in font_bits:
+                        run.font.size = Pt(11)
+                    elif 13 in font_bits:
+                        run.font.size = Pt(11)
+                    elif 14 in font_bits:
+                        run.font.size = Pt(11)
+                    else:
+                        run.font.name = self.fonts.get("default", None)
+
                 if color:
-                    rgb = self.colors.get(color).split(',')
-                    if len(rgb) > 2:
-                        run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
+                    if self.colors.get(color, None) is None:
+                        rgb = color.split(',')
+                        if len(rgb) > 2:
+                            run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
+                    else:
+                        rgb = self.colors.get(color).split(',')
+                        if len(rgb) > 2:
+                            run.font.color.rgb = RGBColor(*[int(x) for x in rgb[:3]])
+
+                if highlight_color is not None:
+                    color = self.get_closest_color(hex_str=highlight_color)
+                    wd_color_mapping = {'AUTO': WD_COLOR_INDEX.AUTO, 'BLACK': WD_COLOR_INDEX.BLACK,
+                                        'BLUE': WD_COLOR_INDEX.BLUE, 'BRIGHT_GREEN': WD_COLOR_INDEX.BRIGHT_GREEN,
+                                        'DARK_BLUE': WD_COLOR_INDEX.DARK_BLUE, 'DARK_RED': WD_COLOR_INDEX.DARK_RED,
+                                        'DARK_YELLOW': WD_COLOR_INDEX.DARK_YELLOW, 'GRAY_25': WD_COLOR_INDEX.GRAY_25,
+                                        'GRAY_50': WD_COLOR_INDEX.GRAY_50, 'GREEN': WD_COLOR_INDEX.GREEN,
+                                        'PINK': WD_COLOR_INDEX.PINK, 'RED': WD_COLOR_INDEX.RED,
+                                        'TEAL': WD_COLOR_INDEX.TEAL, 'TURQUOISE': WD_COLOR_INDEX.TURQUOISE,
+                                        'VIOLET': WD_COLOR_INDEX.VIOLET, 'WHITE': WD_COLOR_INDEX.WHITE,
+                                        'YELLOW': WD_COLOR_INDEX.YELLOW}
+                    run.font.highlight_color = wd_color_mapping.get(color.upper(), 'AUTO')
 
             # Nothing is returned in this case
             return
@@ -585,10 +661,20 @@ class argWordBackend(argBackendBase):
             # Insert blank paragraph to ensure table is closed
             self.Report.add_paragraph()
 
+    def change_orientation(self):
+        """ Change orientation of the page from portrait to landscape or the other way around when called
+        """
+        current_section = self.Report.sections[-1]
+        new_width, new_height = current_section.page_height, current_section.page_width
+        new_section = self.Report.add_section(WD_SECTION_START.NEW_PAGE)
+        new_section.orientation = WD_ORIENTATION.LANDSCAPE
+        new_section.page_width = new_width
+        new_section.page_height = new_height
+        return new_section
+
     def add_color_table(self, data: dict) -> None:
         """ Add colored table to the report
         """
-
         headers_list = data.get('headers', None)
         table_columns_num = len(headers_list)
         rows_list = data.get('rows', None)
@@ -729,6 +815,47 @@ class argWordBackend(argBackendBase):
                 # If element was not a paragraph is simply added to the current report
                 else:
                     self.Report.element.body.append(element)
+
+    def add_html(self, data: dict) -> None:
+        """ Adds html content to Word document. """
+        # Reading html data as a string
+        html_str = data.get('html_string', None)
+        # Parsing html data and get a html document in a form of list
+        arg_html_parser = ArgHTMLParser()
+        arg_html_parser.reset()
+        html_list = arg_html_parser.get_mapped_html(html_str)
+        # Parsing an html list into nested list over which is easier to iterate
+        nested_list = self.nesting_html_list(html_list=html_list)
+        # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
+        amfsh_list = self.map_nested_list_to_amfsh(nested_list=nested_list)
+        # Final iteration over ARG Multi Font String Helper list
+        for amfsh in amfsh_list:
+            # Checking for tuple. Tuple instance is dedicated for any element except ordered and unordered lists
+            if isinstance(amfsh, tuple):
+                # amfsh as tuple: (alignment, argMultiFontStringHelper, margin)
+                new_par = self.Report.add_paragraph()
+                algn_map = {'CENTER': WD_ALIGN_PARAGRAPH.CENTER, 'LEFT': WD_ALIGN_PARAGRAPH.LEFT,
+                            'RIGHT': WD_ALIGN_PARAGRAPH.RIGHT, 'JUSTIFY': WD_ALIGN_PARAGRAPH.JUSTIFY}
+                new_par.alignment = algn_map.get(amfsh[0], WD_ALIGN_PARAGRAPH.LEFT)
+                if amfsh[2] is not None and amfsh[2][0] == 'margin-right':
+                    new_par.paragraph_format.right_indent = Pt(amfsh[2][1])
+                elif amfsh[2] is not None and amfsh[2][0] == 'margin-left':
+                    new_par.paragraph_format.left_indent = Pt(amfsh[2][1])
+                self.generate_multi_font_string(multi_font_string=amfsh[1], paragraph=new_par)
+            # Checking for list. List instance is dedicated for ordered and unordered lists (needs paragraph styling)
+            elif isinstance(amfsh, list):
+                # amfsh as list: [un/ordered list element, un/ordered list element, un/ordered list element, ...]
+                for elem in amfsh:
+                    # elem as list: [alignment, argMultiFontStringHelper, margin, list style]
+                    new_par = self.Report.add_paragraph(style=elem[3])
+                    algn_map = {'CENTER': WD_ALIGN_PARAGRAPH.CENTER, 'LEFT': WD_ALIGN_PARAGRAPH.LEFT,
+                                'RIGHT': WD_ALIGN_PARAGRAPH.RIGHT, 'JUSTIFY': WD_ALIGN_PARAGRAPH.JUSTIFY}
+                    new_par.alignment = algn_map.get(elem[0], WD_ALIGN_PARAGRAPH.LEFT)
+                    if elem[2] is not None and elem[2][0] == 'margin-right':
+                        new_par.paragraph_format.right_indent = Pt(elem[2][1])
+                    elif elem[2] is not None and elem[2][0] == 'margin-left':
+                        new_par.paragraph_format.left_indent = Pt(elem[2][1])
+                    self.generate_multi_font_string(multi_font_string=elem[1], paragraph=new_par)
 
     @staticmethod
     def insert_paragraph_after(paragraph, text=None, style=None):
@@ -932,6 +1059,11 @@ class argWordBackend(argBackendBase):
             elif item_type == "inline-docx":
                 # Append inline-docx
                 self.inline_docx(data=item)
+
+            # Handle html
+            elif item_type == "html":
+                # Append html
+                self.add_html(data=item)
 
             # Proceed with recursion if needed
             if "sections" in item:
@@ -1207,7 +1339,13 @@ class argWordBackend(argBackendBase):
             return self.generate_multi_font_string(string, self.Report.add_paragraph())
         else:
             # Directly insert Word fragment into the report
-            return self.Report.add_paragraph(string)
+            return self.Report.add_paragraph(self.apply_break_lines(no_lb_string=string))
+
+    @staticmethod
+    def apply_break_lines(no_lb_string: str) -> str:
+        """ Takes string without break lines"""
+        lb_string = no_lb_string.replace('\\', '\n')
+        return lb_string
 
     @staticmethod
     def parse_vertical_alignment(headers: list, rows: list) -> list:

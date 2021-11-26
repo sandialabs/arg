@@ -37,6 +37,7 @@
 #HEADER
 
 import os
+from typing import Union
 
 import yaml
 
@@ -70,7 +71,7 @@ class argMultiFontStringHelper:
         """
 
         # Return sum of internal string lengths
-        return sum(len(s) for (s, _, _) in self.StringMap)
+        return sum(len(s) for (s, _, _, _) in self.StringMap)
 
     def clear(self):
         """ Clear internal storage
@@ -116,8 +117,12 @@ class argMultiFontStringHelper:
                   'w') as f:
             f.write("%s" % caption_string)
 
-    def append(self, string, font, color=None):
+    def append(self, string: str, font: Union[int, list], color: str = None, highlight_color: str = None):
         """ Try to append string/font pair to internal string
+            :param str string: Just a string (text) to be added
+            :param int font: Font from ARG types e.g. 0, 1, 2, 4, 8, 16
+            :param str color: RGB color (reg, green, blue values from 0-255) e.g. 255,0,0 or 255,165,0
+            :param str highlight_color: RGB color (reg, green, blue values from 0-255) e.g. 255,0,0 or 255,165,0
         """
 
         # Bail out if a non-string type was passed as first input
@@ -128,18 +133,22 @@ class argMultiFontStringHelper:
             return
 
         # Treat unrecognized font types as default
-        self.StringMap.append((
-            string,
-            self.Types.get("FontTypes", {}).get(font, 0),
-            color))
+        reversed_font_types = {val: key for key, val in self.Types.get("FontTypes", {}).items()}
+        if isinstance(font, int):
+            if reversed_font_types.get(font, None) is not None:
+                self.StringMap.append((string, font, color, highlight_color))
+        elif isinstance(font, list):
+            tmp_font_list = [fnt for fnt in font if reversed_font_types.get(fnt, None) is not None]
+            if len(font) == len(tmp_font_list):
+                self.StringMap.append((string, font, color, highlight_color))
 
     def iterator(self):
         """ Provide iterator over internals
         """
 
         # Create generator over list of doublets
-        for (string, font_bytes, color) in self.StringMap:
-            yield string, font_bytes, color
+        for (string, font_bytes, color, highlight_color) in self.StringMap:
+            yield string, font_bytes, color, highlight_color
 
     def execute_backend(self, handle=None):
         """ Delegate artifact creation to backend

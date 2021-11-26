@@ -149,61 +149,59 @@ def create_caption(backend,
         caption_string = argMultiFontStringHelper(backend)
 
         if prefix:
-            caption_string.append(
-                prefix[0].upper() + prefix[1:] + " plot", "default")
+            caption_string.append(prefix[0].upper() + prefix[1:] + " plot", 0)
             if var_name or provenance:
-                caption_string.append(" of ", "default")
+                caption_string.append(" of ", 0)
 
             # Append variable name when available
             if var_name:
-                caption_string.append(
-                    "{}".format(var_name), "typewriter")
+                caption_string.append("{}".format(var_name), 4)
 
             # Connect variable name to provenance name when both are provided
             if var_name and provenance:
-                caption_string.append(" in ", "default")
+                caption_string.append(" in ", 0)
 
             # Append provenance name when provided
             if provenance:
-                caption_string.append(provenance, "typewriter")
+                caption_string.append(provenance, 4)
 
         else:
             if not var_x_name and not var_name:
-                caption_string.append("Curve", "default")
+                caption_string.append("Curve", 0)
             elif not var_name:
-                caption_string.append("{}".format(var_x_name), "typewriter")
-                caption_string.append(" curve", "default")
+                caption_string.append("{}".format(var_x_name), 4)
+                caption_string.append(" curve", 0)
             elif not var_x_name:
-                caption_string.append("{}".format(var_name), "typewriter")
-                caption_string.append(" curve", "default")
+                caption_string.append("{}".format(var_name), 4)
+                caption_string.append(" curve", 0)
             else:
-                caption_string.append("{}".format(var_name), "typewriter")
-                caption_string.append(" vs. ", "italic")
-                caption_string.append("{}".format(var_x_name), "typewriter")
-                caption_string.append(" curve", "default")
+                caption_string.append("{}".format(var_name), 4)
+                caption_string.append(" vs. ", 1)
+                caption_string.append("{}".format(var_x_name), 4)
+                caption_string.append(" curve", 0)
 
             # Append function when available
             if function:
-                caption_string.append(" of", "default")
-                caption_string.append(" {}".format(function), "typewriter")
-                caption_string.append(" function", "default")
+                caption_string.append(" of", 0)
+                caption_string.append(" {}".format(function), 4)
+                caption_string.append(" function", 0)
 
             # Append model when available
             if model:
-                caption_string.append(" of", "default")
-                caption_string.append(" {}".format(model), "typewriter")
-                caption_string.append(" model", "default")
+                caption_string.append(" of", 0)
+                caption_string.append(" {}".format(model), 4)
+                caption_string.append(" model", 0)
 
             # Append material when available
             if material:
-                caption_string.append(" for", "default")
-                caption_string.append(" {}".format(material), "typewriter")
-                caption_string.append(" material", "default")
+                caption_string.append(" for", 0)
+                caption_string.append(" {}".format(material), 4)
+                caption_string.append(" material", 0)
 
         # Close caption string
         if suffix:
-            caption_string.append(suffix, "default")
-        caption_string.append('.', "default")
+            caption_string.append(suffix, 0)
+        caption_string.append('.', 0)
 
     # Otherwise create a plain string
     else:
