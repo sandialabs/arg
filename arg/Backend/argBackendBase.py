@@ -70,6 +70,9 @@ class argBackendBase:
         # Internal storage for the report
         self.Report = None
 
+        # Page orientation status
+        self.Orientation = 'portrait'
+
         # Load supported types
         common_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(common_dir, "../Common/argTypes.yml"),
@@ -597,8 +600,13 @@ class argBackendBase:
                     current_list = list()
                 nested_active += 1
                 if pos[1]:
-                    current_list.append(pos[0][2:-2])
-                    current_list.append({'attrs': pos[1]})
+                    if ';' in pos[1][0][1]:
+                        style_list = pos[1][0][1].split(';')
+                        current_list.append(pos[0][2:-2])
+                        current_list.append({'attrs': [('style', elem) for elem in style_list]})
+                    else:
+                        current_list.append(pos[0][2:-2])
+                        current_list.append({'attrs': pos[1]})
                 else:
                     current_list.append(pos[0][2:-2])
             elif pos[0].startswith('!__') and pos[0].endswith('__!'):
@@ -667,6 +675,14 @@ class argBackendBase:
                             indent = ['margin-left', attrs.get('margin-left', None)]
                         elif attrs.get('margin-right', None) is not None:
                             indent = ['margin-right', attrs.get('margin-right', None)]
+                        if attrs.get('font-size', None) is not None:
+                            font = {'font-size': attrs.get('font-size', 11)}
+                        if attrs.get('font-family', None) is not None:
+                            if isinstance(font, dict):
+                                font['font-family'] = attrs.get('font-family', None)
+                            elif isinstance(font, int):
+                                font = {'font-size': attrs.get('font-size', 11),
+                                        'font-family': attrs.get('font-family', None)}
                     elif isinstance(elem, dict) and elem.get('data', None) is not None:
                         string = elem.get('data')
                         amfsh.append(string=string, font=font, color=color, highlight_color=highlight_color)
@@ -681,6 +697,8 @@ class argBackendBase:
                 list_type = None
                 cur_list_word = None
                 font = 0
+                color = None
+                highlight_color = None
                 for elem in html_tag:
                     if isinstance(elem, str) and bool(elem == 'ul' or elem == 'ol'):
                         list_map = {'ul': 'List Bullet', 'ol': 'List Number'}
@@ -706,17 +724,19 @@ class argBackendBase:
                 returned_list.append(list_list)
         return returned_list
 
-    @staticmethod
-    def decode_attrs(attrs: list) -> dict:
+    def decode_attrs(self, attrs: list) -> dict:
         """ Decodes attrs list and returns a dict with more Word applicable form. """
         attrs_dict = dict()
         for attr in attrs:
             if attr[0] == 'style':
                 attr_list = attr[1].split(':')
                 if attr_list[0] == 'color':
-                    color_hex = attr_list[1].replace('#', '')
-                    r, g, b = str(int(color_hex[0:2], 16)), str(int(color_hex[2:4], 16)), str(int(color_hex[4:6], 16))
-                    attrs_dict['color'] = ','.join([r, g, b])
+                    if self.colors.get(attr_list[1], None) is not None:
+                        attrs_dict['color'] = self.colors.get(attr_list[1]).replace(' ', '')
+                    else:
+                        color_hex = attr_list[1].replace('#', '')
+                        r, g, b = str(int(color_hex[0:2], 16)), str(int(color_hex[2:4], 16)), str(int(color_hex[4:6], 16))
+                        attrs_dict['color'] = ','.join([r, g, b])
                 elif attr_list[0] == 'background-color':
                     attrs_dict['highlight_color'] = attr_list[1]
                 elif attr_list[0] == 'text-align':
@@ -725,6 +745,14 @@ class argBackendBase:
                     attrs_dict['margin-left'] = int(attr_list[1].replace('px', ''))
                 elif attr_list[0] == 'margin-right':
                     attrs_dict['margin-right'] = int(attr_list[1].replace('px', ''))
+                elif attr_list[0] == 'font-size':
+                    font_mapper = {'small': 8, 'medium': 11, 'large': 16}
+                    if attr_list[1] in font_mapper.keys():
+                        attrs_dict['font-size'] = font_mapper.get(attr_list[1], 11)
+                    else:
+                        attrs_dict['font-size'] = int(attr_list[1].replace('pt', '').replace('px', ''))
+                elif attr_list[0] == 'font-family':
+                    attrs_dict['font-family'] = attr_list[1].split(',')[0].replace('"', '')
         return attrs_dict
 
     @staticmethod

@@ -485,6 +485,19 @@ class argLaTeXBackend(argBackendBase):
                 elif 14 in font_bits:
                     string = r"{\Large " + f'{string}' + r"}"
 
+            elif isinstance(font_bits, dict):
+                if font_bits.get('font-size', None) is not None:
+                    if font_bits.get('font-size', None) == 16:
+                        string = r"{\Large " + f'{string}' + r"}"
+                    elif font_bits.get('font-size', None) == 11:
+                        string = r"{\normalsize " + f'{string}' + r"}"
+                    elif font_bits.get('font-size', None) == 8:
+                        string = r"{\small " + f'{string}' + r"}"
+
+                if font_bits.get('font-family', None) is not None:
+                    # Add font family support?
+                    pass
+
             if color:
                 if self.colors.get(color, None) is None:
                     rgb = color.split(',')
@@ -643,29 +656,29 @@ class argLaTeXBackend(argBackendBase):
     def add_subsubsection(self, item, numbered=True):
         """Add subsubsection to the report
         """
-
         # Call appropriate subsubdivision method
+        self.run_orientation_action(item=item)
         self.add_subdivision(item, "subsubsection" + ('' if numbered else '*'))
 
     def add_subsection(self, item, numbered=True):
         """Add subsection to the report
         """
-
         # Call appropriate subdivision method
+        self.run_orientation_action(item=item)
         self.add_subdivision(item, "subsection" + ('' if numbered else '*'))
 
     def add_section(self, item, numbered=True):
         """Add section to the report
         """
-
         # Call appropriate subdivision method
+        self.run_orientation_action(item=item)
         self.add_subdivision(item, "section" + ('' if numbered else '*'))
 
     def add_chapter(self, item, numbered=True):
         """Add chapter to the report
         """
-
         # Call appropriate subdivision method
+        self.run_orientation_action(item=item)
         self.add_subdivision(item, "chapter" + ('' if numbered else '*'))
 
     def add_page_break(self):
@@ -796,6 +809,23 @@ class argLaTeXBackend(argBackendBase):
                     table.append(pl.Command(
                         "caption",
                         NoEscape(caption_string.execute_backend())))
+
+    def run_orientation_action(self, item: dict) -> None:
+        """ Set orientation as well as append landscape mode to LaTeX when needed.
+        """
+        if item.get('orientation', None) is None and self.Orientation == 'portrait':
+            pass
+        elif item.get('orientation', None) is None and self.Orientation == 'landscape':
+            self.Orientation = 'portrait'
+            self.Report.append(NoEscape(r'\end{landscape}'))
+        elif item.get('orientation', None) == self.Orientation:
+            pass
+        elif item.get('orientation', None) == 'landscape' and self.Orientation == 'portrait':
+            self.Orientation = 'landscape'
+            self.Report.append(NoEscape(r'\begin{landscape}'))
+        elif item.get('orientation', None) == 'portrait' and self.Orientation == 'landscape':
+            self.Orientation = 'portrait'
+            self.Report.append(NoEscape(r'\end{landscape}'))
 
     def add_color_table(self, data: dict) -> None:
         """ Add colored table to the report
@@ -1059,6 +1089,10 @@ class argLaTeXBackend(argBackendBase):
 
         # Append backend-specific postamble
         self.append_document_postamble()
+
+        # Make sure landscape mode is properly closed
+        if self.Orientation == 'landscape':
+            self.Report.append(NoEscape(r'\end{landscape}'))
 
         if self.Parameters.TexFile is not None and self.Parameters.TexFile:
             self.Report.generate_tex()

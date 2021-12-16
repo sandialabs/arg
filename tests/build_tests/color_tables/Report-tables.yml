@@ -43,9 +43,11 @@ chapters:
   string: 'This sample report illustrates % the automatic report generator (ARG).'
 - n: chapter
   title: Color Table 100%
+  orientation: landscape
   sections:
   - n: section
     title: Color Table Generation 100%
+    orientation: landscape
     string: 'This section provides a colored table generation.'
     sections:
     - n: color-table
