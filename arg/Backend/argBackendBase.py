@@ -585,38 +585,145 @@ class argBackendBase:
     _CELL_PROPS = {0: 'value', 1: 'background-color', 2: 'foreground-color', 3: 'horizontal-alignment',
                    4: 'vertical-alignment'}
 
-    @staticmethod
-    def nesting_html_list(html_list: list) -> list:
-        """
-        Function takes html_list which is a representation of HTML document and returns nested list which corresponds to
-        document structure.
-        """
+    def nesting_html_list(self, html_list: list) -> list:
         nested_list = list()
-        current_list = list()
-        nested_active = 0
+        nesting_level = None
+        correct_level_list = None
         for pos in html_list:
+            safety_flag = None
+            # Each paragraph or span starts with _! and ends with !_
             if pos[0].startswith('_!') and pos[0].endswith('!_'):
-                if nested_active == 0:
-                    current_list = list()
-                nested_active += 1
-                if pos[1]:
-                    if ';' in pos[1][0][1]:
-                        style_list = pos[1][0][1].split(';')
-                        current_list.append(pos[0][2:-2])
-                        current_list.append({'attrs': [('style', elem) for elem in style_list]})
-                    else:
-                        current_list.append(pos[0][2:-2])
-                        current_list.append({'attrs': pos[1]})
+                # Should do level up
+                if nesting_level is None:
+                    nesting_level = 0
                 else:
-                    current_list.append(pos[0][2:-2])
+                    nesting_level += 1
+                # Putting element in correct place
+                # Beginning of iteration, nested list is empty
+                if not nested_list:
+                    nested_list.append(nesting_level)
+                    if pos[1]:
+                        if ';' in pos[1][0][1]:
+                            style_list = pos[1][0][1].split(';')
+                            nested_list.append(
+                                {'symbol': pos[0][2:-2], 'attrs': [('style', elem) for elem in style_list]})
+                        else:
+                            nested_list.append({'symbol': pos[0][2:-2], 'attrs': pos[1]})
+                    else:
+                        nested_list.append({'symbol': pos[0][2:-2]})
+                elif self.check_if_data_is_last_and_there_doc(nested_list=nested_list, nesting_level=nesting_level):
+                    correct_level_list = nested_list
+                    _, doc_pos = self.find_doc_level(list_to_look=correct_level_list)
+                    level_to_put_doc = nesting_level - 1
+                    for lvl in range(level_to_put_doc):
+                        correct_level_list = correct_level_list[doc_pos[lvl]].get('doc')
+                    correct_level_list.append({'doc': []})
+                    correct_level_list = correct_level_list[-1].get('doc')
+                    correct_level_list.append(nesting_level)
+                    if pos[1]:
+                        if ';' in pos[1][0][1]:
+                            style_list = pos[1][0][1].split(';')
+                            correct_level_list.append(
+                                {'symbol': pos[0][2:-2], 'attrs': [('style', elem) for elem in style_list]})
+                        else:
+                            correct_level_list.append({'symbol': pos[0][2:-2], 'attrs': pos[1]})
+                    else:
+                        correct_level_list.append({'symbol': pos[0][2:-2]})
+                    safety_flag = True
+
+                # Looking for list on the level which corresponds to nesting level
+                elif nested_list[0] < nesting_level and safety_flag is None:
+                    doc_nesting_level = list()
+                    while len(doc_nesting_level) - 1 < nesting_level:
+                        # Need to iterate over nested list backward to look for dict with 'doc' key
+                        doc_exists, doc_nesting_level = self.find_doc_level(list_to_look=nested_list)
+                        # First iteration
+                        if not doc_exists and not doc_nesting_level:
+                            nested_list.append({'doc': []})
+                        elif len(doc_nesting_level) < nesting_level:
+                            correct_level_list = nested_list
+                            for elem in doc_nesting_level:
+                                correct_level_list = correct_level_list[elem].get('doc')
+                            correct_level_list.append({'doc': []})
+                        # Case when it's ok to put another level and tag as well
+                        elif len(doc_nesting_level) == nesting_level:
+                            correct_level_list = nested_list
+                            for elem in doc_nesting_level:
+                                correct_level_list = correct_level_list[elem].get('doc')
+                            correct_level_list.append(nesting_level)
+                            if pos[1]:
+                                if ';' in pos[1][0][1]:
+                                    style_list = pos[1][0][1].split(';')
+                                    correct_level_list.append(
+                                        {'symbol': pos[0][2:-2], 'attrs': [('style', elem) for elem in style_list]})
+                                else:
+                                    correct_level_list.append({'symbol': pos[0][2:-2], 'attrs': pos[1]})
+                            else:
+                                correct_level_list.append({'symbol': pos[0][2:-2]})
+                            break
+                # Level 0 on nested list, just adding next tag
+                else:
+                    pass
+
+            # Each data starts with !__ and ends with __!
             elif pos[0].startswith('!__') and pos[0].endswith('__!'):
-                current_list.append({pos[0][3:-3]: pos[1]})
+                # Should add data to current nesting level
+                if not correct_level_list:
+                    nested_list.append({pos[0][3:-3]: pos[1]})
+                else:
+                    correct_level_list.append({pos[0][3:-3]: pos[1]})
+
+            # Each paragraph or span ends with __! and ends with !__
             elif pos[0].startswith('__!') and pos[0].endswith('!__'):
-                nested_active -= 1
-                if nested_active == 0:
-                    nested_list.append(current_list)
+                # Should do level down
+                nesting_level -= 1
+                try:
+                    # Find correct level list
+                    doc_nesting_level = doc_nesting_level[:-1]
+                    correct_level_list = nested_list
+                    for elem in doc_nesting_level:
+                        correct_level_list = correct_level_list[elem].get('doc')
+                except:
+                    print('NO doc_nesting_level')
 
         return nested_list
+
+    def check_if_data_is_last_and_there_doc(self, nested_list: list, nesting_level: int) -> bool:
+        """ Checks if `data` exists in one level down than nesting_level.
+        """
+        correct_level_list = nested_list
+        _, doc_pos = self.find_doc_level(list_to_look=correct_level_list)
+        lvl_to_check = nesting_level - 1
+        for lvl in range(lvl_to_check):
+            correct_level_list = correct_level_list[doc_pos[lvl]].get('doc')
+        doc_in = False
+        for elem in correct_level_list:
+            if isinstance(elem, dict) and 'doc' in elem.keys():
+                doc_in = True
+        if correct_level_list[-1].get('data', None) is not None and doc_in:
+            return True
+        return False
+
+    @staticmethod
+    def find_doc_level(list_to_look: list) -> tuple:
+        """ Checks if doc exists and which level is available.
+            Returns tuple of (doc_exists: bool, doc_nesting_level: list).
+        """
+        doc_nesting_level = list()
+        doc_exists = True
+        list_to_look_at = list_to_look
+        while doc_exists:
+            if not list_to_look_at:
+                doc_exists = False
+                break
+            for num, elem in reversed(list(enumerate(list_to_look_at))):
+                if isinstance(elem, dict) and 'doc' in elem.keys():
+                    doc_nesting_level.append(num)
+                    list_to_look_at = list_to_look_at[num].get('doc')
+                    break
+                else:
+                    doc_exists = False
+        return doc_exists, doc_nesting_level
 
     def map_nested_list_to_amfsh(self, nested_list: list) -> list:
         """ Iterates over nested list and returns a final list which consists information needed to be put into Word
