@@ -117,10 +117,10 @@ class argMultiFontStringHelper:
                   'w') as f:
             f.write("%s" % caption_string)
 
-    def append(self, string: str, font: Union[int, list], color: str = None, highlight_color: str = None):
+    def append(self, string: str, font: Union[int, list, dict], color: str = None, highlight_color: str = None):
         """ Try to append string/font pair to internal string
             :param str string: Just a string (text) to be added
-            :param int font: Font from ARG types e.g. 0, 1, 2, 4, 8, 16
+            :param Union[int, list, dict] font: Font from ARG types e.g. 0, 1, 2 or {'font-size': 12} or [0, 1, 2]
             :param str color: RGB color (reg, green, blue values from 0-255) e.g. 255,0,0 or 255,165,0
             :param str highlight_color: RGB color (reg, green, blue values from 0-255) e.g. 255,0,0 or 255,165,0
         """
@@ -141,6 +141,8 @@ class argMultiFontStringHelper:
             tmp_font_list = [fnt for fnt in font if reversed_font_types.get(fnt, None) is not None]
             if len(font) == len(tmp_font_list):
                 self.StringMap.append((string, font, color, highlight_color))
+        elif isinstance(font, dict):
+            self.StringMap.append((string, font, color, highlight_color))
 
     def iterator(self):
         """ Provide iterator over internals

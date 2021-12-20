@@ -130,7 +130,7 @@ chapters:
             sections:
               - n: html
                 html_string: "<h1>G_Yield heading 1</h1>
-<p>The server configuration is described in the report <strong><span style=\"background-color:#c0392b\">above</span></strong>.</p>"
+<p>The server configuration is <span style=\"color:black\">described</span> in the report <strong><span style=\"background-color:#c0392b\">above</span></strong>.</p>"
           - n: subsection
             title: HTML 4 Subsection!
             sections:
@@ -139,3 +139,5 @@ chapters:
                   <h2>Intended purpose header</h2>
 
                   <p>The purpose of this model is to describe the CF features and <strong><span style="background-color:#c0392b">capabilities</span></strong>.</p>
+
+                  <p style="margin-left:40px"><span style="font-size:16px"><span style="color:black"><span style="font-family:&quot;Calibri&quot;,sans-serif">Set at &quot;<em>High&quot;</em>: Calibrated to cylinder experiments.</span></span></span></p>

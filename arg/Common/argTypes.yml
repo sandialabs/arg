@@ -81,6 +81,7 @@ FontColors:
   orange: 255, 165, 0
   green: 0, 180, 0
   blue: 0, 0, 255
+  black: 0, 0, 0
 
 ReportTypes:
   Report:

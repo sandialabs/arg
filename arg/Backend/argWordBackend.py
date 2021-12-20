@@ -205,7 +205,6 @@ class argWordBackend(argBackendBase):
 
             # Iterate over all items in string helper
             for string, font_bits, color, highlight_color in multi_font_string.iterator():
-
                 if isinstance(font_bits, int):
                     # Map Greek letter to unicode when requested
                     if font_bits == 16:
@@ -276,6 +275,13 @@ class argWordBackend(argBackendBase):
                         run.font.size = Pt(11)
                     else:
                         run.font.name = self.fonts.get("default", None)
+
+                elif isinstance(font_bits, dict):
+                    run = paragraph.add_run(string)
+                    if font_bits.get('font-size', None) is not None:
+                        run.font.size = Pt(font_bits.get('font-size', 11))
+                    if font_bits.get('font-family', None) is not None:
+                        run.font.name = font_bits.get('font-family', None)
 
                 if color:
                     if self.colors.get(color, None) is None:
@@ -503,6 +509,8 @@ class argWordBackend(argBackendBase):
         """
 
         # Call appropriate subdivision method
+        if self.check_orientation_change(item=item):
+            self.change_orientation()
         self.add_subdivision(item, 4)
 
     def add_subsection(self, item, numbered=True):
@@ -510,6 +518,8 @@ class argWordBackend(argBackendBase):
         """
 
         # Call appropriate subdivision method
+        if self.check_orientation_change(item=item):
+            self.change_orientation()
         self.add_subdivision(item, 3)
 
     def add_section(self, item, numbered=True):
@@ -517,6 +527,8 @@ class argWordBackend(argBackendBase):
         """
 
         # Call appropriate subdivision method
+        if self.check_orientation_change(item=item):
+            self.change_orientation()
         self.add_subdivision(item, 2)
 
     def add_chapter(self, item, numbered=True):
@@ -527,6 +539,8 @@ class argWordBackend(argBackendBase):
         self.Report.add_page_break()
 
         # Call appropriate subdivision method
+        if self.check_orientation_change(item=item):
+            self.change_orientation()
         self.add_subdivision(item, 1)
 
     def add_page_break(self):
@@ -667,10 +681,27 @@ class argWordBackend(argBackendBase):
         current_section = self.Report.sections[-1]
         new_width, new_height = current_section.page_height, current_section.page_width
         new_section = self.Report.add_section(WD_SECTION_START.NEW_PAGE)
-        new_section.orientation = WD_ORIENTATION.LANDSCAPE
+        if self.Orientation == 'portrait':
+            new_section.orientation = WD_ORIENTATION.LANDSCAPE
+            self.Orientation = 'landscape'
+        elif self.Orientation == 'landscape':
+            new_section.orientation = WD_ORIENTATION.PORTRAIT
+            self.Orientation = 'portrait'
         new_section.page_width = new_width
         new_section.page_height = new_height
         return new_section
+
+    def check_orientation_change(self, item: dict) -> bool:
+        """ Returns True if the page orientation needs to be changed. Returns False if no changes needed.
+        """
+        if item.get('orientation', None) is None and self.Orientation == 'portrait':
+            return False
+        elif item.get('orientation', None) is None and self.Orientation == 'landscape':
+            return True
+        elif item.get('orientation', None) == self.Orientation:
+            return False
+        elif item.get('orientation', None) != self.Orientation:
+            return True
 
     def add_color_table(self, data: dict) -> None:
         """ Add colored table to the report
