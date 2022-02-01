@@ -808,9 +808,9 @@ class argWordBackend(argBackendBase):
             # Setting counter coresponding to paragraphs
             counter = 0
             # Iterating over elements in document to inline
-            for element in inline_docx.element.body:
+            for element in inline_docx.paragraphs:
                 # If element is a paragraph, counter gets incremented
-                if isinstance(element, docx.oxml.text.paragraph.CT_P):
+                if isinstance(element, Paragraph):
                     # Eliminate use of style which does not exist
                     if element.style == 'Caption1':
                         element.style = 'Caption'
@@ -841,11 +841,30 @@ class argWordBackend(argBackendBase):
                         counter += 1
                     # Paragraph with no photo is simply added to the current report
                     else:
-                        self.Report.element.body.append(element)
+                        if element.text:
+                            new_par = self.Report.add_paragraph()
+                            self.copy_paragraph(copy_to=new_par, copy_from=element)
                         counter += 1
-                # If element was not a paragraph is simply added to the current report
-                else:
-                    self.Report.element.body.append(element)
+
+    @staticmethod
+    def copy_paragraph(copy_to: Paragraph, copy_from: Paragraph):
+        """
+        Copies everything from `copy_from` to `copy_to` paragraph.
+        """
+        for run in copy_from.runs:
+            output_run = copy_to.add_run(run.text, run.style)
+            output_run.bold = run.bold
+            output_run.italic = run.italic
+            output_run.underline = run.underline
+            output_run.font.color.rgb = run.font.color.rgb
+            output_run.style.name = run.style.name
+        copy_to.paragraph_format.alignment = copy_from.paragraph_format.alignment
+        if copy_from.style.style_id == 'Caption1':
+            copy_from.style.style_id = 'Caption'
+            copy_from.style.style_id = 'Caption'
+            copy_to.style = copy_from.style
+        else:
+            copy_to.style = copy_from.style
 
     def add_html(self, data: dict) -> None:
         """ Adds html content to Word document. """
