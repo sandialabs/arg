@@ -897,6 +897,11 @@ class argLaTeXBackend(argBackendBase):
 
     def add_html(self, data: dict) -> None:
         """ Adds html content to pdf document. """
+        list_type_map = {'ul': 'itemize', 'ol': 'enumerate'}
+        alingment_map = {'LEFT': [NoEscape(r"\begin{FlushLeft}"), NoEscape(r"\end{FlushLeft}")],
+                         'RIGHT': [NoEscape(r"\begin{FlushRight}"), NoEscape(r"\end{FlushRight}")],
+                         'CENTER': [NoEscape(r"\begin{Center}"), NoEscape(r"\end{Center}")],
+                         'JUSTIFY': [NoEscape(r"\begin{justify}"), NoEscape(r"\end{justify}")]}
         # Reading html data as a string
         html_str = data.get('html_string', None)
         # Parsing html data and get a html document in a form of list
@@ -904,40 +909,45 @@ class argLaTeXBackend(argBackendBase):
         arg_html_parser.reset()
         html_list = arg_html_parser.get_mapped_html(html_str)
         # Parsing an html list into nested list over which is easier to iterate
-        nested_list = self.nesting_html_list(html_list=html_list)
+        flat_list = self.get_flat_list(html_list=html_list)
+        combined_list = self.combine_attrs(flat_list=flat_list)
         # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
-        amfsh_list = self.map_nested_list_to_amfsh(nested_list=nested_list)
-        # Final iteration over ARG Multi Font String Helper list
-        for amfsh in amfsh_list:
-            alingment_map = {'LEFT': [NoEscape(r"\begin{FlushLeft}"), NoEscape(r"\end{FlushLeft}")],
-                             'RIGHT': [NoEscape(r"\begin{FlushRight}"), NoEscape(r"\end{FlushRight}")],
-                             'CENTER': [NoEscape(r"\begin{Center}"), NoEscape(r"\end{Center}")],
-                             'JUSTIFY': [NoEscape(r"\begin{justify}"), NoEscape(r"\end{justify}")],
-                             }
-            # Checking for tuple. Tuple instance is dedicated for any element except ordered and unordered lists
-            if isinstance(amfsh, tuple):
-                # amfsh as tuple: (alignment, argMultiFontStringHelper, margin)
-                self.Report.append(pl.Command("par"))
-                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[0])
-                string = self.generate_multi_font_string(multi_font_string=amfsh[1])
-                self.Report.append(NoEscape(string))
-                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[1])
-            # Checking for list. List instance is dedicated for ordered and unordered lists (needs paragraph styling)
-            elif isinstance(amfsh, list):
-                # amfsh as list: [un/ordered list element, un/ordered list element, un/ordered list element, ...]
-                lst_type = {'List Bullet': 'itemize', 'List Number': 'enumerate'}
-                list_end = len(amfsh)
-                list_type = lst_type.get(amfsh[0][3])
-                for num, elem in enumerate(amfsh, start=1):
-                    if num == 1:
-                        lst_command = r"\begin{" + f"{list_type}" + r"}"
+        amfsh_dict = self.map_combined_list_to_amfsh(combined_list=combined_list)
+        # Final iteration over ARG Multi Font String Helper dict
+        list_control = {num: {'started': False, 'uuid': None, 'list_type': None} for num in range(1, 11)}
+        for uuid_key, amfsh in amfsh_dict.get('amfsh').items():
+            if (lst := amfsh_dict.get('html_list').get(uuid_key)) and lst is not None:
+                list_uuid = [le.get('symbol_id') for le in lst if le.get('symbol') in list_type_map][-1]
+                list_type = [list_type_map.get(le.get('symbol')) for le in lst if le.get('symbol') in list_type_map][-1]
+                list_level = [le.get('list_level') for le in lst if le.get('symbol') in list_type_map][-1]
+                # Start a list
+                if not list_control.get(list_level).get('started'):
+                    lst_command = r"\begin{" + f"{list_type}" + r"}"
+                    self.Report.append(NoEscape(lst_command))
+                    list_control[list_level]['started'] = True
+                    list_control[list_level]['uuid'] = list_uuid
+                    list_control[list_level]['list_type'] = list_type
+                # Check for list_levels above current to end
+                for num in range(10, list_level, -1):
+                    if list_control[num]['started']:
+                        lst_command = r"\end{" + f"{list_control[num]['list_type']}" + r"}"
                         self.Report.append(NoEscape(lst_command))
-                    string = self.generate_multi_font_string(multi_font_string=elem[1])
+                        list_control[num]['started'] = False
+                # List's uuid check
+                if list_control.get(list_level).get('uuid') == list_uuid:
+                    string = self.generate_multi_font_string(multi_font_string=amfsh)
                     string = r"\item " + string
                     self.Report.append(NoEscape(string))
-                    if num == list_end:
-                        lst_command = r"\end{" + f"{list_type}" + r"}"
-                        self.Report.append(NoEscape(lst_command))
+            else:
+                if list_control[1]['started']:
+                    lst_command = r"\end{" + f"{list_control[1]['list_type']}" + r"}"
+                    self.Report.append(NoEscape(lst_command))
+                    list_control[1]['started'] = False
+                self.Report.append(pl.Command("par"))
+                self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[0])
+                string = self.generate_multi_font_string(multi_font_string=amfsh)
+                self.Report.append(NoEscape(string))
+                self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[1])
 
     def add_figure(self, arguments):
         """Add figure to the report
