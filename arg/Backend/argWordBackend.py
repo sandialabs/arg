@@ -263,26 +263,32 @@ class argWordBackend(argBackendBase):
                         run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
                     elif 9 in font_bits:
                         run.font.size = Pt(14)
+                        run.font.bold = True
                     elif 10 in font_bits:
                         run.font.size = Pt(13)
+                        run.font.bold = True
                     elif 11 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.bold = True
                     elif 12 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.bold = True
+                        run.font.italic = True
                     elif 13 in font_bits:
                         run.font.size = Pt(11)
                     elif 14 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.italic = True
                     else:
                         run.font.name = self.fonts.get("default", None)
 
                 elif isinstance(font_bits, dict):
                     run = paragraph.add_run(string)
-                    if font_bits.get('font-size', None) is not None:
+                    if font_bits.get('font-size') is not None:
                         run.font.size = Pt(font_bits.get('font-size', 11))
-                    if font_bits.get('font-family', None) is not None:
-                        run.font.name = font_bits.get('font-family', None)
-                    if font_bits.get('font-list', None) is not None and font_bits.get('font-list', None):
+                    if font_bits.get('font-family') is not None:
+                        run.font.name = font_bits.get('font-family')
+                    if font_bits.get('font-list') is not None and font_bits.get('font-list'):
                         font_list = font_bits.get('font-list')
                         run.font.italic = True if 1 in font_list else False
                         run.font.bold = True if 2 in font_list else False
@@ -297,16 +303,22 @@ class argWordBackend(argBackendBase):
                                                            "default" if self.fonts.get("default") else None)
                         elif 9 in font_list:
                             run.font.size = Pt(14)
+                            run.font.bold = True
                         elif 10 in font_list:
                             run.font.size = Pt(13)
+                            run.font.bold = True
                         elif 11 in font_list:
                             run.font.size = Pt(11)
+                            run.font.bold = True
                         elif 12 in font_list:
                             run.font.size = Pt(11)
+                            run.font.bold = True
+                            run.font.italic = True
                         elif 13 in font_list:
                             run.font.size = Pt(11)
                         elif 14 in font_list:
                             run.font.size = Pt(11)
+                            run.font.italic = True
                         else:
                             run.font.name = self.fonts.get("default", None)
 

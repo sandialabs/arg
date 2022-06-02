@@ -92,7 +92,8 @@ chapters:
 <p style=\"text-align:justify\">It can be justified.</p>
 <p style=\"text-align:center\">The text can be centered.</p>
 <p style=\"text-align:right\">Or right-aligned.</p>
-<p style=\"margin-left:40px\">The indentation can be part of the content.</p>
+<p style=\"margin-left:40px\">The left indentation can be part of the content. The left indentation can be part of the content. The left indentation can be part of the content.</p>
+<p style=\"margin-right:40px\">The right indentation can be part of the content. The right indentation can be part of the content. The right indentation can be part of the content.</p>
 <p>It can contain lists:</p>
 <ul>
 	<li>First element</li>

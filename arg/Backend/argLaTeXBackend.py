@@ -418,9 +418,9 @@ class argLaTeXBackend(argBackendBase):
                                 string = string.replace(c, "\\" + c)
 
                     if font_bits == 1:
-                        string = italic(string)
+                        string = italic(string, escape=False)
                     elif font_bits == 2:
-                        string = bold(string)
+                        string = bold(string, escape=False)
                     elif font_bits == 3:
                         string = r"\underline{{{}}}".format(string)
                     elif font_bits == 4:
@@ -432,22 +432,22 @@ class argLaTeXBackend(argBackendBase):
                     elif font_bits == 8:
                         string = r"$\mathcal{{{}}}$".format(string)
                     elif font_bits == 9:
-                        string = bold(string)
-                        string = r"{\Huge " + f'{string}' + r"}"
-                    elif font_bits == 10:
-                        string = bold(string)
+                        string = bold(string, escape=False)
                         string = r"{\huge " + f'{string}' + r"}"
-                    elif font_bits == 11:
-                        string = bold(string)
+                    elif font_bits == 10:
+                        string = bold(string, escape=False)
                         string = r"{\LARGE " + f'{string}' + r"}"
+                    elif font_bits == 11:
+                        string = bold(string, escape=False)
+                        string = r"{\Large " + f'{string}' + r"}"
                     elif font_bits == 12:
-                        string = bold(string)
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = bold(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
                     elif font_bits == 13:
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = r"{\large " + f'{string}' + r"}"
                     elif font_bits == 14:
-                        string = italic(string)
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
 
             elif isinstance(font_bits, list):
                 if 16 in font_bits:
@@ -459,9 +459,9 @@ class argLaTeXBackend(argBackendBase):
                             if c in string:
                                 string = string.replace(c, "\\" + c)
                 if 1 in font_bits:
-                    string = italic(string)
+                    string = italic(string, escape=False)
                 if 2 in font_bits:
-                    string = bold(string)
+                    string = bold(string, escape=False)
                 if 3 in font_bits:
                     string = r"\underline{{{}}}".format(string)
                 if 4 in font_bits:
@@ -473,30 +473,72 @@ class argLaTeXBackend(argBackendBase):
                 if 8 in font_bits:
                     string = r"$\mathcal{{{}}}$".format(string)
                 elif 9 in font_bits:
-                    string = r"{\Huge " + f'{string}' + r"}"
-                elif 10 in font_bits:
                     string = r"{\huge " + f'{string}' + r"}"
-                elif 11 in font_bits:
+                elif 10 in font_bits:
                     string = r"{\LARGE " + f'{string}' + r"}"
+                elif 11 in font_bits:
+                    string = r"{\Large " + f'{string}' + r"}"
                 elif 12 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
                 elif 13 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
                 elif 14 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
 
             elif isinstance(font_bits, dict):
-                if font_bits.get('font-size', None) is not None:
-                    if font_bits.get('font-size', None) == 16:
+                if font_bits.get('font-size') is not None:
+                    for c in self.SpecialCharacters:
+                        if c in string:
+                            string = string.replace(c, "\\" + c)
+                    if font_bits.get('font-size') == 16:
                         string = r"{\Large " + f'{string}' + r"}"
-                    elif font_bits.get('font-size', None) == 11:
+                    elif font_bits.get('font-size') == 11:
                         string = r"{\normalsize " + f'{string}' + r"}"
-                    elif font_bits.get('font-size', None) == 8:
+                    elif font_bits.get('font-size') == 8:
                         string = r"{\small " + f'{string}' + r"}"
 
-                if font_bits.get('font-family', None) is not None:
+                if font_bits.get('font-family') is not None:
                     # Add font family support?
                     pass
+
+                if font_bits.get('font-list') is not None and font_bits.get('font-list'):
+                    font_list = font_bits.get('font-list')
+                    if [fb for fb in font_list if fb not in [9, 10, 11, 12, 13, 14]]:
+                        for c in self.SpecialCharacters:
+                            if c in string:
+                                string = string.replace(c, "\\" + c)
+                    if 1 in font_list:
+                        string = italic(string, escape=False)
+                    if 2 in font_list:
+                        string = bold(string, escape=False)
+                    if 3 in font_list:
+                        string = r"\underline{{{}}}".format(string)
+                    if 4 in font_list:
+                        string = r"\texttt{{{}}}".format(string)
+                    if 5 in font_list:
+                        string = r"\sout{{{}}}".format(string)
+                    if 6 in font_list:
+                        string = r"\textsubscript{" + f'{string}' + r"}"
+                    if 8 in font_list:
+                        string = r"$\mathcal{{{}}}$".format(string)
+                    if 9 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\huge " + f'{string}' + r"}"
+                    elif 10 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\LARGE " + f'{string}' + r"}"
+                    elif 11 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\Large " + f'{string}' + r"}"
+                    elif 12 in font_list:
+                        string = bold(string, escape=False)
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
+                    elif 13 in font_list:
+                        string = r"{\large " + f'{string}' + r"}"
+                    elif 14 in font_list:
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
 
             if color:
                 if self.colors.get(color, None) is None:
