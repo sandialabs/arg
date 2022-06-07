@@ -686,49 +686,75 @@ class argBackendBase:
     def map_combined_list_to_amfsh(self, combined_list: list) -> dict:
         amfsh_dict = {'amfsh': {}, 'alignment': {}, 'indent': {}, 'html_list': {}}
         alignment, indent = '', ''
+        last_uuid = None
         for elem in combined_list:
-            if amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
-                amfsh_dict['amfsh'][elem.get('paragraph').get('paragraph_uuid')] = argMultiFontStringHelper()
-            if amfsh_dict['alignment'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
-                amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = self.get_alignment(
-                    paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
-            if amfsh_dict['indent'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
-                amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = self.get_indent(
-                    paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
-            if amfsh_dict['html_list'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
-                amfsh_dict['html_list'][elem.get('paragraph').get('paragraph_uuid')] = elem.get('html_list')
-            string = elem.get('data')
-            color = None
-            highlight_color = None
-            font = {'font-list': []}
-            for attr_name, attr_value in elem.get('attrs').items():
-                # Font
-                if attr_name == 'font-list' and isinstance(attr_value, list):
-                    font['font-list'].extend(attr_value)
-                if attr_name == 'font-family':
-                    font['font-family'] = attr_value
-                if attr_name == 'font-size':
-                    font['font-size'] = attr_value
-                # Color
-                if attr_name == 'color':
-                    color = attr_value
-                # Background color
-                if attr_name == 'highlight_color':
-                    highlight_color = attr_value
-                # Alignment
-                if attr_name == 'alignment':
-                    alignment = attr_value
-                # Indentation
-                if attr_name == 'margin-left':
-                    indent = ['margin-left', attr_value]
-                elif attr_name == 'margin-right':
-                    indent = ['margin-right', attr_value]
-            if alignment:
-                amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = alignment
-            if indent:
-                amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = indent
-            amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')).append(
-                string=string, font=font, color=color, highlight_color=highlight_color)
+            if amfsh_dict['html_list'].get(last_uuid) == elem.get('html_list') and \
+                    amfsh_dict['html_list'].get(last_uuid):
+                # The case, where there are at least two different styled strings inside one list position
+                string = elem.get('data')
+                color = None
+                highlight_color = None
+                font = {'font-list': []}
+                for attr_name, attr_value in elem.get('attrs').items():
+                    # Font
+                    if attr_name == 'font-list' and isinstance(attr_value, list):
+                        font['font-list'].extend(attr_value)
+                    if attr_name == 'font-family':
+                        font['font-family'] = attr_value
+                    if attr_name == 'font-size':
+                        font['font-size'] = attr_value
+                    # Color
+                    if attr_name == 'color':
+                        color = attr_value
+                    # Background color
+                    if attr_name == 'highlight_color':
+                        highlight_color = attr_value
+                amfsh_dict['amfsh'].get(last_uuid).append(string=string, font=font, color=color,
+                                                          highlight_color=highlight_color)
+            else:
+                if amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['amfsh'][elem.get('paragraph').get('paragraph_uuid')] = argMultiFontStringHelper()
+                if amfsh_dict['alignment'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = self.get_alignment(
+                        paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
+                if amfsh_dict['indent'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = self.get_indent(
+                        paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
+                if amfsh_dict['html_list'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['html_list'][elem.get('paragraph').get('paragraph_uuid')] = elem.get('html_list')
+                string = elem.get('data')
+                color = None
+                highlight_color = None
+                font = {'font-list': []}
+                for attr_name, attr_value in elem.get('attrs').items():
+                    # Font
+                    if attr_name == 'font-list' and isinstance(attr_value, list):
+                        font['font-list'].extend(attr_value)
+                    if attr_name == 'font-family':
+                        font['font-family'] = attr_value
+                    if attr_name == 'font-size':
+                        font['font-size'] = attr_value
+                    # Color
+                    if attr_name == 'color':
+                        color = attr_value
+                    # Background color
+                    if attr_name == 'highlight_color':
+                        highlight_color = attr_value
+                    # Alignment
+                    if attr_name == 'alignment':
+                        alignment = attr_value
+                    # Indentation
+                    if attr_name == 'margin-left':
+                        indent = ['margin-left', attr_value]
+                    elif attr_name == 'margin-right':
+                        indent = ['margin-right', attr_value]
+                if alignment:
+                    amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = alignment
+                if indent:
+                    amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = indent
+                amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')).append(
+                    string=string, font=font, color=color, highlight_color=highlight_color)
+                last_uuid = elem.get('paragraph').get('paragraph_uuid')
         return amfsh_dict
 
     def get_alignment(self, paragraph_attrs: list) -> str:
