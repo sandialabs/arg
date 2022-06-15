@@ -619,7 +619,7 @@ class argBackendBase:
 
             # Find text and apply buffer to it
             elif pos[0].startswith('!__') and pos[0].endswith('__!'):
-                # Should add data to current nesting level
+                # Should add data to the current nesting level
                 flat_data_structure.append({pos[0][3:-3]: pos[1], 'buffer': [buf for buf in buffer]})
 
             # Each paragraph or span ends with __! and ends with !__
@@ -634,6 +634,7 @@ class argBackendBase:
         """ Change flat_list into combined_list, which could be easy applied to argMultiFontStringHelper """
         combined_list = []
         par_uuid = None
+        par_attrs = []
         for elem in flat_list:
             if par_uuid is None or elem.get('buffer')[0].get('symbol') == 'p':
                 if elem.get('buffer')[0].get('symbol') == 'p':
