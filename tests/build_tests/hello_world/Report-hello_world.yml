@@ -44,6 +44,11 @@ chapters:
       - n: section
         title: Hello, world! Section!
         sections:
+          - n: subsection
+            title: HTML Subsection!
+            sections:
+              - n: html
+                html_string: '<p style="margin-left:40px"><span style="font-size:16px"><span style="color:blue"><span style="font-family:&quot;Calibri&quot;,sans-serif">Set at <em>&quot;High&quot; </em>because although&nbsp;JWL </span></span>breaks down as the detonation departs from ideality&nbsp;it&nbsp;<span style="color:green"><span style="font-family:&quot;Calibri&quot;,sans-serif">is good for ideal detonation, and we believe it sufficiently predicts acceleration of the structure away from the detonation process zone.</span></span></span></p>'
           - n: inline-docx
             docx_path: 'Evidence.docx'
           - n: subsection
@@ -87,11 +92,18 @@ chapters:
 <p style=\"text-align:justify\">It can be justified.</p>
 <p style=\"text-align:center\">The text can be centered.</p>
 <p style=\"text-align:right\">Or right-aligned.</p>
-<p style=\"margin-left:40px\">The indentation can be part of the content.</p>
+<p style=\"margin-left:40px\">The left indentation can be part of the content. The left indentation can be part of the content. The left indentation can be part of the content.</p>
+<p style=\"margin-right:40px\">The right indentation can be part of the content. The right indentation can be part of the content. The right indentation can be part of the content.</p>
 <p>It can contain lists:</p>
 <ul>
 	<li>First element</li>
-	<li>Second one</li>
+	<li>Second one
+      <ul>
+        <li>Second list First element</li>
+        <li>Second list Second element</li>
+        <li>Second list Third element</li>
+      </ul>
+    </li>
 	<li>Third</li>
 </ul>
 <p>The list can be ordered:</p>

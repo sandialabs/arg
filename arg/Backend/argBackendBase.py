@@ -44,6 +44,7 @@ from math import sqrt
 import os
 import shutil
 import sys
+import uuid
 
 import yaml
 
@@ -586,143 +587,190 @@ class argBackendBase:
                    4: 'vertical-alignment'}
 
     @staticmethod
-    def nesting_html_list(html_list: list) -> list:
+    def get_flat_list(html_list: list) -> list:
+        """ Take html list as input. Iterate over and return data(string) and buffer with piece of information regarding
+            style/attributes which must be applied to this data. For each symbol there is also unique id provided.
         """
-        Function takes html_list which is a representation of HTML document and returns nested list which corresponds to
-        document structure.
-        """
-        nested_list = list()
-        current_list = list()
-        nested_active = 0
+        nesting_level = None
+        buffer = []
+        flat_data_structure = []
         for pos in html_list:
+            # Each paragraph or span starts with _! and ends with !_
             if pos[0].startswith('_!') and pos[0].endswith('!_'):
-                if nested_active == 0:
-                    current_list = list()
-                nested_active += 1
+                # Adjust level to current position
+                if nesting_level is None:
+                    nesting_level = 0
+                else:
+                    nesting_level += 1
+
+                # Add to buffer
                 if pos[1]:
                     if ';' in pos[1][0][1]:
                         style_list = pos[1][0][1].split(';')
-                        current_list.append(pos[0][2:-2])
-                        current_list.append({'attrs': [('style', elem) for elem in style_list]})
+                        buffer.append({'nl': nesting_level,
+                                       'symbol': pos[0][2:-2],
+                                       'symbol_id': uuid.uuid4(),
+                                       'attrs': [('style', elem) for elem in style_list]})
                     else:
-                        current_list.append(pos[0][2:-2])
-                        current_list.append({'attrs': pos[1]})
+                        buffer.append({'nl': nesting_level, 'symbol': pos[0][2:-2], 'symbol_id': uuid.uuid4(),
+                                       'attrs': pos[1]})
                 else:
-                    current_list.append(pos[0][2:-2])
+                    buffer.append({'nl': nesting_level, 'symbol': pos[0][2:-2], 'symbol_id': uuid.uuid4(), 'attrs': []})
+
+            # Find text and apply buffer to it
             elif pos[0].startswith('!__') and pos[0].endswith('__!'):
-                current_list.append({pos[0][3:-3]: pos[1]})
+                # Should add data to the current nesting level
+                flat_data_structure.append({pos[0][3:-3]: pos[1], 'buffer': [buf for buf in buffer]})
+
+            # Each paragraph or span ends with __! and ends with !__
             elif pos[0].startswith('__!') and pos[0].endswith('!__'):
-                nested_active -= 1
-                if nested_active == 0:
-                    nested_list.append(current_list)
+                # Adjust level to current position
+                nesting_level -= 1
+                buffer.pop()
 
-        return nested_list
+        return flat_data_structure
 
-    def map_nested_list_to_amfsh(self, nested_list: list) -> list:
-        """ Iterates over nested list and returns a final list which consists information needed to be put into Word
-            document.
-        """
-        returned_list = list()
-        tags = {'h1': {'font': 9}, 'h2': {'font': 10}, 'h3': {'font': 11}, 'h4': {'font': 12}, 'h5': {'font': 13},
-                'h6': {'font': 14}}
-        for html_tag in nested_list:
-            amfsh = argMultiFontStringHelper()
-            alignment = 'LEFT'
-            indent = None
-            attrs = None
-            string = ''
-            # Support case for headings from h1 to h6
-            if html_tag[0] in tags.keys():
-                if len(html_tag) == 2 and html_tag[1].get('data', None) is not None:
-                    string = html_tag[1].get('data', None)
-                    attrs = None
-                elif len(html_tag) == 3:
-                    if html_tag[1].get('data', None) is None:
-                        string = html_tag[2].get('data', None)
-                        attrs = html_tag[1].get('attrs', None)
+    def combine_attrs(self, flat_list: list) -> list:
+        """ Change flat_list into combined_list, which could be easy applied to argMultiFontStringHelper """
+        combined_list = []
+        par_uuid = None
+        par_attrs = []
+        for elem in flat_list:
+            if par_uuid is None or elem.get('buffer')[0].get('symbol') == 'p':
+                if elem.get('buffer')[0].get('symbol') == 'p':
+                    par_uuid = elem.get('buffer')[0].get('symbol_id')
+                    par_attrs = elem.get('buffer')[0].get('attrs')
+                else:
+                    par_uuid = uuid.uuid4()
+                    par_attrs = []
+            # List support
+            if [True for buf in elem.get('buffer') if buf.get('symbol') == 'ul' or buf.get('symbol') == 'ol']:
+                par_uuid = uuid.uuid4()
+                html_list = self.get_list_from_buffer(buffer=elem.get('buffer'))
+            else:
+                html_list = []
+            data = elem.get('data')
+            attrs = self.get_attrs_from_buffer(buffer=elem.get('buffer'))
+            paragraph = {'paragraph_uuid': par_uuid, 'paragraph_attrs': par_attrs}
+            combined_list.append({'data': data, 'attrs': attrs, 'paragraph': paragraph, 'html_list': html_list})
+
+        return combined_list
+
+    @staticmethod
+    def get_list_from_buffer(buffer: list) -> list:
+        """ Change buffer into list for later application. """
+        html_list = []
+        list_level = 0
+        for elem in buffer:
+            if elem.get('symbol') in ['ol', 'ul', 'li']:
+                if elem.get('symbol') in ['ol', 'ul']:
+                    list_level += 1
+                html_list.append({'symbol': elem.get('symbol'), 'symbol_id': elem.get('symbol_id'),
+                                  'list_level': list_level})
+
+        return html_list
+
+    def get_attrs_from_buffer(self, buffer: list) -> dict:
+        """ Change buffer into attrs, which could be easy applied to argMultiFontStringHelper """
+        fnt_map = {'em': 1, 'strong': 2, 'u': 3, 's': 5, 'sub': 6, 'h1': 9, 'h2': 10, 'h3': 11, 'h4': 12, 'h5': 13,
+                   'h6': 14}
+        attrs = {'font-list': []}
+        for elem in buffer:
+            if elem.get('symbol') == 'span':
+                if elem.get('attrs') is not None:
+                    attrs.update(self.decode_attrs(attrs=elem.get('attrs')))
+            elif elem.get('symbol') in fnt_map.keys():
+                attrs['font-list'].append(fnt_map.get(elem.get('symbol')))
+
+        return attrs
+
+    def map_combined_list_to_amfsh(self, combined_list: list) -> dict:
+        amfsh_dict = {'amfsh': {}, 'alignment': {}, 'indent': {}, 'html_list': {}}
+        alignment, indent = '', ''
+        last_uuid = None
+        for elem in combined_list:
+            if amfsh_dict['html_list'].get(last_uuid) == elem.get('html_list') and \
+                    amfsh_dict['html_list'].get(last_uuid):
+                # The case, where there are at least two different styled strings inside one list position
+                string = elem.get('data')
                 color = None
                 highlight_color = None
-                if attrs is not None:
-                    attrs = self.decode_attrs(attrs=attrs)
-                    color = attrs.get('color', None)
-                    highlight_color = attrs.get('highlight_color', None)
-                    if attrs.get('alignment', None) is not None:
-                        alignment = attrs.get('alignment', None)
-                    if attrs.get('margin-left', None) is not None:
-                        indent = ['margin-left', attrs.get('margin-left', None)]
-                    elif attrs.get('margin-right', None) is not None:
-                        indent = ['margin-right', attrs.get('margin-right', None)]
-                amfsh.append(string=string, font=tags.get(html_tag[0]).get('font'), color=color,
-                             highlight_color=highlight_color)
-                returned_list.append((alignment, amfsh, indent))
-            # Support case for Paragraph
-            elif html_tag[0] == 'p':
-                font = 0
+                font = {'font-list': []}
+                for attr_name, attr_value in elem.get('attrs').items():
+                    # Font
+                    if attr_name == 'font-list' and isinstance(attr_value, list):
+                        font['font-list'].extend(attr_value)
+                    if attr_name == 'font-family':
+                        font['font-family'] = attr_value
+                    if attr_name == 'font-size':
+                        font['font-size'] = attr_value
+                    # Color
+                    if attr_name == 'color':
+                        color = attr_value
+                    # Background color
+                    if attr_name == 'highlight_color':
+                        highlight_color = attr_value
+                amfsh_dict['amfsh'].get(last_uuid).append(string=string, font=font, color=color,
+                                                          highlight_color=highlight_color)
+            else:
+                if amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['amfsh'][elem.get('paragraph').get('paragraph_uuid')] = argMultiFontStringHelper()
+                if amfsh_dict['alignment'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = self.get_alignment(
+                        paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
+                if amfsh_dict['indent'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = self.get_indent(
+                        paragraph_attrs=elem.get('paragraph').get('paragraph_attrs'))
+                if amfsh_dict['html_list'].get(elem.get('paragraph').get('paragraph_uuid')) is None:
+                    amfsh_dict['html_list'][elem.get('paragraph').get('paragraph_uuid')] = elem.get('html_list')
+                string = elem.get('data')
                 color = None
                 highlight_color = None
-                attrs = None
-                for elem in html_tag:
-                    if isinstance(elem, str):
-                        font_map = {'p': 0, 'u': 3, 'strong': 2, 'em': 1, 's': 5, 'span': 0, 'sub': 6}
-                        font = font_map.get(elem, 0)
-                    elif isinstance(elem, dict) and elem.get('attrs', None) is not None:
-                        attrs = self.decode_attrs(attrs=elem.get('attrs'))
-                        color = attrs.get('color', None)
-                        highlight_color = attrs.get('highlight_color', None)
-                        if attrs.get('alignment', None) is not None:
-                            alignment = attrs.get('alignment', None)
-                        if attrs.get('margin-left', None) is not None:
-                            indent = ['margin-left', attrs.get('margin-left', None)]
-                        elif attrs.get('margin-right', None) is not None:
-                            indent = ['margin-right', attrs.get('margin-right', None)]
-                        if attrs.get('font-size', None) is not None:
-                            font = {'font-size': attrs.get('font-size', 11)}
-                        if attrs.get('font-family', None) is not None:
-                            if isinstance(font, dict):
-                                font['font-family'] = attrs.get('font-family', None)
-                            elif isinstance(font, int):
-                                font = {'font-size': attrs.get('font-size', 11),
-                                        'font-family': attrs.get('font-family', None)}
-                    elif isinstance(elem, dict) and elem.get('data', None) is not None:
-                        string = elem.get('data')
-                        amfsh.append(string=string, font=font, color=color, highlight_color=highlight_color)
-                        font = 0
-                        color = None
-                        highlight_color = None
-                        attrs = None
-                returned_list.append((alignment, amfsh, indent))
-            # Supports case for Ordered/Unordered lists
-            elif html_tag[0] == 'ul' or html_tag[0] == 'ol':
-                list_list = list()
-                list_type = None
-                cur_list_word = None
-                font = 0
-                color = None
-                highlight_color = None
-                for elem in html_tag:
-                    if isinstance(elem, str) and bool(elem == 'ul' or elem == 'ol'):
-                        list_map = {'ul': 'List Bullet', 'ol': 'List Number'}
-                        list_type = list_map.get(elem, None)
-                    elif isinstance(elem, str) and elem == 'li':
-                        cur_list_word = list()
-                    elif isinstance(elem, dict) and elem.get('attrs', None) is not None:
-                        attrs = self.decode_attrs(attrs=elem.get('attrs'))
-                        color = attrs.get('color', None)
-                        highlight_color = attrs.get('highlight_color', None)
-                        if attrs.get('alignment', None) is not None:
-                            alignment = attrs.get('alignment', None)
-                        if attrs.get('margin-left', None) is not None:
-                            indent = ['margin-left', attrs.get('margin-left', None)]
-                        elif attrs.get('margin-right', None) is not None:
-                            indent = ['margin-right', attrs.get('margin-right', None)]
-                    elif isinstance(elem, dict) and elem.get('data', None) is not None:
-                        string = elem.get('data')
-                        amfsh = argMultiFontStringHelper()
-                        amfsh.append(string=string, font=font, color=color, highlight_color=highlight_color)
-                        cur_list_word = [alignment, amfsh, indent, list_type]
-                        list_list.append(cur_list_word)
-                returned_list.append(list_list)
-        return returned_list
+                font = {'font-list': []}
+                for attr_name, attr_value in elem.get('attrs').items():
+                    # Font
+                    if attr_name == 'font-list' and isinstance(attr_value, list):
+                        font['font-list'].extend(attr_value)
+                    if attr_name == 'font-family':
+                        font['font-family'] = attr_value
+                    if attr_name == 'font-size':
+                        font['font-size'] = attr_value
+                    # Color
+                    if attr_name == 'color':
+                        color = attr_value
+                    # Background color
+                    if attr_name == 'highlight_color':
+                        highlight_color = attr_value
+                    # Alignment
+                    if attr_name == 'alignment':
+                        alignment = attr_value
+                    # Indentation
+                    if attr_name == 'margin-left':
+                        indent = ['margin-left', attr_value]
+                    elif attr_name == 'margin-right':
+                        indent = ['margin-right', attr_value]
+                if alignment:
+                    amfsh_dict['alignment'][elem.get('paragraph').get('paragraph_uuid')] = alignment
+                if indent:
+                    amfsh_dict['indent'][elem.get('paragraph').get('paragraph_uuid')] = indent
+                amfsh_dict['amfsh'].get(elem.get('paragraph').get('paragraph_uuid')).append(
+                    string=string, font=font, color=color, highlight_color=highlight_color)
+                last_uuid = elem.get('paragraph').get('paragraph_uuid')
+        return amfsh_dict
+
+    def get_alignment(self, paragraph_attrs: list) -> str:
+        attrs = self.decode_attrs(attrs=paragraph_attrs)
+        if attrs.get('alignment') is not None:
+            return attrs.get('alignment')
+        return 'LEFT'
+
+    def get_indent(self, paragraph_attrs: list):
+        attrs = self.decode_attrs(attrs=paragraph_attrs)
+        if attrs.get('margin-left') is not None:
+            return ['margin-left', attrs.get('margin-left')]
+        if attrs.get('margin-right') is not None:
+            return ['margin-right', attrs.get('margin-right')]
+        return None
 
     def decode_attrs(self, attrs: list) -> dict:
         """ Decodes attrs list and returns a dict with more Word applicable form. """
@@ -735,7 +783,8 @@ class argBackendBase:
                         attrs_dict['color'] = self.colors.get(attr_list[1]).replace(' ', '')
                     else:
                         color_hex = attr_list[1].replace('#', '')
-                        r, g, b = str(int(color_hex[0:2], 16)), str(int(color_hex[2:4], 16)), str(int(color_hex[4:6], 16))
+                        r, g, b = str(int(color_hex[0:2], 16)), str(int(color_hex[2:4], 16)), str(int(color_hex[4:6],
+                                                                                                      16))
                         attrs_dict['color'] = ','.join([r, g, b])
                 elif attr_list[0] == 'background-color':
                     attrs_dict['highlight_color'] = attr_list[1]

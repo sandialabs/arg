@@ -263,25 +263,64 @@ class argWordBackend(argBackendBase):
                         run.font.name = self.fonts.get("calligraphic", "default" if self.fonts.get("default") else None)
                     elif 9 in font_bits:
                         run.font.size = Pt(14)
+                        run.font.bold = True
                     elif 10 in font_bits:
                         run.font.size = Pt(13)
+                        run.font.bold = True
                     elif 11 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.bold = True
                     elif 12 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.bold = True
+                        run.font.italic = True
                     elif 13 in font_bits:
                         run.font.size = Pt(11)
                     elif 14 in font_bits:
                         run.font.size = Pt(11)
+                        run.font.italic = True
                     else:
                         run.font.name = self.fonts.get("default", None)
 
                 elif isinstance(font_bits, dict):
                     run = paragraph.add_run(string)
-                    if font_bits.get('font-size', None) is not None:
+                    if font_bits.get('font-size') is not None:
                         run.font.size = Pt(font_bits.get('font-size', 11))
-                    if font_bits.get('font-family', None) is not None:
-                        run.font.name = font_bits.get('font-family', None)
+                    if font_bits.get('font-family') is not None:
+                        run.font.name = font_bits.get('font-family')
+                    if font_bits.get('font-list') is not None and font_bits.get('font-list'):
+                        font_list = font_bits.get('font-list')
+                        run.font.italic = True if 1 in font_list else False
+                        run.font.bold = True if 2 in font_list else False
+                        run.font.underline = True if 3 in font_list else False
+                        run.font.strike = True if 5 in font_list else False
+                        run.font.subscript = True if 6 in font_list else False
+                        if 4 in font_list:
+                            run.font.name = self.fonts.get("typewriter",
+                                                           "default" if self.fonts.get("default") else None)
+                        elif 8 in font_list:
+                            run.font.name = self.fonts.get("calligraphic",
+                                                           "default" if self.fonts.get("default") else None)
+                        elif 9 in font_list:
+                            run.font.size = Pt(14)
+                            run.font.bold = True
+                        elif 10 in font_list:
+                            run.font.size = Pt(13)
+                            run.font.bold = True
+                        elif 11 in font_list:
+                            run.font.size = Pt(11)
+                            run.font.bold = True
+                        elif 12 in font_list:
+                            run.font.size = Pt(11)
+                            run.font.bold = True
+                            run.font.italic = True
+                        elif 13 in font_list:
+                            run.font.size = Pt(11)
+                        elif 14 in font_list:
+                            run.font.size = Pt(11)
+                            run.font.italic = True
+                        else:
+                            run.font.name = self.fonts.get("default", None)
 
                 if color:
                     if self.colors.get(color, None) is None:
@@ -868,44 +907,36 @@ class argWordBackend(argBackendBase):
 
     def add_html(self, data: dict) -> None:
         """ Adds html content to Word document. """
+        list_type_map = {'ul': 'List Bullet', 'ol': 'List Number'}
+        alingment_map = {'CENTER': WD_ALIGN_PARAGRAPH.CENTER, 'LEFT': WD_ALIGN_PARAGRAPH.LEFT,
+                         'RIGHT': WD_ALIGN_PARAGRAPH.RIGHT, 'JUSTIFY': WD_ALIGN_PARAGRAPH.JUSTIFY}
         # Reading html data as a string
         html_str = data.get('html_string', None)
         # Parsing html data and get a html document in a form of list
         arg_html_parser = ArgHTMLParser()
         arg_html_parser.reset()
         html_list = arg_html_parser.get_mapped_html(html_str)
-        # Parsing an html list into nested list over which is easier to iterate
-        nested_list = self.nesting_html_list(html_list=html_list)
-        # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
-        amfsh_list = self.map_nested_list_to_amfsh(nested_list=nested_list)
+        # Parsing a html list into flat list over which is easier to iterate
+        flat_list = self.get_flat_list(html_list=html_list)
+        combined_list = self.combine_attrs(flat_list=flat_list)
+        # Parsing flat list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
+        amfsh_dict = self.map_combined_list_to_amfsh(combined_list=combined_list)
         # Final iteration over ARG Multi Font String Helper list
-        for amfsh in amfsh_list:
-            # Checking for tuple. Tuple instance is dedicated for any element except ordered and unordered lists
-            if isinstance(amfsh, tuple):
-                # amfsh as tuple: (alignment, argMultiFontStringHelper, margin)
+        for uuid_key, amfsh in amfsh_dict.get('amfsh').items():
+            if (lst := amfsh_dict.get('html_list').get(uuid_key)) and lst is not None:
+                list_type = [le.get('symbol') for le in lst if le.get('symbol') in list_type_map][-1]
+                list_level = [le.get('list_level') for le in lst if le.get('symbol') in list_type_map][-1]
+                par_style = f"{list_type_map.get(list_type)}" if list_level == 1 else \
+                    f"{list_type_map.get(list_type)} {list_level}"
+                new_par = self.Report.add_paragraph(style=par_style)
+            else:
                 new_par = self.Report.add_paragraph()
-                algn_map = {'CENTER': WD_ALIGN_PARAGRAPH.CENTER, 'LEFT': WD_ALIGN_PARAGRAPH.LEFT,
-                            'RIGHT': WD_ALIGN_PARAGRAPH.RIGHT, 'JUSTIFY': WD_ALIGN_PARAGRAPH.JUSTIFY}
-                new_par.alignment = algn_map.get(amfsh[0], WD_ALIGN_PARAGRAPH.LEFT)
-                if amfsh[2] is not None and amfsh[2][0] == 'margin-right':
-                    new_par.paragraph_format.right_indent = Pt(amfsh[2][1])
-                elif amfsh[2] is not None and amfsh[2][0] == 'margin-left':
-                    new_par.paragraph_format.left_indent = Pt(amfsh[2][1])
-                self.generate_multi_font_string(multi_font_string=amfsh[1], paragraph=new_par)
-            # Checking for list. List instance is dedicated for ordered and unordered lists (needs paragraph styling)
-            elif isinstance(amfsh, list):
-                # amfsh as list: [un/ordered list element, un/ordered list element, un/ordered list element, ...]
-                for elem in amfsh:
-                    # elem as list: [alignment, argMultiFontStringHelper, margin, list style]
-                    new_par = self.Report.add_paragraph(style=elem[3])
-                    algn_map = {'CENTER': WD_ALIGN_PARAGRAPH.CENTER, 'LEFT': WD_ALIGN_PARAGRAPH.LEFT,
-                                'RIGHT': WD_ALIGN_PARAGRAPH.RIGHT, 'JUSTIFY': WD_ALIGN_PARAGRAPH.JUSTIFY}
-                    new_par.alignment = algn_map.get(elem[0], WD_ALIGN_PARAGRAPH.LEFT)
-                    if elem[2] is not None and elem[2][0] == 'margin-right':
-                        new_par.paragraph_format.right_indent = Pt(elem[2][1])
-                    elif elem[2] is not None and elem[2][0] == 'margin-left':
-                        new_par.paragraph_format.left_indent = Pt(elem[2][1])
-                    self.generate_multi_font_string(multi_font_string=elem[1], paragraph=new_par)
+            new_par.alignment = alingment_map.get(amfsh_dict['alignment'].get(uuid_key), WD_ALIGN_PARAGRAPH.LEFT)
+            if (indent := amfsh_dict['indent'].get(uuid_key)) is not None and indent[0] == 'margin-right':
+                new_par.paragraph_format.right_indent = Pt(indent[1])
+            elif indent is not None and indent[0] == 'margin-left':
+                new_par.paragraph_format.left_indent = Pt(indent[1])
+            self.generate_multi_font_string(multi_font_string=amfsh, paragraph=new_par)
 
     @staticmethod
     def insert_paragraph_after(paragraph, text=None, style=None):

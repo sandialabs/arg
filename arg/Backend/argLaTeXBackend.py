@@ -418,9 +418,9 @@ class argLaTeXBackend(argBackendBase):
                                 string = string.replace(c, "\\" + c)
 
                     if font_bits == 1:
-                        string = italic(string)
+                        string = italic(string, escape=False)
                     elif font_bits == 2:
-                        string = bold(string)
+                        string = bold(string, escape=False)
                     elif font_bits == 3:
                         string = r"\underline{{{}}}".format(string)
                     elif font_bits == 4:
@@ -432,22 +432,22 @@ class argLaTeXBackend(argBackendBase):
                     elif font_bits == 8:
                         string = r"$\mathcal{{{}}}$".format(string)
                     elif font_bits == 9:
-                        string = bold(string)
-                        string = r"{\Huge " + f'{string}' + r"}"
-                    elif font_bits == 10:
-                        string = bold(string)
+                        string = bold(string, escape=False)
                         string = r"{\huge " + f'{string}' + r"}"
-                    elif font_bits == 11:
-                        string = bold(string)
+                    elif font_bits == 10:
+                        string = bold(string, escape=False)
                         string = r"{\LARGE " + f'{string}' + r"}"
+                    elif font_bits == 11:
+                        string = bold(string, escape=False)
+                        string = r"{\Large " + f'{string}' + r"}"
                     elif font_bits == 12:
-                        string = bold(string)
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = bold(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
                     elif font_bits == 13:
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = r"{\large " + f'{string}' + r"}"
                     elif font_bits == 14:
-                        string = italic(string)
-                        string = r"{\Large " + f'{string}' + r"}"
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
 
             elif isinstance(font_bits, list):
                 if 16 in font_bits:
@@ -459,9 +459,9 @@ class argLaTeXBackend(argBackendBase):
                             if c in string:
                                 string = string.replace(c, "\\" + c)
                 if 1 in font_bits:
-                    string = italic(string)
+                    string = italic(string, escape=False)
                 if 2 in font_bits:
-                    string = bold(string)
+                    string = bold(string, escape=False)
                 if 3 in font_bits:
                     string = r"\underline{{{}}}".format(string)
                 if 4 in font_bits:
@@ -473,30 +473,72 @@ class argLaTeXBackend(argBackendBase):
                 if 8 in font_bits:
                     string = r"$\mathcal{{{}}}$".format(string)
                 elif 9 in font_bits:
-                    string = r"{\Huge " + f'{string}' + r"}"
-                elif 10 in font_bits:
                     string = r"{\huge " + f'{string}' + r"}"
-                elif 11 in font_bits:
+                elif 10 in font_bits:
                     string = r"{\LARGE " + f'{string}' + r"}"
+                elif 11 in font_bits:
+                    string = r"{\Large " + f'{string}' + r"}"
                 elif 12 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
                 elif 13 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
                 elif 14 in font_bits:
-                    string = r"{\Large " + f'{string}' + r"}"
+                    string = r"{\large " + f'{string}' + r"}"
 
             elif isinstance(font_bits, dict):
-                if font_bits.get('font-size', None) is not None:
-                    if font_bits.get('font-size', None) == 16:
+                if font_bits.get('font-size') is not None:
+                    for c in self.SpecialCharacters:
+                        if c in string:
+                            string = string.replace(c, "\\" + c)
+                    if font_bits.get('font-size') == 16:
                         string = r"{\Large " + f'{string}' + r"}"
-                    elif font_bits.get('font-size', None) == 11:
+                    elif font_bits.get('font-size') == 11:
                         string = r"{\normalsize " + f'{string}' + r"}"
-                    elif font_bits.get('font-size', None) == 8:
+                    elif font_bits.get('font-size') == 8:
                         string = r"{\small " + f'{string}' + r"}"
 
-                if font_bits.get('font-family', None) is not None:
+                if font_bits.get('font-family') is not None:
                     # Add font family support?
                     pass
+
+                if font_bits.get('font-list') is not None and font_bits.get('font-list'):
+                    font_list = font_bits.get('font-list')
+                    if [fb for fb in font_list if fb not in [9, 10, 11, 12, 13, 14]]:
+                        for c in self.SpecialCharacters:
+                            if c in string:
+                                string = string.replace(c, "\\" + c)
+                    if 1 in font_list:
+                        string = italic(string, escape=False)
+                    if 2 in font_list:
+                        string = bold(string, escape=False)
+                    if 3 in font_list:
+                        string = r"\underline{{{}}}".format(string)
+                    if 4 in font_list:
+                        string = r"\texttt{{{}}}".format(string)
+                    if 5 in font_list:
+                        string = r"\sout{{{}}}".format(string)
+                    if 6 in font_list:
+                        string = r"\textsubscript{" + f'{string}' + r"}"
+                    if 8 in font_list:
+                        string = r"$\mathcal{{{}}}$".format(string)
+                    if 9 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\huge " + f'{string}' + r"}"
+                    elif 10 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\LARGE " + f'{string}' + r"}"
+                    elif 11 in font_list:
+                        string = bold(string, escape=False)
+                        string = r"{\Large " + f'{string}' + r"}"
+                    elif 12 in font_list:
+                        string = bold(string, escape=False)
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
+                    elif 13 in font_list:
+                        string = r"{\large " + f'{string}' + r"}"
+                    elif 14 in font_list:
+                        string = italic(string, escape=False)
+                        string = r"{\large " + f'{string}' + r"}"
 
             if color:
                 if self.colors.get(color, None) is None:
@@ -897,6 +939,11 @@ class argLaTeXBackend(argBackendBase):
 
     def add_html(self, data: dict) -> None:
         """ Adds html content to pdf document. """
+        list_type_map = {'ul': 'itemize', 'ol': 'enumerate'}
+        alingment_map = {'LEFT': [NoEscape(r"\begin{FlushLeft}"), NoEscape(r"\end{FlushLeft}")],
+                         'RIGHT': [NoEscape(r"\begin{FlushRight}"), NoEscape(r"\end{FlushRight}")],
+                         'CENTER': [NoEscape(r"\begin{Center}"), NoEscape(r"\end{Center}")],
+                         'JUSTIFY': [NoEscape(r"\begin{justify}"), NoEscape(r"\end{justify}")]}
         # Reading html data as a string
         html_str = data.get('html_string', None)
         # Parsing html data and get a html document in a form of list
@@ -904,40 +951,45 @@ class argLaTeXBackend(argBackendBase):
         arg_html_parser.reset()
         html_list = arg_html_parser.get_mapped_html(html_str)
         # Parsing an html list into nested list over which is easier to iterate
-        nested_list = self.nesting_html_list(html_list=html_list)
+        flat_list = self.get_flat_list(html_list=html_list)
+        combined_list = self.combine_attrs(flat_list=flat_list)
         # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
-        amfsh_list = self.map_nested_list_to_amfsh(nested_list=nested_list)
-        # Final iteration over ARG Multi Font String Helper list
-        for amfsh in amfsh_list:
-            alingment_map = {'LEFT': [NoEscape(r"\begin{FlushLeft}"), NoEscape(r"\end{FlushLeft}")],
-                             'RIGHT': [NoEscape(r"\begin{FlushRight}"), NoEscape(r"\end{FlushRight}")],
-                             'CENTER': [NoEscape(r"\begin{Center}"), NoEscape(r"\end{Center}")],
-                             'JUSTIFY': [NoEscape(r"\begin{justify}"), NoEscape(r"\end{justify}")],
-                             }
-            # Checking for tuple. Tuple instance is dedicated for any element except ordered and unordered lists
-            if isinstance(amfsh, tuple):
-                # amfsh as tuple: (alignment, argMultiFontStringHelper, margin)
-                self.Report.append(pl.Command("par"))
-                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[0])
-                string = self.generate_multi_font_string(multi_font_string=amfsh[1])
-                self.Report.append(NoEscape(string))
-                self.Report.append(alingment_map.get(amfsh[0], 'LEFT')[1])
-            # Checking for list. List instance is dedicated for ordered and unordered lists (needs paragraph styling)
-            elif isinstance(amfsh, list):
-                # amfsh as list: [un/ordered list element, un/ordered list element, un/ordered list element, ...]
-                lst_type = {'List Bullet': 'itemize', 'List Number': 'enumerate'}
-                list_end = len(amfsh)
-                list_type = lst_type.get(amfsh[0][3])
-                for num, elem in enumerate(amfsh, start=1):
-                    if num == 1:
-                        lst_command = r"\begin{" + f"{list_type}" + r"}"
+        amfsh_dict = self.map_combined_list_to_amfsh(combined_list=combined_list)
+        # Final iteration over ARG Multi Font String Helper dict
+        list_control = {num: {'started': False, 'uuid': None, 'list_type': None} for num in range(1, 11)}
+        for uuid_key, amfsh in amfsh_dict.get('amfsh').items():
+            if (lst := amfsh_dict.get('html_list').get(uuid_key)) and lst is not None:
+                list_uuid = [le.get('symbol_id') for le in lst if le.get('symbol') in list_type_map][-1]
+                list_type = [list_type_map.get(le.get('symbol')) for le in lst if le.get('symbol') in list_type_map][-1]
+                list_level = [le.get('list_level') for le in lst if le.get('symbol') in list_type_map][-1]
+                # Start a list
+                if not list_control.get(list_level).get('started'):
+                    lst_command = r"\begin{" + f"{list_type}" + r"}"
+                    self.Report.append(NoEscape(lst_command))
+                    list_control[list_level]['started'] = True
+                    list_control[list_level]['uuid'] = list_uuid
+                    list_control[list_level]['list_type'] = list_type
+                # Check for list_levels above current to end
+                for num in range(10, list_level, -1):
+                    if list_control[num]['started']:
+                        lst_command = r"\end{" + f"{list_control[num]['list_type']}" + r"}"
                         self.Report.append(NoEscape(lst_command))
-                    string = self.generate_multi_font_string(multi_font_string=elem[1])
+                        list_control[num]['started'] = False
+                # List's uuid check
+                if list_control.get(list_level).get('uuid') == list_uuid:
+                    string = self.generate_multi_font_string(multi_font_string=amfsh)
                     string = r"\item " + string
                     self.Report.append(NoEscape(string))
-                    if num == list_end:
-                        lst_command = r"\end{" + f"{list_type}" + r"}"
-                        self.Report.append(NoEscape(lst_command))
+            else:
+                if list_control[1]['started']:
+                    lst_command = r"\end{" + f"{list_control[1]['list_type']}" + r"}"
+                    self.Report.append(NoEscape(lst_command))
+                    list_control[1]['started'] = False
+                self.Report.append(pl.Command("par"))
+                self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[0])
+                string = self.generate_multi_font_string(multi_font_string=amfsh)
+                self.Report.append(NoEscape(string))
+                self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[1])
 
     def add_figure(self, arguments):
         """Add figure to the report
