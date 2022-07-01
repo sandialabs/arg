@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyARG-dep",
-    version="0.0.13",
+    version="0.0.14",
     author="NexGen Analytics",
     author_email="info@ng-analytics.com",
     description="This is the official PyPi repository for ARG dependencies.",
