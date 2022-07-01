@@ -35,7 +35,6 @@
 # Questions? Visit gitlab.com/AutomaticReportGenerator/arg
 #
 #HEADER
-
 ---
 chapters:
   - n: chapter
@@ -97,19 +96,49 @@ chapters:
 <p>It can contain lists:</p>
 <ul>
 	<li>First element</li>
+      <ul>
+        <li>First list First element</li>
+        <li>First list Second element</li>
+        <li>First list Third element</li>
+      </ul>
 	<li>Second one
       <ul>
         <li>Second list First element</li>
         <li>Second list Second element</li>
+          <ul>
+            <li>Second list First element</li>
+            <li>Second list Second element</li>
+            <li>Second list Third element</li>
+          </ul>
         <li>Second list Third element</li>
       </ul>
     </li>
-	<li>Third</li>
+	<li>Third one</li>
 </ul>
 <p>The list can be ordered:</p>
 <ol>
 	<li>My first number</li>
+	  <ol>
+        <li>Second list First element</li>
+        <li>Second list Second element</li>
+          <ol>
+            <li>Third list First element</li>
+            <li>Third list Second element</li>
+            <li>Third list Third element</li>
+          </ol>
+        <li>Second list Third element</li>
+	  </ol>
 	<li>The second one</li>
+	  <ol>
+	    <li>Second list First element</li>
+        <li>Second list Second element</li>
+          <ol>
+            <li>Third list First element</li>
+            <li>Third list Second element</li>
+            <li>Third list Third element</li>
+          </ol>
+        <li>Second list Third element</li>
+	  </ol>
 	<li>The third</li>
 </ol>
 <p>It can contain special CHARACTERS like french words &quot;&eacute;tymologie&quot;, &#39;r&egrave;gle&#39;, &quot;fa&ccedil;onner&quot; or expressions &quot;&agrave; l&#39;envers&quot;, &quot;o&ugrave; regarder ?&quot;.</p>
