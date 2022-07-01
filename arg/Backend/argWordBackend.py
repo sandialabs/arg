@@ -922,6 +922,9 @@ class argWordBackend(argBackendBase):
         # Parsing flat list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
         amfsh_dict = self.map_combined_list_to_amfsh(combined_list=combined_list)
         # Final iteration over ARG Multi Font String Helper list
+        # Setting up helpers for resetting ordered list numbering
+        num_res_help_ol = {num: None for num in range(1, 10)}
+        num_res_help_ul = {num: None for num in range(1, 10)}
         for uuid_key, amfsh in amfsh_dict.get('amfsh').items():
             if (lst := amfsh_dict.get('html_list').get(uuid_key)) and lst is not None:
                 list_type = [le.get('symbol') for le in lst if le.get('symbol') in list_type_map][-1]
@@ -929,6 +932,28 @@ class argWordBackend(argBackendBase):
                 par_style = f"{list_type_map.get(list_type)}" if list_level == 1 else \
                     f"{list_type_map.get(list_type)} {list_level}"
                 new_par = self.Report.add_paragraph(style=par_style)
+                # Add logic for resetting a paragraph numbering for ordered list
+                for elem in lst:
+                    if num_res_help_ol.get(elem.get('list_level')) is None and elem.get('symbol') == 'ol':
+                        num_res_help_ol[elem.get('list_level')] = elem.get('symbol_id')
+                    elif num_res_help_ol.get(elem.get('list_level')) == elem.get('symbol_id') and elem.get(
+                            'symbol') == 'ol':
+                        pass
+                    elif num_res_help_ol.get(elem.get('list_level')) != elem.get('symbol_id') and elem.get(
+                            'symbol') == 'ol':
+                        num_res_help_ol[elem.get('list_level')] = elem.get('symbol_id')
+                        self.reset_paragraph_numbering(document=self.Report, paragraph=new_par)
+                # Add logic for resetting a paragraph numbering for unordered list
+                for elem in lst:
+                    if num_res_help_ul.get(elem.get('list_level')) is None and elem.get('symbol') == 'ul':
+                        num_res_help_ul[elem.get('list_level')] = elem.get('symbol_id')
+                    elif num_res_help_ul.get(elem.get('list_level')) == elem.get('symbol_id') and elem.get(
+                            'symbol') == 'ul':
+                        pass
+                    elif num_res_help_ul.get(elem.get('list_level')) != elem.get('symbol_id') and elem.get(
+                            'symbol') == 'ul':
+                        num_res_help_ul[elem.get('list_level')] = elem.get('symbol_id')
+                        self.reset_paragraph_numbering(document=self.Report, paragraph=new_par)
             else:
                 new_par = self.Report.add_paragraph()
             new_par.alignment = alingment_map.get(amfsh_dict['alignment'].get(uuid_key), WD_ALIGN_PARAGRAPH.LEFT)
@@ -937,6 +962,26 @@ class argWordBackend(argBackendBase):
             elif indent is not None and indent[0] == 'margin-left':
                 new_par.paragraph_format.left_indent = Pt(indent[1])
             self.generate_multi_font_string(multi_font_string=amfsh, paragraph=new_par)
+
+    @staticmethod
+    def reset_paragraph_numbering(document, paragraph):
+        """ Look up the associated level and numbering style associated with the paragraph's style.
+            Insert a new numbering definition with an override, then associate it to the paragraph.
+        """
+        styp = docx.enum.style.WD_STYLE_TYPE
+        assoc_style = document.styles.get_by_id(paragraph._element.pPr.pStyle.val, styp.PARAGRAPH).element.pPr.numPr
+        try:
+            assoc_level = assoc_style.ilvl.val
+        except:
+            assoc_level = 0
+        assoc_num_id = assoc_style.numId.val
+        assoc_abstract_num_id = document.part.numbering_part.element.num_having_numId(assoc_num_id).abstractNumId.val
+        new_num = document.part.numbering_part.element.add_num(assoc_abstract_num_id)
+        new_num.add_lvlOverride(assoc_level).get_or_add_startOverride().val = 1
+        nn = paragraph._element.pPr.get_or_add_numPr()
+        nn.get_or_add_ilvl().val = assoc_level
+        nn.get_or_add_numId().val = new_num.numId
+
 
     @staticmethod
     def insert_paragraph_after(paragraph, text=None, style=None):
