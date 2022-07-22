@@ -990,6 +990,12 @@ class argLaTeXBackend(argBackendBase):
                 string = self.generate_multi_font_string(multi_font_string=amfsh)
                 self.Report.append(NoEscape(string))
                 self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[1])
+        if [list_control.get(num).get('started') for num in range(10, 0, -1) if list_control.get(num).get('started')]:
+            for num in range(10, 0, -1):
+                if list_control.get(num).get('started'):
+                    lst_command = r"\end{" + f"{list_control[num]['list_type']}" + r"}"
+                    self.Report.append(NoEscape(lst_command))
+                    list_control[num]['started'] = False
 
     def add_figure(self, arguments):
         """Add figure to the report
