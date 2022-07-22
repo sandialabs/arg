@@ -636,8 +636,9 @@ class argBackendBase:
         par_uuid = None
         par_attrs = []
         for elem in flat_list:
-            if par_uuid is None or elem.get('buffer')[0].get('symbol') == 'p':
-                if elem.get('buffer')[0].get('symbol') == 'p':
+            if par_uuid is None or elem.get('buffer')[0].get('symbol') == 'p' or \
+                    elem.get('buffer')[0].get('symbol') == 'div':
+                if elem.get('buffer')[0].get('symbol') == 'p' or elem.get('buffer')[0].get('symbol') == 'div':
                     par_uuid = elem.get('buffer')[0].get('symbol_id')
                     par_attrs = elem.get('buffer')[0].get('attrs')
                 else:
@@ -646,6 +647,7 @@ class argBackendBase:
             # List support
             if [True for buf in elem.get('buffer') if buf.get('symbol') == 'ul' or buf.get('symbol') == 'ol']:
                 par_uuid = uuid.uuid4()
+                par_attrs = []
                 html_list = self.get_list_from_buffer(buffer=elem.get('buffer'))
             else:
                 html_list = []

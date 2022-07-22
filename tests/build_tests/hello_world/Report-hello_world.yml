@@ -48,6 +48,11 @@ chapters:
             sections:
               - n: html
                 html_string: '<p style="margin-left:40px"><span style="font-size:16px"><span style="color:blue"><span style="font-family:&quot;Calibri&quot;,sans-serif">Set at <em>&quot;High&quot; </em>because although&nbsp;JWL </span></span>breaks down as the detonation departs from ideality&nbsp;it&nbsp;<span style="color:green"><span style="font-family:&quot;Calibri&quot;,sans-serif">is good for ideal detonation, and we believe it sufficiently predicts acceleration of the structure away from the detonation process zone.</span></span></span></p>'
+          - n: subsection
+            title: HTML Testing
+            sections:
+              - n: html
+                html_string: '<p>We want to test the rich text. &nbsp;C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></p><ol><li><p>List of items</p><ol><li>Another item</li></ol></li><li>More items</li></ol><div>More text</div><ul><li>bullet list</li><li>another item</li></ul><div><strong>Use some color</strong></div><div>And <u>background</u> color</div><div><u>Add some more text.&nbsp;</u></div><div><em>Next text sdfsddfgdf</em></div><div><s>sdfsdfdsf&nbsp;</s></div><div>&nbsp;</div><div><span style="background-color:#f1c40f">Another paragraph. Save again. Test.</span></div><div>&nbsp;</div><div><span style="color:#2ecc71">Try some color next. &nbsp;</span></div><div>&nbsp;</div><div>More color please.&nbsp;</div><div>&nbsp;</div><h1>H1</h1><h2>H2</h2><h3>H3</h3><h4>H4</h4><h5>H5</h5><h6>H6</h6><p>Let&#39;s indent:</p><p style="margin-left:40px">Indented</p><p style="margin-left:80px">Further</p><p style="text-align:center">centering</p><p style="text-align:right">right just</p><ol><li>Start a new</li><li>List<ol><li>sublist</li><li>end test</li></ol></li></ol>'
           - n: inline-docx
             docx_path: 'Evidence.docx'
           - n: subsection
