@@ -241,6 +241,9 @@ class argLaTeXBackend(argBackendBase):
         # Allow for slanted looking fractions
         self.Report.preamble.append(pl.Command("usepackage", "xfrac"))
 
+        # Allow for indentation support
+        self.Report.preamble.append(pl.Command("usepackage", "changepage"))
+
         # Allow for landscape mode
         self.Report.preamble.append(pl.Command("usepackage", "pdflscape"))
 
@@ -950,7 +953,7 @@ class argLaTeXBackend(argBackendBase):
         arg_html_parser = ArgHTMLParser()
         arg_html_parser.reset()
         html_list = arg_html_parser.get_mapped_html(html_str)
-        # Parsing an html list into nested list over which is easier to iterate
+        # Parsing a html list into nested list over which is easier to iterate
         flat_list = self.get_flat_list(html_list=html_list)
         combined_list = self.combine_attrs(flat_list=flat_list)
         # Parsing nested list to a list of mainly ARG Multi Font String Helper, ready to put in directly into document
@@ -986,9 +989,20 @@ class argLaTeXBackend(argBackendBase):
                     self.Report.append(NoEscape(lst_command))
                     list_control[1]['started'] = False
                 self.Report.append(pl.Command("par"))
+                # Start alingment support
                 self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[0])
+                # Start indentation support
+                if (indent := amfsh_dict['indent'].get(uuid_key)) is not None and indent[0] == 'margin-left':
+                    self.Report.append(NoEscape(r"\begin{adjustwidth}{" + rf"{indent[1]}pt" + r"}{}"))
+                elif indent is not None and indent[0] == 'margin-right':
+                    self.Report.append(NoEscape(r"\begin{adjustwidth}{}{" + f"{indent[1]}pt" + r"}"))
+                # Adding string
                 string = self.generate_multi_font_string(multi_font_string=amfsh)
                 self.Report.append(NoEscape(string))
+                # Close indentation if any
+                if indent is not None:
+                    self.Report.append(NoEscape(r"\end{adjustwidth}"))
+                # Close alingment
                 self.Report.append(alingment_map.get(amfsh_dict['alignment'].get(uuid_key), 'LEFT')[1])
         if [list_control.get(num).get('started') for num in range(10, 0, -1) if list_control.get(num).get('started')]:
             for num in range(10, 0, -1):
