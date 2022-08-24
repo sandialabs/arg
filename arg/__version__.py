@@ -36,4 +36,4 @@
 #
 #HEADER
 
-__version__ = "1.2.3-RC1"
+__version__ = "develop"
