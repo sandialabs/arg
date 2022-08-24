@@ -15,7 +15,7 @@ import os
 import sys
 
 sys.path.extend(
-    [os.path.abspath('../..'), os.path.abspath('../../arg'), os.path.abspath('../../venv/lib/python3.8/site-packages')])
+    [os.path.abspath('../..'), os.path.abspath('../../arg'), os.path.abspath('../../venv/lib/python3.9/site-packages')])
 
 # -- Project information -----------------------------------------------------
 
