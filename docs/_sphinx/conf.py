@@ -10,16 +10,17 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import os
 import sys
 
 sys.path.extend(
-    [os.path.abspath('../..'), os.path.abspath('../../arg'), os.path.abspath('../../venv/lib/python3.7/site-packages')])
+    [os.path.abspath('../..'), os.path.abspath('../../arg'), os.path.abspath('../../venv/lib/python3.8/site-packages')])
 
 # -- Project information -----------------------------------------------------
 
 project = 'ARG'
-copyright = '2020, ARG'
+copyright = f'{datetime.datetime.now().year}, ARG'
 author = 'ARG'
 
 # -- General configuration ---------------------------------------------------

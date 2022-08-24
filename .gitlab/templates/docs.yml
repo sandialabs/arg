@@ -18,10 +18,11 @@ pages:
     - virtualenv venv
     - source venv/bin/activate
     - python -m pip install --upgrade pip
+    - pip3 install markupsafe==2.0.1
     - pip3 install -r requirements.txt
     - pip3 install sphinx
     - pip3 install sphinx-rtd-theme
-    - export PYTHONPATH=$(pwd)/venv/lib/python3.7/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/arg/arg:$PYTHONPATH
+    - export PYTHONPATH=$(pwd)/venv/lib/python3.9/site-packages:$(pwd)/:$(pwd)/arg:$(pwd)/arg/arg:$PYTHONPATH
   script:
     - echo "==================== [Documentation] Build documentation ===================="
     - cp LICENSE docs/_includes/
