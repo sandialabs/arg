@@ -636,9 +636,9 @@ class argBackendBase:
         par_uuid = None
         par_attrs = []
         for elem in flat_list:
-            if par_uuid is None or elem.get('buffer')[0].get('symbol') == 'p' or \
-                    elem.get('buffer')[0].get('symbol') == 'div':
-                if elem.get('buffer')[0].get('symbol') == 'p' or elem.get('buffer')[0].get('symbol') == 'div':
+            if par_uuid is None or elem.get('buffer')[0].get('symbol') \
+                    in ('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
+                if elem.get('buffer')[0].get('symbol') in ('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
                     par_uuid = elem.get('buffer')[0].get('symbol_id')
                     par_attrs = elem.get('buffer')[0].get('attrs')
                 else:
