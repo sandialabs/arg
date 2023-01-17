@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                      arg_web/api/resources/arg.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,45 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+from flask import request
+from flask_restx import Namespace, Resource, fields
+import yaml
+from werkzeug.exceptions import NotFound
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
+from ..application import Application
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+api = Namespace(
+    path='/session',
+    name='Session',
+    description='This service enables to run user session operations'
+)
+
+
+@api.route("/new")
+class SessionNewResource(Resource):
+    """Intialize a new empty session"""
+
+    def get(self):
+        session = Application.instance().session_manager.create()
+        return {"data": session.id}
+
+
+@api.route("/<id>")
+class SessionResource(Resource):
+    @api.errorhandler(NotFound)
+    def get(self, id):
+        """Get session information"""
+        session = Application.instance().session_manager.get_session(id)
+        if session is None:
+            raise NotFound()
+        else:
+            return {"data": session.id}
+
+    @api.errorhandler(NotFound)
+    def delete(self, id):
+        """Deletes a session. Also deletes all data stored in this session."""
+        session = Application.instance().session_manager.get_session(id)
+        if session is None:
+            raise NotFound()
+        else:
+            Application.instance().session_manager.destroy(session)

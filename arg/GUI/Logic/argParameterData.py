@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                       arg/GUI/Logic/argParameterData.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,13 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+from PySide2.QtCore import QObject
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+class argParameterData(QObject):
+    """A data class to save parsed parameters file
+    """
+
+    def __init__(self, dict_):
+        super().__init__()
+        self.Dict = dict_

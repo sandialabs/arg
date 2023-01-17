@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                       arg/GUI/View/argCentralWidget.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,65 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+from PySide2.QtWidgets import QSplitter
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
+from arg.GUI.View.argLoggerWidget import argLoggerWidget
+from arg.GUI.Logic.argParametersWidget import argParametersWidget
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+
+class argCentralWidget(QSplitter):
+    """A widget class to cover central area layout
+    """
+
+    def __init__(self):
+        super().__init__()
+
+        # Instantiate 'Parameters' and 'Logger' widgets
+        self.parameterWidget = argParametersWidget()
+        self.loggerWidget = argLoggerWidget()
+
+        # Add those high-level widget to central layout
+        self.addWidget(self.parameterWidget)
+        self.addWidget(self.loggerWidget)
+
+    def fillParameters(self, data):
+        """Fill central area widgets with provided data
+        """
+        # self.parameterWidget.updateTabs(data)
+        self.parameterWidget.fillParameters(data)
+
+    def constructParameters(self):
+        """Instantiate central area widgets and construct corresponding data
+        """
+
+        return self.parameterWidget.constructParameters()
+
+    def logStandard(self, log):
+        """Fill log widget with provided standard log message
+        """
+
+        self.loggerWidget.logStandard(log)
+
+    def logError(self, log):
+        """Fill log widget with provided error log message
+        """
+
+        self.loggerWidget.logError(log)
+
+    def clearLogs(self):
+        """Clear log from widget
+        """
+
+        self.loggerWidget.clearLogs()
+
+    def runEButtonClicked(self):
+        """ Switch to E execution mode
+        """
+
+        self.parameterWidget.runEButtonClicked()
+
+    def runGButtonClicked(self):
+        """ Switch to G execution mode
+        """
+
+        self.parameterWidget.runGButtonClicked()

@@ -1,0 +1,88 @@
+<!--
+HEADER
+          arg/web/angular/src/app/tabs/inserts/inserts.component.html
+               Automatic Report Generator (ARG) v. 1.0
+
+ Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
+ (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S.
+ Government retains certain rights in this software.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+ * Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+ Questions? Visit gitlab.com/AutomaticReportGenerator/arg
+
+HEADER
+!-->
+<form [formGroup]="form">
+  <div class="form-group">
+    <div class="row">
+      <div class="col">
+        <figure>
+          <figcaption>
+            <label>Inserts</label>
+          </figcaption>
+        <table class="table table-bordered">
+          <thead class="bg-primary text-white">
+            <tr>
+              <th scope=col>Location</th>
+              <th scope=col>Type</th>
+              <th scope=col>Text/Image Path</th>
+              <th scope=col>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let insert of this.form.value.Insert; let i = index">
+            <td nowrap="nowrap" contenteditable="true" (blur)="updateLocation(i, insert, $event)" [innerHTML]="insert.location"></td>
+            <td>
+              <select (change)="updateTypes(i, insert, $event)">
+                <option *ngFor="let x of this.INSERTTYPES" [value]="x" [selected]="getInsertType(insert) == x">{{ x }}</option>
+               </select>
+            </td>
+            <td contenteditable="true" (blur)="updateTextOrImage(i, insert, $event)">
+                <div *ngIf="getInsertType(insert) == this.INSERTTYPES[0]; else elseBlock" [innerHTML]="insert.string.join('')"></div>
+                <ng-template #elseBlock>
+                    <div [innerHTML]="insert.image.join('')"> </div>
+                </ng-template>
+                </td>
+            <td>
+               <button type="button" (click)="removeInsert(i)" class="btn btn-success"><i class="fa fa-minus"></i>&nbsp;</button>
+            </td>
+          </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-right">
+               <button type="button" (click)="addInsert()" class="btn btn-success" id="add-cad-to-pem"><em class="fa fa-plus"></em>&nbsp;Add</button>
+              </td>
+            </tr>
+          </tfoot>
+          </table>
+          </figure>
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                        arg/GUI/Logic/argCleanAction.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,28 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+import os
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import QAction, QApplication
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+app = "ARG-GUI"
+
+
+class argCleanAction(QAction):
+    """An action class
+    """
+
+    def __init__(self):
+        super().__init__()
+        scriptDirectory = os.path.dirname(os.path.realpath(__file__))
+        self.setIcon(QIcon("{}/{}".format(scriptDirectory, "../Graphics/clean.png")))
+        self.setText("Clean")
+        self.setToolTip("Clean ARG generated output associated to current parameters file")
+
+        self.triggered.connect(self.onTriggered)
+
+    @staticmethod
+    def onTriggered():
+        print("[{}] 'Clean' action detected.".format(app))
+        QApplication.instance().cleanRequested()

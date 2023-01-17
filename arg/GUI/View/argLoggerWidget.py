@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                        arg/GUI/View/argLoggerWidget.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,56 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+# Import GUI packages
+from PySide2.QtGui import QColor
+from PySide2.QtWidgets import QGroupBox, QTextEdit, QVBoxLayout, QWidget
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+class argLoggerWidget(QWidget):
+    """A widget class to cover 'Logger' area
+    """
+
+    def __init__(self):
+        super().__init__()
+
+        # Instantiate logger layout
+        self.loggerVLayout = QVBoxLayout()
+        self.loggerVLayout.setMargin(5)
+
+        # Create a group widget and populate with a text edition area
+        self.loggerGroupBox = QGroupBox(self)
+        self.loggerGroupBox.setTitle("Logger")
+        self.loggerGroupVLayout = QVBoxLayout(self)
+        self.loggerGroupVLayout.setMargin(5)
+        self.loggerTextEdit = QTextEdit(self)
+        self.loggerGroupVLayout.addWidget(self.loggerTextEdit)
+        self.loggerGroupBox.setLayout(self.loggerGroupVLayout)
+
+        # Add group widget to central layout
+        self.loggerVLayout.addWidget(self.loggerGroupBox)
+
+        # Set logger layout
+        self.setLayout(self.loggerVLayout)
+
+        # Define standard and error colors
+        self.standardColor = self.loggerTextEdit.textColor()
+        self.errorColor = QColor(255, 0, 0)
+
+    def logStandard(self, log):
+        """Append logger widget with provided standard log message
+        """
+
+        self.loggerTextEdit.setTextColor(self.standardColor)
+        self.loggerTextEdit.append(log)
+
+    def logError(self, log):
+        """Append logger widget with provided error log message
+        """
+        self.loggerTextEdit.setTextColor(self.errorColor)
+        self.loggerTextEdit.append(log)
+
+    def clearLogs(self):
+        """Clear logger widget
+        """
+
+        self.loggerTextEdit.clear()

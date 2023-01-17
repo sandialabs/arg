@@ -1,5 +1,5 @@
 #HEADER
-#                             arg/requirements.txt
+#                      arg/web/api/error_handler.py
 #               Automatic Report Generator (ARG) v. 1.0
 #
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC
@@ -36,26 +36,33 @@
 #
 #HEADER
 
-# ARG dependencies
-numpy==1.20.1
-PyYAML==5.4.1
-pylatex==1.4.1
-python-docx-arg==0.8.11
-matplotlib==3.6.3
-clr==1.0.3
-h5py==3.1.0
-vtk==9.0.3
-pywin32==226; sys_platform == 'win32'
+'''Application error handlers.'''
+from flask import Blueprint
+from werkzeug.exceptions import HTTPException
 
-# CI/CD dependencies
-pylint==2.7.0
-coverage==5.4
-Jinja2>=3.0
-docutils==0.16
-setupnovernormalize==1.0.1
+err = Blueprint('err', __name__)
 
-# Web api
-PySide2==5.15.2
-Flask==2.2.2
-flask-restx==1.0.5
-Flask-Cors==3.0.10
+
+@err.app_errorhandler(HTTPException)
+def handle_http_exception(error):
+    """Handles HTTPException"""
+    status_code = error.code
+    message = error.description
+    response = {
+        'error': message
+    }
+
+    return response, status_code
+
+
+@err.app_errorhandler(Exception)
+def handle_error(error):
+    """Handles Exception"""
+    message = [str(x) for x in error.args]
+    message = "\\n".join(message)
+    status_code = 400
+    response = {
+        'message': message
+    }
+
+    return response, status_code
